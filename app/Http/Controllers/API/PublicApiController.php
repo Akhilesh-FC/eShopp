@@ -13,6 +13,71 @@ use Illuminate\Support\Str;
 
 class PublicApiController extends Controller
 {
+
+    public function ProductDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product_id' => 'required'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+    
+        // Check if the product ID exists in the product_variants table
+        $variantExists = DB::table('products')
+            ->where('id', $request->product_id)
+            ->exists();
+    
+        if (!$variantExists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No variants found for this product ID'
+            ], 200);
+        }
+    
+        // Fetch the product details
+        $product = DB::table('products')
+            ->where('id', $request->product_id)
+            ->select(
+                'id as product_id',
+                'name',
+                'rating',
+                'made_in',
+                'stock',
+                'availability',
+                'no_of_ratings',
+                'item_to_sell',
+                'in_day_to_sell',
+                'product_highlight'
+            )
+            ->first(); // Fetch a single product record
+    
+        // Fetch all variants for the product
+        $variants = DB::table('product_variants')
+            ->where('product_id', $request->product_id)
+            ->select(
+                'special_price',
+                'price',
+                'percentage_off',
+                'size',
+                'color'
+            )
+            ->get();
+    
+        // Combine product details with its variants
+        $product->variants = $variants;
+    
+        // Return the product details along with its variants
+        return response()->json([
+            'status' => 'success',
+            'data' => $product
+        ], 200);
+    }
+
     public function Token(Request $request)
     {
        
@@ -55,7 +120,6 @@ class PublicApiController extends Controller
                 'message' => $validator->errors()->first()
             ], 200);
         }
-
 
         $user = DB::table('users')->insert([
             'username' => $request->username,
@@ -142,72 +206,57 @@ class PublicApiController extends Controller
         ], 200);
     }
     
-//     public function subcategories(Request $request)
-//     {
-//     // You can filter by category_id if needed. 
-//     // For example, to fetch subcategories for a specific category:
-//     $categoryId = $request->input('category_id'); // Get category_id from query parameters or request body
-
-//     // Fetch data by joining categories and subcategories, optionally filter by category_id
-//     $query = DB::table('subcategories')
-//         ->join('categories', 'categories.id', '=', 'subcategories.category_id') // Join the tables
-//         ->select('subcategories.id', 'subcategories.name', 'subcategories.image', 'categories.name as category_name'); // Select relevant fields from both tables
-
-//     // If a category_id is provided, filter the results by that category_id
-//     if ($categoryId) {
-//         $query->where('subcategories.category_id', '=', $categoryId);
-//     }
-
-//     // Execute the query and fetch the results
-//     $subcategories = $query->get();
-
-//     // Return the response with subcategory data
-//     return response()->json([
-//         'success' => true,
-//         'data' => $subcategories,
-//     ], 200);
-// }
-
     public function subcategories(Request $request)
     {
-        // Fetch category_id from the request (either query parameters or request body)
-        $categoryId = $request->input('category_id'); // Get category_id from request body
+    // Fetch category_id from the request
+    $categoryId = $request->input('category_id'); 
+
+    // Validate if category_id is provided
+    if (!$categoryId) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Category ID is required.',
+        ], 400);
+    }
+
+    // Fetch categories based on category_id
+    $categories = DB::table('categories')
+        ->where('id', $categoryId) // Filter categories by category_id
+        ->get();
+
+    // Initialize an array to store the categories with their subcategories and sub-subcategories
     
-        // Validate if category_id is provided
-        if (!$categoryId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category ID is required.',
-            ], 400);
+
+    foreach ($categories as $category) {
+        // Fetch subcategories for each category
+        $subcategories = DB::table('subcategories')
+            ->where('category_id', $category->id) // Get subcategories by category_id
+            ->get(['id', 'name', 'image', 'category_id']);
+
+        // For each subcategory, fetch sub-subcategories from `sub_categories2`
+        foreach ($subcategories as $subcategory) {
+            $subSubcategories = DB::table('sub_categories2')
+                ->where('sub_categories_id', $subcategory->id) // Match sub_categories_id with subcategory ID
+                ->get(['id', 'sub_categories_id','name','images']); // Fetch relevant fields
+            
+            // // Attach sub-subcategories to the subcategory
+             $subcategory->sub_subcategories = $subSubcategories;
         }
-    
-        // Fetch categories based on category_id
-        $categories = DB::table('categories')
-            ->where('id', $categoryId) // Filter categories by category_id
-            ->get();
-    
-        // Initialize an empty array to store the categories and subcategories
-        $categoriesWithSubcategories = [];
-    
-        foreach ($categories as $category) {
-            // Fetch subcategories for each category
-            $subcategories = DB::table('subcategories')
-                ->where('category_id', $category->id) // Get subcategories by category_id
-                ->get(['id', 'name', 'image', 'category_id']);
-    
-            // Prepare the category data with its subcategories
-            $categoryData = [
-                'id' => $category->id,
-                'name' => $category->name,
-                'image' => $category->image, // You can return category image if required
-                'category_name' => $category->name,
-                'sub_category' => $subcategories // Attach the subcategories
-            ];
-    
-            // Add the category data to the response array
-            $categoriesWithSubcategories[] = $categoryData;
-        }
-    
+
+        // Prepare the category data with its subcategories and sub-subcategories
+        $categoryData = [
+            'id' => $category->id,
+            'name' => $category->name,
+            'image' => $category->image, // Include category image if required
+            'category_name' => $category->name,
+            'sub_category' => $subcategories // Attach subcategories with their sub-subcategories
+            
+        ];
+
+        // Add the category data to the response array
+        $categoriesWithSubcategories = $categoryData;
+    }
+
         // Return the final response
         return response()->json([
             'success' => true,
@@ -215,39 +264,51 @@ class PublicApiController extends Controller
         ], 200);
     }
     
-    public function getProductsByCategory(Request $request)
+
+    public function getProductsBySubcategory(Request $request)
     {
-        // Fetch category_id from the request (either query parameters or request body)
-        $categoryId = $request->input('category_id'); // Get category_id from request body or query params
-    
-        // Validate if category_id is provided
-        if (!$categoryId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category ID is required.',
-            ], 400);
-        }
-    
-        // Fetch products that match the category_id
-        $products = DB::table('products')
-            ->where('category_id', $categoryId) // Filter products by category_id
-            ->get(['id', 'name', 'description', 'image', 'category_id']); // Select relevant fields
-    
-        // Check if products are found
-        if ($products->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No products found for this category.',
-            ], 404);
-        }
-    
-        // Return the products data
+    // Fetch subcategory_id from the request (query parameters or request body)
+    $subcategoryId = $request->input('subcategory_id'); 
+
+    // Validate if subcategory_id is provided
+    if (!$subcategoryId) {
         return response()->json([
-            'success' => true,
-            'data' => $products,
+            'success' => false,
+            'message' => 'Subcategory ID is required.',
         ], 200);
     }
-    
+
+    // Define base URL for images
+    $baseUrl = env('APP_URL'); 
+
+    // Fetch products that match the subcategory_id along with price and special_price from product_variants
+    $products = DB::table('products')
+         ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
+        ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
+        ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
+         ->orWhere('sub_categories2.id', $subcategoryId)
+        ->get([
+            'products.*',
+            
+            'product_variants.price', // Fetch price from product_variants
+            'product_variants.special_price' // Fetch special price from product_variants
+        ]); // Select relevant fields
+
+    // Check if products are found
+    if ($products->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No products found for this subcategory.',
+        ], 200);
+    }
+
+    // Return the products data as a list
+    return response()->json([
+        'success' => true,
+        'data' => $products,
+    ], 200);
+    }
+
     public function addToCart(Request $request)
     {
         // Validate the input data
@@ -259,7 +320,7 @@ class PublicApiController extends Controller
             'quantity' => [
                 'required',
                 'integer',
-                'min:1', // Quantity must be at least 1
+                'min:1|max:5', // Quantity must be at least 1
             ],
         ], [
             'product_id.required' => 'Product ID is required.',
@@ -334,7 +395,6 @@ class PublicApiController extends Controller
         }
     }
 
-
     public function getProfile($id)
     {
         // Debugging: Log the incoming ID
@@ -361,200 +421,70 @@ class PublicApiController extends Controller
         }
     }
 
-//   public function updateProfile(Request $request)
-//     {
-//         // Validate the incoming request
-//         $validator = Validator::make($request->all(), [
-//             'image' => 'required|string',  // Ensure image is a Base64 encoded string
-//         ]);
-
-//         if ($validator->fails()) {
-//             return response()->json([
-//                 'error' => $validator->errors()
-//             ], 400);
-//         }
-
-//         // Get the Base64 encoded string from the request
-//         $base64Image = $request->input('image');
-
-//         // Check if the string is a valid Base64 image format
-//         if (!preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-//             // If the image format is missing (no data:image/jpeg;base64,...), we try to prepend it
-//             if (preg_match('/^\/9j/', $base64Image)) {
-//                 // It's a JPEG image, so we prepend the appropriate header
-//                 $base64Image = 'data:image/jpeg;base64,' . $base64Image;
-//             } elseif (preg_match('/^iVBOR/', $base64Image)) {
-//                 // It's a PNG image, so we prepend the appropriate header
-//                 $base64Image = 'data:image/png;base64,' . $base64Image;
-//             } else {
-//                 return response()->json([
-//                     'error' => 'Invalid image format'
-//                 ], 400);
-//             }
-//         }
-
-//         // Now we can safely remove the image header
-//         $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
-
-//         // Decode the image data
-//         $image = base64_decode($imageData);
-
-//         if (!$image) {
-//             return response()->json([
-//                 'error' => 'Image decoding failed'
-//             ], 400);
-//         }
-
-//         // Generate a unique filename for the image
-//         $imageName = Str::random(10) . '.png';  // You can use other formats based on your image type
-
-//         // Save the image to storage (storage/app/public directory)
-//         $imagePath = 'profileimage/' . $imageName;
-
-//         // Store the image file on disk (in storage/app/public)
-//         Storage::disk('public')->put($imagePath, $image);
-
-//         // Return success response with the image URL
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Profile image updated successfully',
-//             'image_url' => asset('storage/' . $imagePath)
-//         ], 200);
-//     }
-
-    // public function updateProfile(Request $request)
-    // {
-    //     // Validate the incoming request
-    //     $validator = Validator::make($request->all(), [
-    //         'id' => 'required', // Ensure the user ID exists in the users table
-    //         'username' => 'nullable|string|max:255',
-    //         'email' => 'nullable|email|max:255',
-    //         'image' => 'nullable|string', // Assuming Base64 encoded image
-    //     ]);
-    
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'error' => $validator->errors()->first(),
-    //         ], 400);
-    //     }
-    //     // Fetch the user by ID
-    //     $user = DB::table('users')->where('id', $request->id)->first();
-        
-    //     if (!$user) {
-    //         return response()->json([
-    //             'error' => 'User not found'
-    //         ], 404);
-    //     }
-    
-    //     // Prepare the data to update
-    //     $updateData = [];
-    
-    //     // Update username if provided
-    //     if ($request->has('username')) {
-    //         $updateData['username'] = $request->username;
-    //     }
-    
-    //     if ($request->has('email')) {
-    //         $updateData['email'] = $request->email;
-    //     }
-    
-    //     if ($request->has('image')) {
-    //         $base64Image = $request->input('image');
-    
-    //         if (!preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-    //             // Check if missing the header and prepend based on image type
-    //             if (preg_match('/^\/9j/', $base64Image)) {
-    //                 $base64Image = 'data:image/jpeg;base64,' . $base64Image;
-    //             } elseif (preg_match('/^iVBOR/', $base64Image)) {
-    //                 $base64Image = 'data:image/png;base64,' . $base64Image;
-    //             } else {
-    //                 return response()->json([
-    //                     'error' => 'Invalid image format'
-    //                 ], 400);
-    //             }
-    //         }
-    
-    //         // Remove the image header and decode
-    //         $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
-    //         $image = base64_decode($imageData);
-    
-    //         if (!$image) {
-    //             return response()->json([
-    //                 'error' => 'Image decoding failed'
-    //             ], 400);
-    //         }
-    //         // Generate a unique filename
-    //         $imageName = Str::random(10) . '.png';
-    //         $imagePath = 'https://eshop.foundercode.org/storage/app/public/profileimage/' . $imageName;
-    //         // Save the image to storage
-    //         Storage::disk('public')->put($imagePath, $image);
-    //         // Add image to update data
-    //         $updateData['image'] = $imagePath;
-    //     }
-    //     // Update the user record in the database
-    //     DB::table('users')->where('id', $request->id)->update($updateData);
-    
-    //     // Return success response
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Profile updated successfully',
-    //         'data' => [
-    //             'username' => $request->username ?? $user->username,
-    //             'email' => $request->email ?? $user->email,
-    //             'image_url' => isset($updateData['image']) ? asset('storage/' . $updateData['image']) : null,
-    //         ]
-    //     ], 200);
-    // }
-    
     public function updateProfile(Request $request)
     {
         $userId = $request->input('id');
-        
+    
         // Check if the user exists
-        $user = DB::table('users')->where('id', $userId)->first();
+        $user = DB::table('users')
+            ->where('id', $userId)
+            ->select('id', 'username', 'email', 'image') // Ensure 'image' column is included
+            ->first();
     
         if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['error' => 'User not found'], 400);
         }
     
         // Validate the input fields
         $validator = Validator::make($request->all(), [
             'username' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255|unique:users,email,' . $userId,
-            'image_base64' => 'nullable|string', // For base64-encoded image
+            'profileimage' => 'nullable|image|max:2048', // For uploaded image
+            'image_base64' => 'nullable|string',         // For base64-encoded image
         ]);
     
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'error' => $validator->errors()->first()
-            ], 422);
+            ], 200);
         }
     
-        $baseUrl = env('APP_URL'); // Base URL for constructing image path
-        $input = $request->only(['username', 'email']); // Extract relevant fields
+        $baseUrl = env('APP_URL', 'https://eshop.foundercode.org') . '/public';
+     // Base URL for constructing image path
+        $input = collect($request->only(['username', 'email']))
+            ->filter(function ($value) {
+                return $value !== null;
+            })->toArray();
     
-        // Handle Base64-encoded image if provided
-        if ($request->input('image_base64')) {
-            $imageData = base64_decode($request->input('image_base64'));
-    
-            if ($imageData === false) {
-                return response()->json(['error' => 'Invalid base64 image data'], 400);
-            }
-    
-            // Generate a unique file name for the image
-            $imageName = 'images/' . uniqid() . '.png';
-    
-            // Save the decoded image to the public directory
-            file_put_contents(public_path($imageName), $imageData);
-    
-            // Delete the old image if it exists
-            if ($user->image && file_exists(public_path($user->image))) {
+        // Handle uploaded file (if provided)
+        if ($request->hasFile('profileimage')) {
+            // Delete old image if exists
+            if (!empty($user->image) && file_exists(public_path($user->image))) {
                 unlink(public_path($user->image));
             }
     
-            // Save the new image path
-            $input['image'] = $baseUrl . '/' . $imageName;
+            $file = $request->file('profileimage');
+            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('profileimage'), $fileName);
+    
+            $input['image'] = 'profileimage/' . $fileName; // Relative path
+        }
+    
+        // Handle base64 image (if provided)
+        if ($request->input('image_base64')) {
+            // Decode and store the image
+            $imageData = base64_decode($request->input('image_base64'));
+            $imageName = 'profileimage/' . uniqid() . '.png'; // Unique name
+    
+            file_put_contents(public_path($imageName), $imageData);
+    
+            // Delete old image if exists
+            if (!empty($user->image) && file_exists(public_path($user->image))) {
+                unlink(public_path($user->image));
+            }
+    
+            $input['image'] = $imageName; // Relative path
         }
     
         // Check if there is any data to update
@@ -571,18 +501,22 @@ class PublicApiController extends Controller
             ->update($input);
     
         // Fetch the updated user data
-         $updatedUser = DB::table('users')
+        $updatedUser = DB::table('users')
             ->where('id', $userId)
-            ->select('id', 'username', 'mobile','email', 'image') // Specify fields to return
+            ->select('id', 'username', 'email', 'image') // Specify fields to return
             ->first();
+    
+        // Append the base URL to the image path, if an image exists
+        if (!empty($updatedUser->image)) {
+            $updatedUser->image = $baseUrl . '/' . $updatedUser->image;
+        }
     
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'user' => $updatedUser
+            // 'user' => $updatedUser
         ], 200);
     }
-
 
     public function about_us(Request $request)
       {

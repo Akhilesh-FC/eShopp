@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API;
 use App\Http\Controller\Api\AuthController;
-use App\Http\Controllers\API\{PublicApiController,ListController};
+use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController};
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,10 +16,7 @@ Route::post('/login', [PublicApiController::class,'login']);
 Route::get('/sliders', [PublicApiController::class, 'showSliders']);
 Route::get('/categories', [PublicApiController::class, 'showCategories']);
 Route::post('/subcategories', [PublicApiController::class, 'subcategories']);
-Route::get('/products', [PublicApiController::class, 'getProductsByCategory']);
-Route::post('/cart/add', [PublicApiController::class, 'addToCart']);
-
-
+Route::post('/products', [PublicApiController::class, 'getProductsBySubcategory']);
 
 Route::get('/profile/{id}', [PublicApiController::class, 'getProfile']);
 Route::post('/update-profile', [PublicApiController::class, 'updateProfile']);
@@ -31,6 +28,18 @@ Route::get('/shipping_policy',[PublicApiController::class,'Shipping_Policy']);
 Route::get('/faqs',[PublicApiController::class,'FAQs']);
 Route::get('/Terms_Condition',[PublicApiController::class,'Terms_Condition']);
 Route::post('/tokens', [ListController::class, 'tokens']);
+Route::post('/product_details',[PublicApiController::class,'ProductDetails']);
+
+Route::controller(ProductApiController::class)->group(function () {
+   // Route::get('/orders/{id}', 'show');
+    Route::get('/product_list_rating', 'Product_list_rating');
+    Route::post('/product/rating', 'productRating');
+});
+
+
+Route::controller(CartApiController::class)->group(function () {
+    Route::post('/addtocart', 'addToCart');
+});
 
 
 
