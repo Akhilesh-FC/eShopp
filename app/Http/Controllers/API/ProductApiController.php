@@ -56,7 +56,190 @@ class ProductApiController extends Controller
     // }
 
     
-public function Product_list_rating(Request $request)
+    
+    
+//     public function Product_list_rating(){
+        
+//         $Diwali = DB::table('products')
+//                   ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+//                   ->select('products.*',
+//                   'product_variants.price as price',
+//                   'product_variants.special_price as special_price',
+//                   'product_variants.percentage_off as percentage_off'
+//                   )
+//                   ->where('products.category_id', '=', 1)
+//                   ->limit(4)
+//                   ->get();
+                   
+//         $Clothes = DB::table('products')
+//             ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+//                   ->select('products.*',
+//                   'product_variants.price as price',
+//                   'product_variants.special_price as special_price',
+//                   'product_variants.percentage_off as percentage_off'
+//                   )
+//                 ->where('products.category_id', '=', 2)->limit(4)->get();
+                
+//         $Digital = DB::table('products')
+//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+//                   ->select('products.*',
+//                   'product_variants.price as price',
+//                   'product_variants.special_price as special_price',
+//                   'product_variants.percentage_off as percentage_off'
+//                   )
+//         ->where('products.category_id', '=', 3)->limit(4)->get();
+        
+//         $Furniture = DB::table('products')
+//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+//                   ->select('products.*',
+//                   'product_variants.price as price',
+//                   'product_variants.special_price as special_price',
+//                   'product_variants.percentage_off as percentage_off'
+//                   )
+//         ->where('products.category_id', '=', 4)->limit(4)->get();
+        
+        
+//         $Electronics= DB::table('products')
+//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+//                   ->select('products.*',
+//                   'product_variants.price as price',
+//                   'product_variants.special_price as special_price',
+//                   'product_variants.percentage_off as percentage_off'
+//                   )
+//         ->where('products.category_id', '=', 5)->limit(4)->get();
+        
+//         return response()->json([
+//             (object)[
+//             'category_id'=>1,
+//             'category_id_name'=>'Diwali',
+//             'category_title'=>'Top deals on diwali',
+//             'products'=>$Diwali
+//             ],
+//             (object)[
+//             'category_id'=>2,
+//             'category_id_name'=>'Clothes',
+//             'category_title'=>'Top deals on clothes',
+//             'products'=>$Clothes
+//             ],
+//             (object)[
+//             'category_id'=>3,
+//             'category_id_name'=>'Digital',
+//             'category_title'=>'Top deals on Digital',
+//             'products'=>$Digital
+//             ],
+//             (object)[
+//             'category_id'=>4,
+//             'category_id_name'=>'Furniture',
+//             'category_title'=>'Top deals on Furniture',
+//             'products'=>$Furniture
+//             ],
+//             (object)[
+//             'category_id'=>5,
+//             'category_id_name'=>'Electronics',
+//             'category_title'=>'Top deals on Electronics',
+//             'products'=>$Electronics
+//             ],
+//             ]);
+//                       return response()->json([
+//             'data' => $data,
+//             'success' => true,
+//             'message' => 'Filtered data grouped by type and category retrieved successfully',
+    
+// ], 200);
+        
+//     }
+    
+    public function Product_list_rating(){
+        
+    $Diwali = DB::table('products')
+                ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+                ->select('products.*',
+                'product_variants.price as price',
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off'
+                )
+                ->where('products.category_id', '=', 1)
+                ->limit(4)
+                ->get();
+                
+    $Clothes = DB::table('products')
+        ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+                ->select('products.*',
+                'product_variants.price as price',
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off'
+                )
+            ->where('products.category_id', '=', 2)->limit(4)->get();
+            
+    $Digital = DB::table('products')
+    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+                ->select('products.*',
+                'product_variants.price as price',
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off'
+                )
+    ->where('products.category_id', '=', 3)->limit(4)->get();
+    
+    $Furniture = DB::table('products')
+    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+                ->select('products.*',
+                'product_variants.price as price',
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off'
+                )
+    ->where('products.category_id', '=', 4)->limit(4)->get();
+    
+    
+    $Electronics= DB::table('products')
+    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
+                ->select('products.*',
+                'product_variants.price as price',
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off'
+                )
+    ->where('products.category_id', '=', 5)->limit(4)->get();
+    
+    return response()->json([
+        'data' => [
+            (object)[
+                'category_id'=>1,
+                'category_id_name'=>'Diwali',
+                'category_title'=>'Top deals on diwali',
+                'products'=>$Diwali
+            ],
+            (object)[
+                'category_id'=>2,
+                'category_id_name'=>'Clothes',
+                'category_title'=>'Top deals on clothes',
+                'products'=>$Clothes
+            ],
+            (object)[
+                'category_id'=>3,
+                'category_id_name'=>'Digital',
+                'category_title'=>'Top deals on Digital',
+                'products'=>$Digital
+            ],
+            (object)[
+                'category_id'=>4,
+                'category_id_name'=>'Furniture',
+                'category_title'=>'Top deals on Furniture',
+                'products'=>$Furniture
+            ],
+            (object)[
+                'category_id'=>5,
+                'category_id_name'=>'Electronics',
+                'category_title'=>'Top deals on Electronics',
+                'products'=>$Electronics
+            ]
+        ],
+        'success' => true,
+        'message' => 'Filtered data grouped by type and category retrieved successfully',
+    ], 200);
+}
+
+    
+    
+public function Product_list_rating_old(Request $request)
 {
     // Fetch all products data with conditions applied
     $data = \DB::table('products')

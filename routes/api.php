@@ -16,8 +16,8 @@ Route::post('/login', [PublicApiController::class,'login']);
 Route::get('/sliders', [PublicApiController::class, 'showSliders']);
 Route::get('/categories', [PublicApiController::class, 'showCategories']);
 Route::post('/subcategories', [PublicApiController::class, 'subcategories']);
-Route::post('/products', [PublicApiController::class, 'getProductsBySubcategory']);
 
+Route::post('/products', [PublicApiController::class, 'getProductsBySubcategory']);
 Route::get('/profile/{id}', [PublicApiController::class, 'getProfile']);
 Route::post('/update-profile', [PublicApiController::class, 'updateProfile']);
 Route::get('/about_us',[PublicApiController::class,'about_us']);
@@ -35,12 +35,16 @@ Route::controller(ProductApiController::class)->group(function () {
     Route::get('/product_list_rating', 'Product_list_rating');
     Route::post('/product/rating', 'productRating');
 });
-
-
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');
+    Route::post('/updatecart', 'updateFromCart');
+    Route::post('/view_cart', 'viewCart');
+    Route::post('/remove_from_cart', 'removeFromCart');
+    
+    Route::post('/addtofav', 'addToFavorite');
+    Route::post('/view_fav', 'viewFav');
+    
 });
-
 
 
 
