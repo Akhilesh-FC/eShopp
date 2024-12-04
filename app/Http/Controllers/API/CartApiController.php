@@ -296,6 +296,38 @@ class CartApiController extends Controller
         ], 200);
     }
     
+    public function removeFromFavorite(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'product_id' => 'required|integer|exists:products,id',
+        ]);
+    
+        $existingFavorite = DB::table('favorites')
+            ->where('user_id', $request->user_id)
+            ->where('product_id', $request->product_id)
+            ->first();
+    
+        if (!$existingFavorite) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found in favorites',
+            ], 404);
+        }
+
+        // Remove the product from favorites
+        DB::table('favorites')
+            ->where('user_id', $request->user_id)
+            ->where('product_id', $request->product_id)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product removed from favorites successfully',
+        ], 200);
+    }
+    
+        
 
 
 

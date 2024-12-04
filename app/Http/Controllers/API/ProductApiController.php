@@ -55,9 +55,7 @@ class ProductApiController extends Controller
     //     ], 200);
     // }
 
-    
-    
-    
+
 //     public function Product_list_rating(){
         
 //         $Diwali = DB::table('products')
@@ -151,7 +149,7 @@ class ProductApiController extends Controller
     
     public function Product_list_rating(){
         
-    $Diwali = DB::table('products')
+    $Furnitures = DB::table('products')
                 ->leftJoin('product_variants','products.id','=','product_variants.product_id')
                 ->select('products.*',
                 'product_variants.price as price',
@@ -162,7 +160,7 @@ class ProductApiController extends Controller
                 ->limit(4)
                 ->get();
                 
-    $Clothes = DB::table('products')
+    $Fashion = DB::table('products')
         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
                 ->select('products.*',
                 'product_variants.price as price',
@@ -171,7 +169,7 @@ class ProductApiController extends Controller
                 )
             ->where('products.category_id', '=', 2)->limit(4)->get();
             
-    $Digital = DB::table('products')
+    $Electronics = DB::table('products')
     ->leftJoin('product_variants','products.id','=','product_variants.product_id')
                 ->select('products.*',
                 'product_variants.price as price',
@@ -180,7 +178,7 @@ class ProductApiController extends Controller
                 )
     ->where('products.category_id', '=', 3)->limit(4)->get();
     
-    $Furniture = DB::table('products')
+    $Vegitable = DB::table('products')
     ->leftJoin('product_variants','products.id','=','product_variants.product_id')
                 ->select('products.*',
                 'product_variants.price as price',
@@ -190,7 +188,7 @@ class ProductApiController extends Controller
     ->where('products.category_id', '=', 4)->limit(4)->get();
     
     
-    $Electronics= DB::table('products')
+    $Baby_Care= DB::table('products')
     ->leftJoin('product_variants','products.id','=','product_variants.product_id')
                 ->select('products.*',
                 'product_variants.price as price',
@@ -203,33 +201,33 @@ class ProductApiController extends Controller
         'data' => [
             (object)[
                 'category_id'=>1,
-                'category_id_name'=>'Diwali',
-                'category_title'=>'Top deals on diwali',
-                'products'=>$Diwali
+                'category_id_name'=>'Furnitures',
+                'category_title'=>'Top deals on Furnitures',
+                'products'=>$Furnitures
             ],
             (object)[
                 'category_id'=>2,
-                'category_id_name'=>'Clothes',
-                'category_title'=>'Top deals on clothes',
-                'products'=>$Clothes
+                'category_id_name'=>'Fashion',
+                'category_title'=>'Top deals on Fashion',
+                'products'=>$Fashion
             ],
             (object)[
                 'category_id'=>3,
-                'category_id_name'=>'Digital',
-                'category_title'=>'Top deals on Digital',
-                'products'=>$Digital
-            ],
-            (object)[
-                'category_id'=>4,
-                'category_id_name'=>'Furniture',
-                'category_title'=>'Top deals on Furniture',
-                'products'=>$Furniture
-            ],
-            (object)[
-                'category_id'=>5,
                 'category_id_name'=>'Electronics',
                 'category_title'=>'Top deals on Electronics',
                 'products'=>$Electronics
+            ],
+            (object)[
+                'category_id'=>4,
+                'category_id_name'=>'Vegitable',
+                'category_title'=>'Top deals on Vegitable',
+                'products'=>$Vegitable
+            ],
+            (object)[
+                'category_id'=>5,
+                'category_id_name'=>'Baby_Care',
+                'category_title'=>'Top deals on Baby_Care',
+                'products'=>$Baby_Care
             ]
         ],
         'success' => true,

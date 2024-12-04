@@ -86,6 +86,10 @@ Route::get('/area', function() {return view('location.area');})->name('area');
 Route::get('/counteries', function() {return view('location.counteries');})->name('counteries');
 Route::get('/bulks_uploadss', function() { return view('location.bulkupload');})->name('bulk_uploads');
 
+Route::get('/sales_report', function() {return view('reports.salesreport');})->name('sales_report');
+Route::get('/sales_inventory', function() {return view('reports.salesinventory');})->name('sales_inventory');
+Route::get('/faq', function() {return view('faq');})->name('faq');
+Route::get('/system_user', function() {return view('systemuser');})->name('system_user');
 
 
 

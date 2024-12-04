@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API;
 use App\Http\Controller\Api\AuthController;
-use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController};
+use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController};
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -40,12 +40,17 @@ Route::controller(CartApiController::class)->group(function () {
     Route::post('/updatecart', 'updateFromCart');
     Route::post('/view_cart', 'viewCart');
     Route::post('/remove_from_cart', 'removeFromCart');
-    
+
     Route::post('/addtofav', 'addToFavorite');
     Route::post('/view_fav', 'viewFav');
-    
+    Route::post('/removeFromFavorite', 'removeFromFavorite');
+
 });
 
+
+Route::controller(AddressApiController::class)->group(function() {
+    Route::post('/add_address', 'add_address');
+});
 
 
 

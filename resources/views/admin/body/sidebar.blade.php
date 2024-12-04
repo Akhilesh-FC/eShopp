@@ -122,14 +122,14 @@
                             </ul>
                         </li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-pie nav-icon text-primary"></i><span class="hide-menu">Reports </span></a>
-                            <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="form-basic.html" class="sidebar-link"><i class="fa fa-chart-line nav-icon "></i><span class="hide-menu"> Sales Report </span></a></li>
-                                <li class="sidebar-item"><a href="form-basic.html" class="sidebar-link"><i class="fa fa-chart-line nav-icon "></i><span class="hide-menu">   Sale Inventory Report  </span></a></li>
+                            <ul aria-expanded="false" class="collapse  first-level"> 
+                                <li class="sidebar-item"><a href="{{route('sales_report')}}" class="sidebar-link"><i class="fa fa-chart-line nav-icon "></i><span class="hide-menu"> Sales Report </span></a></li>
+                                <li class="sidebar-item"><a href="{{route('sales_inventory')}}"class="sidebar-link"><i class="fa fa-chart-line nav-icon "></i><span class="hide-menu">   Sale Inventory Report  </span></a></li>
                             </ul>
-                        </li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-elements.html" aria-expanded="false"><i class="nav-icon fas fa-question-circle text-warning"></i><span class="hide-menu">FAQ</span></a></li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-elements.html" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">System User </span></a></li>
-                    </ul>
+                        </li> 
+                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route('faq')}}" aria-expanded="false"><i class="nav-icon fas fa-question-circle text-warning"></i><span class="hide-menu">FAQ</span></a></li>
+                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route('system_user')}}" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">System User </span></a></li>
+                    </ul> 
                 </nav>
                 <!-- End Sidebar navigation -->
             </div>
