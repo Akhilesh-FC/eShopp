@@ -14,69 +14,155 @@ use Illuminate\Support\Str;
 class PublicApiController extends Controller
 {
 
+    // public function ProductDetails(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), 
+    //     [
+    //         'product_id' => 'required'
+    //     ]);
+    //     $validator->stopOnFirstFailure();
+    //     if($validator->fails())
+    //         {
+    //             $response = [
+    //                         'status' => false,
+    //                       'message' => $validator->errors()->first()
+    //                       ]; 
+    //                 return response()->json($response,400);
+    //         }
+    
+    //     // Check if the product ID exists in the product_variants table
+    //     $variantExists = DB::table('products')
+    //         ->where('id', $request->product_id)
+    //         ->exists();
+    
+    //     if (!$variantExists) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'No variants found for this product ID'
+    //         ], 200);
+    //     }
+    
+    //     // Fetch the product details
+    //     $product = DB::table('products')
+    //         ->where('id', $request->product_id)
+    //         ->select(
+    //             'id as product_id',
+    //             'name',
+    //             'rating',
+    //             'made_in',
+    //             'stock',
+    //             'availability',
+    //             'no_of_ratings',
+    //             'item_to_sell',
+    //             'in_day_to_sell',
+    //             'product_highlight'
+    //         )
+    //         ->first(); // Fetch a single product record
+    
+    //     // Fetch all variants for the product
+    //     $variants = DB::table('product_variants')
+    //         ->where('product_id', $request->product_id)
+    //         ->select(
+    //             'special_price',
+    //             'price',
+    //             'percentage_off',
+    //             'size',
+    //             'color'
+    //         )
+    //         ->get();
+    
+    //     // Combine product details with its variants
+    //     $product->variants = $variants;
+    
+    //     // Return the product details along with its variants
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $product
+    //     ], 200);
+    // }
     public function ProductDetails(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'product_id' => 'required'
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
-            ], 200);
-        }
-    
-        // Check if the product ID exists in the product_variants table
-        $variantExists = DB::table('products')
-            ->where('id', $request->product_id)
-            ->exists();
-    
-        if (!$variantExists) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No variants found for this product ID'
-            ], 200);
-        }
-    
-        // Fetch the product details
-        $product = DB::table('products')
-            ->where('id', $request->product_id)
-            ->select(
-                'id as product_id',
-                'name',
-                'rating',
-                'made_in',
-                'stock',
-                'availability',
-                'no_of_ratings',
-                'item_to_sell',
-                'in_day_to_sell',
-                'product_highlight'
-            )
-            ->first(); // Fetch a single product record
-    
-        // Fetch all variants for the product
-        $variants = DB::table('product_variants')
-            ->where('product_id', $request->product_id)
-            ->select(
-                'special_price',
-                'price',
-                'percentage_off',
-                'size',
-                'color'
-            )
-            ->get();
-    
-        // Combine product details with its variants
-        $product->variants = $variants;
-    
-        // Return the product details along with its variants
+{
+    $validator = Validator::make($request->all(), [
+        'product_id' => 'required'
+    ]);
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
         return response()->json([
-            'status' => 'success',
-            'data' => $product
+            'status' => false,
+            'message' => $validator->errors()->first()
+        ], 400);
+    }
+
+    // Check if the product ID exists in the products table
+    $productExists = DB::table('products')
+        ->where('id', $request->product_id)
+        ->exists();
+
+    if (!$productExists) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'No product found for this product ID'
         ], 200);
     }
+
+    // Fetch the product details
+    $product = DB::table('products')
+        ->where('id', $request->product_id)
+        ->select(
+            'id as product_id',
+            'name',
+            'rating',
+            'made_in',
+            'stock',
+            'availability',
+            'no_of_ratings',
+            'item_to_sell',
+            'in_day_to_sell',
+            'product_highlight'
+        )
+        ->first();
+
+    // Fetch all variants for the product
+    $variants = DB::table('product_variants')
+        ->where('product_id', $request->product_id)
+        ->select(
+            'special_price',
+            'price',
+            'percentage_off',
+            'size',
+            'color'
+        )
+        ->get();
+
+    // Fetch cart items for the current user if `user_id` is provided
+    $userId = $request->input('user_id'); // Optional user ID
+    $cartItems = [];
+    if ($userId) {
+        $cartItems = DB::table('cart')
+            ->where('user_id', $userId)
+            ->pluck('product_id') // Get the product IDs from the cart
+            ->toArray();
+    }
+
+    // Add `is_added` parameter to each variant
+    $variants = $variants->map(function ($variant) use ($cartItems, $request) {
+        $variant->is_added = in_array($request->product_id, $cartItems) ? 1 : 0;
+        return $variant;
+    });
+
+    // Combine product details with its variants
+    $product->variants = $variants;
+
+    // Return the product details along with its variants
+    return response()->json([
+        'status' => 'success',
+        'data' => $product
+    ], 200);
+}
+
+
+
 
     public function Token(Request $request)
     {

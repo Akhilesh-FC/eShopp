@@ -38,20 +38,20 @@ Route::controller(ProductApiController::class)->group(function () {
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');
     Route::post('/updatecart', 'updateFromCart');
-    Route::post('/view_cart', 'viewCart');
+    Route::post('/view_cart', 'viewCart'); 
     Route::post('/remove_from_cart', 'removeFromCart');
-
-    Route::post('/addtofav', 'addToFavorite');
-    Route::post('/view_fav', 'viewFav');
+ 
+    Route::post('/addtofav', 'addToFavorite'); 
+    Route::post('/view_fav', 'viewFavorites');  
     Route::post('/removeFromFavorite', 'removeFromFavorite');
 
 });
-
-
 Route::controller(AddressApiController::class)->group(function() {
-    Route::post('/add_address', 'add_address');
-});
+    Route::post('/add_address', 'add_address');  
+    Route::post('/edit_address','edit_address'); 
+    Route::delete('/delete_address','delete_address');  
 
+}); 
 
 
 

@@ -52,13 +52,22 @@ class CartApiController extends Controller
     // }
     
     public function addToCart(Request $request)
-{
-    // Validate the incoming request
-    $request->validate([
+    {
+    $validator = Validator::make($request->all(), [
         'user_id' => 'required|integer|exists:users,id', 
         'product_id' => 'required|integer|exists:products,id',
         'quantity' => 'required|integer|min:1', 
-    ]);
+        ]);
+
+        $validator->stopOnFirstFailure();
+        
+    if($validator->fails()){
+         $response = [
+                        'status' => false,
+                       'message' => $validator->errors()->first()
+                      ]; 
+                return response()->json($response,400);
+    }
 
     // Check if the product already exists in the cart for the given user
     $existingCartItem = DB::table('cart')
@@ -94,13 +103,68 @@ class CartApiController extends Controller
         'message' => 'Product added to the cart successfully',
     ], 200);
 }
-
     
-    public function viewCart(Request $request)
-    {
-    $request->validate([
-        'user_id' => 'required|integer|exists:users,id', 
+//     public function viewCart(Request $request)
+//     {
+//             $validator = Validator::make($request->all(), [
+//             'user_id' => 'required|integer', 
+//         ]);
+
+//         $validator->stopOnFirstFailure();
+        
+//     if($validator->fails()){
+//          $response = [
+//                         'status' => false,
+//                       'message' => $validator->errors()->first()
+//                       ]; 
+//                 return response()->json($response,400);
+//     }
+
+//     $cartItems = DB::table('cart')
+//         ->join('products', 'cart.product_id', '=', 'products.id')
+//         ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
+//         ->select(
+//             'cart.id as cart_item_id',
+//             'cart.product_id',
+//             'products.name as product_name',
+//             'products.description as product_description',
+//             'product_variants.price as product_price', // Price from product_variants table
+//             'cart.quantity',
+//             DB::raw('product_variants.price * cart.quantity as total_price') // Total price calculated using product_variants.price
+//         )
+//         ->where('cart.user_id', $request->user_id)
+//         ->get();
+
+//     if ($cartItems->isEmpty()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'No items in the cart',
+//             'data' => []
+//         ], 200);
+//     }
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Cart retrieved successfully',
+//         'data' => $cartItems,
+//     ], 200);
+// }
+
+public function viewCart(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer', 
     ]);
+
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
+        $response = [
+            'status' => false,
+            'message' => $validator->errors()->first()
+        ]; 
+        return response()->json($response, 400);
+    }
 
     $cartItems = DB::table('cart')
         ->join('products', 'cart.product_id', '=', 'products.id')
@@ -108,11 +172,12 @@ class CartApiController extends Controller
         ->select(
             'cart.id as cart_item_id',
             'cart.product_id',
-            'products.name as product_name',
-            'products.description as product_description',
+            'products.*', // Select all columns from the products table
             'product_variants.price as product_price', // Price from product_variants table
+            'product_variants.special_price as special_price',
+            'product_variants.percentage_off as percentage_off',
             'cart.quantity',
-            DB::raw('product_variants.price * cart.quantity as total_price') // Total price calculated using product_variants.price
+            DB::raw('product_variants.special_price * cart.quantity as total_price') // Total price calculated using product_variants.price
         )
         ->where('cart.user_id', $request->user_id)
         ->get();
@@ -132,13 +197,25 @@ class CartApiController extends Controller
     ], 200);
 }
 
+
     public function updateFromCart(Request $request)
     {
-    $request->validate([
-        'user_id' => 'required|integer|exists:users,id', 
+    
+    $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id', 
         'product_id' => 'required|integer|exists:products,id', 
         'quantity' => 'required|integer|min:1', 
-    ]);
+        ]);
+
+        $validator->stopOnFirstFailure();
+        
+    if($validator->fails()){
+         $response = [
+                        'status' => false,
+                       'message' => $validator->errors()->first()
+                      ]; 
+                return response()->json($response,400);
+    }
 
     $existingCartItem = DB::table('cart')
         ->where('user_id', $request->user_id)
@@ -164,17 +241,28 @@ class CartApiController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'Product not found in the cart',
-        ], 404);
+        ], 200);
     }
 }
 
     public function removeFromCart(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id', 
-            'quantity' => 'required|integer|min:1', 
+            'quantity' => 'required|integer|min:1',
         ]);
+
+        $validator->stopOnFirstFailure();
+        
+    if($validator->fails()){
+         $response = [
+                        'status' => false,
+                       'message' => $validator->errors()->first()
+                      ]; 
+                return response()->json($response,400);
+    }
+        
     
         $existingCartItem = DB::table('cart')
             ->where('user_id', $request->user_id)
@@ -214,17 +302,29 @@ class CartApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found in the cart.',
-            ], 404);
+            ], 400);
         }
     }
     
     public function addToFavorite(Request $request)
     {
-    $request->validate([
-        'user_id' => 'required|integer|exists:users,id', 
+   
+    
+    $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id', 
         'product_id' => 'required|integer|exists:products,id',
         'quantity' => 'required|integer|min:1', 
-    ]);
+        ]);
+
+        $validator->stopOnFirstFailure();
+        
+    if($validator->fails()){
+         $response = [
+                        'status' => false,
+                       'message' => $validator->errors()->first()
+                      ]; 
+                return response()->json($response,400);
+    }
 
     $existingFavorite = DB::table('favorites')
         ->where('user_id', $request->user_id)
@@ -262,46 +362,119 @@ class CartApiController extends Controller
     ], 200);
 }
 
-    public function viewFav(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|integer|exists:users,id', 
-        ]);
+    // public function viewFav(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer', 
+    //     ]);
+
+    //     $validator->stopOnFirstFailure();
+        
+    // if($validator->fails()){
+    //      $response = [
+    //                     'status' => false,
+    //                   'message' => $validator->errors()->first()
+    //                   ]; 
+    //             return response()->json($response,400);
+    // }
     
-        $favoriteItems = DB::table('favorites')
-            ->join('products', 'favorites.product_id', '=', 'products.id')
-            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
-            ->select(
-                'favorites.id as favorite_item_id',
-                'favorites.product_id',
-                'products.name as product_name',
-                'products.description as product_description',
-                'product_variants.special_price as product_price' // Price from product_variants table
-            )
-            ->where('favorites.user_id', $request->user_id)
-            ->get();
+    //     $favoriteItems = DB::table('favorites')
+    //         ->join('products', 'favorites.product_id', '=', 'products.id')
+    //         ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+    //         ->select(
+    //             'favorites.id as favorite_item_id',
+    //             'favorites.product_id',
+    //             'products.name as product_name',
+    //             'products.description as product_description',
+    //             'product_variants.special_price as product_price' // Price from product_variants table
+    //         )
+    //         ->where('favorites.user_id', $request->user_id)
+    //         ->get();
     
-        if ($favoriteItems->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No items in favorites',
-                'data' => []
-            ], 200);
-        }
+    //     if ($favoriteItems->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No items in favorites',
+    //             'data' => []
+    //         ], 200);
+    //     }
     
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Favorites retrieved successfully',
+    //         'data' => $favoriteItems,
+    //     ], 200);
+    // }
+    
+    public function viewFavorites(Request $request)
+{
+    // Validate the user ID
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer',
+    ]);
+    
+
+    // Stop on the first failure
+    $validator->stopOnFirstFailure();
+
+    // Return validation errors if any
+    if ($validator->fails()) {
+        $response = [
+            'status' => false,
+            'message' => $validator->errors()->first()
+        ];
+        return response()->json($response, 400);
+    }
+
+    // Get the favorites data from the database
+    $favoriteItems = DB::table('favorites')
+        ->join('products', 'favorites.product_id', '=', 'products.id')
+        ->join('product_variants', 'favorites.product_id', '=', 'product_variants.product_id')
+        ->select(
+            'favorites.id as favorite_item_id',
+            'favorites.product_id',
+            'products.*', // Select all columns from the products table
+            'product_variants.price as product_price', // Price from product_variants table
+            'product_variants.special_price as special_price',
+            'product_variants.percentage_off as percentage_off',
+            DB::raw('product_variants.special_price as total_price') // You can adjust the total price calculation if needed
+        )
+        ->where('favorites.user_id', $request->user_id)
+        ->get();
+
+    // Check if no favorite items found
+    if ($favoriteItems->isEmpty()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Favorites retrieved successfully',
-            'data' => $favoriteItems,
+            'success' => false,
+            'message' => 'No favorite items found',
+            'data' => []
         ], 200);
     }
-    
+
+    // Return the response with favorite items data
+    return response()->json([
+        'success' => true,
+        'message' => 'Favorites retrieved successfully',
+        'data' => $favoriteItems,
+    ], 200);
+}
+
     public function removeFromFavorite(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
             'product_id' => 'required|integer|exists:products,id',
         ]);
+
+        $validator->stopOnFirstFailure();
+        
+    if($validator->fails()){
+         $response = [
+                        'status' => Fakse,
+                       'message' => $validator->errors()->first()
+                      ]; 
+                return response()->json($response,400);
+    }
     
         $existingFavorite = DB::table('favorites')
             ->where('user_id', $request->user_id)
