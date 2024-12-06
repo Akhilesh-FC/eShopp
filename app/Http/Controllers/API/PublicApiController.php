@@ -211,9 +211,11 @@ class PublicApiController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'mobile' => $mobile,
-            'image' => 'https://eshop.foundercode.org/public/profileimage/1.png',
+            //'image' => 'https://eshop.foundercode.org/public/profileimage/1.png',
+            'image' => "profileimage/1.png",
+
             
-        ]);
+        ]); 
         if ($user) {
             $userss = DB::table('users')->where('mobile', $mobile)->first();
             $id=$userss->id;

@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SystemController;
 
 // Route::get('/', function () {return view('welcome');});
 Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
@@ -64,7 +65,7 @@ Route::get('/time_slots', function() {return view('system.timeslots');})->name('
 Route::get('/notification_settings', function() {return view('system.notificationsettings');})->name('notification_settings');
 Route::get('/contact_us', function()  {return view('system.contactus');})->name('contact_us');
 Route::get('/about_us', function() { return view('system.aboutus');})->name('about_us');
-Route::get('/privacy_policy', function() {return view('system.privacypolicy');})->name('privacy_policy');
+// Route::get('/privacy_policy', function() {return view('system.privacypolicy');})->name('privacy_policy');
 Route::get('/shipping_policy', function() {return view('system.shippingpolicy');})->name('shipping_policy');
 Route::get('/return_policy', function() {return view('system.returnpolicy');})->name('return_policy');
 Route::get('/admin_policies', function() {return view('system.adminpolicies');})->name('admin_policies');
@@ -72,6 +73,13 @@ Route::get('/delivery_boy_policies', function() {return view('system.deliveryboy
 Route::get('/seller_policies', function() {return view('system.sellerpolicies');})->name('seller_policies');
 Route::get('/system_updater', function() {return view('system.systemupdater');})->name('system_updater');
 Route::get('/system_registration', function() {return view('system.systemregistration');})->name('system_registration');
+
+Route::controller(SystemController::class)->group(function () {  
+    Route::get('/privacy_policy', 'privacy_policy')->name('privacy_policy'); 
+    Route::get('/term_condition', 'term_condition')->name('term_condition');  
+    //Route::get('/system_updater', 'system_updater')->name('system_updater');  
+    
+});
 
 Route::get('/firebase', function() {return view('websettings.firebase');})->name('firebase');
 Route::get('/general_settings',  function() {return view('websettings.generalsetting');})->name('general_settings');

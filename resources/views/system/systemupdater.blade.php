@@ -4,8 +4,6 @@
     <form action="{{ route('system_updater') }}" method="get"></form>
     
     <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- Main content -->
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -13,7 +11,7 @@
                     <h4>Update (Version 2.5.0)</h4>
                 </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
     <section class="content">
         <div class="container-fluid">
@@ -25,7 +23,7 @@
                         <div class="row">
                 <div class="col-md-12">
                     <div class="card card-info">
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/updater/upload_update_file" method="POST" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="dropzone" id="system-update-dropzone">
                                 </div>

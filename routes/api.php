@@ -34,12 +34,14 @@ Route::controller(ProductApiController::class)->group(function () {
    // Route::get('/orders/{id}', 'show');
     Route::get('/product_list_rating', 'Product_list_rating');
     Route::post('/product/rating', 'productRating');
+    Route::get('/product_explore', 'product_explore');  
 });
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');
     Route::post('/updatecart', 'updateFromCart');
     Route::post('/view_cart', 'viewCart'); 
-    Route::post('/remove_from_cart', 'removeFromCart');
+    Route::post('/remove_from_cart', 'removeFromCart'); 
+    Route::post('/deleteFromCart', 'deleteFromCart');   
  
     Route::post('/addtofav', 'addToFavorite'); 
     Route::post('/view_fav', 'viewFavorites');  
@@ -47,9 +49,10 @@ Route::controller(CartApiController::class)->group(function () {
 
 });
 Route::controller(AddressApiController::class)->group(function() {
-    Route::post('/add_address', 'add_address');  
+    Route::post('/add_address', 'add_address');
+    Route::post('/view_address', 'view_address');   
     Route::post('/edit_address','edit_address'); 
-    Route::delete('/delete_address','delete_address');  
+    Route::post('/delete_address','delete_address');  
 
 }); 
 

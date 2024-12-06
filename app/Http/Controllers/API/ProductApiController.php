@@ -237,8 +237,8 @@ class ProductApiController extends Controller
 
     
     
-public function Product_list_rating_old(Request $request)
-{
+    public function Product_list_rating_old(Request $request)
+    {
     // Fetch all products data with conditions applied
     $data = \DB::table('products')
         ->join('product_rating', 'products.id', '=', 'product_rating.product_id')
@@ -336,6 +336,134 @@ public function Product_list_rating_old(Request $request)
             ]
         ], 200);
     }
+    
+    // public function product_explore()
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //     'product_id' => 'required|integer|exists:products,id',
+    //     ]);
+
+    //     $validator->stopOnFirstFailure();
+        
+    // if($validator->fails()){
+    //      $response = [
+    //                     'status' => false,
+    //                   'message' => $validator->errors()->first()
+    //                   ]; 
+    //             return response()->json($response,400);
+    // }
+    
+    
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product added to the cart successfully',
+    //     ], 200);
+    
+    
+    // }
+    
+    //     public function product_explore(Request $request)
+//     {
+//     // Validate the request
+//     $validator = Validator::make($request->all(), [
+//         'product_id' => 'nullable|integer|exists:products,id',
+//     ]);
+
+//     $validator->stopOnFirstFailure();
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => $validator->errors()->first()
+//         ], 400);
+//     }
+
+//     // Fetch product and variant details using a join with pagination
+//     $productDetails = DB::table('products')
+//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+//         ->select(
+//             'products.*',
+//             'product_variants.price',
+//             'product_variants.special_price',
+//             'product_variants.percentage_off'
+//         )
+//         ->paginate(20); // Get 20 products per page
+
+//     // Prepare response
+//     $response = [
+//         'success' => true,
+//         'message' => 'Product details fetched successfully',
+//         'data' => $productDetails,
+//     ];
+
+//     return response()->json($response, 200);
+// }
+    
+//     public function product_explore(Request $request)
+// {
+//     // Validate the request
+//     $validator = Validator::make($request->all(), [
+//         'product_id' => 'integer|exists:products,id',
+//     ]);
+
+//     $validator->stopOnFirstFailure();
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => $validator->errors()->first()
+//         ], 400);
+//     }
+
+//     // Fetch product and variant details using a join
+//     $productDetails = DB::table('products')
+//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+//         ->where('products.id', $request->product_id)
+//         ->select(
+//             'products.*',
+//             'product_variants.price',
+//             'product_variants.special_price',
+//             'product_variants.percentage_off'
+//         )
+//         ->get();
+
+//     // Check if no data is found
+//     if ($productDetails->isEmpty()) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => 'Product not found',
+//         ], 200);
+//     }
+
+//     // Prepare response
+//     $response = [
+//         'success' => true,
+//         'message' => 'Product details fetched successfully',
+//         'data' => $productDetails
+//     ];
+
+//     return response()->json($response, 200);
+// }
+
+public function product_explore()
+    {
+        // Join query to fetch data
+        $products = DB::table('products')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->select(
+                'products.*',
+                'product_variants.price',
+                'product_variants.special_price',
+                'product_variants.percentage_off'
+            )
+            ->get();
+
+        // Return as JSON response
+        //return response()->json($products);
+        return response()->json(['data' => $products]);
+    }
+
     
 
 
