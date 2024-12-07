@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a>
+                        <li class="breadcrumb-item"><a href="#">Home</a>
                         </li>
                         <li class="breadcrumb-item active">Payment Methods Settings</li>
                     </ol>
@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-info">
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/Payment_settings/update_payment_settings" method="POST" id="payment_setting_form">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" id="payment_setting_form">
                             <div class="card-body">
                                 <h5>Paypal Payments</h5>
                                 <hr>
@@ -178,7 +178,7 @@
                                         <label for="paystack_webhook_url">Payment Endpoint URL <small>(Set this as Endpoint URL in your paystack account)</small></label>
                                     </div>
                                     <div class="form-group col-md-8">
-                                        <input type="text" class="form-control" name="paystack_webhook_url" value="https://avrluxe.com/app/v1/api/paystack-webhook" disabled />
+                                        <input type="text" class="form-control" name="paystack_webhook_url" value="#" disabled />
                                     </div>
                                 </div>
                                 <h5>Stripe Payments </h5>
@@ -209,7 +209,7 @@
                                         <label for="stripe_webhook_url">Payment Endpoint URL <small>(Set this as Endpoint URL in your Stripe account)</small></label>
                                     </div>
                                     <div class="form-group col-md-8">
-                                        <input type="text" class="form-control" name="stripe_webhook_url" value="https://avrluxe.com/app/v1/api/stripe-webhook" disabled />
+                                        <input type="text" class="form-control" name="stripe_webhook_url" value="#" disabled />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -238,7 +238,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label for="">Currency Code <small>[ Stripe supported ]</small> <a href="https://stripe.com/docs/currencies" target="_BLANK"><i class="fa fa-link"></i></a></label>
+                                        <label for="">Currency Code <small>[ Stripe supported ]</small> <a href="#" target="_BLANK"><i class="fa fa-link"></i></a></label>
                                     </div>
                                     <div class="form-group col-md-8">
                                         <select name="stripe_currency_code" class="form-control">

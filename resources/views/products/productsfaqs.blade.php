@@ -16,7 +16,7 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
                             <li class="breadcrumb-item active">Product FAQs</li>
                         </ol>
                     </div>
@@ -39,7 +39,7 @@
                                 </div>
 
                                 <div class="modal-body p-0">
-                                    <form class="form-horizontal form-submit-event" id="product_edit_faq_form" action="https://avrluxe.com/admin/product/edit_product_faqs" method="POST" enctype="multipart/form-data">
+                                    <form class="form-horizontal form-submit-event" id="product_edit_faq_form" action="#" method="POST" enctype="multipart/form-data">
                                         <div class="card-body">
                                             <div class="form-group row">
                                                 <label for="question" class="col-sm-2 col-form-label">Question </label>
@@ -74,7 +74,7 @@
         <div class="card-header border-0">
             <div class="card-tools">
                 <!-- Custom styles for button -->
-                <a href="https://avrluxe.com/admin/product_faqs/create_product_faqs" class="btn btn-outline-primary btn-sm float-right">Add Product FAQs</a>
+                <a href="#" class="btn btn-outline-primary btn-sm float-right">Add Product FAQs</a>
             </div>
         </div>
                             <div class="card-innr">

@@ -47,7 +47,13 @@ Route::get('/paymentrequest', function() {return view('paymentrequest');})->name
 Route::get('/manage_section', function() {return view('featuredSection.managesection');})->name('manage_section');
 Route::get('/section_order', function() {return view('featuredSection.sectionorder');})->name('section_order');
 
-Route::get('/view_customer', function() {return view('customer.viewcustomer');})->name('view_customer');
+//Route::get('/view_customer', function() {return view('customer.viewcustomer');})->name('view_customer');
+
+Route::controller(CustomerController::class)->group(function () {  
+    Route::get('/view_customer', 'viewCustomers')->name('view_customer');         
+   
+});
+
 Route::get('/address', function() {return view('customer.address');})->name('address');
 Route::get('/transaction', function() {return view('customer.transaction');})->name('transaction');
 Route::get('/wallet_transactions', function() {return view('customer.wallettransaction');})->name('wallet_transactions');
@@ -63,22 +69,31 @@ Route::get('/payments_methods',  function() {return view('system.paymetmethods')
 Route::get('/shipping_methods', function() {return view('system.shippingmethods');})->name('shipping_methods');
 Route::get('/time_slots', function() {return view('system.timeslots');})->name('time_slots');
 Route::get('/notification_settings', function() {return view('system.notificationsettings');})->name('notification_settings');
-Route::get('/contact_us', function()  {return view('system.contactus');})->name('contact_us');
-Route::get('/about_us', function() { return view('system.aboutus');})->name('about_us');
+//Route::get('/contact_us', function()  {return view('system.contactus');})->name('contact_us');
+//Route::get('/about_us', function() { return view('system.aboutus');})->name('about_us');
 // Route::get('/privacy_policy', function() {return view('system.privacypolicy');})->name('privacy_policy');
-Route::get('/shipping_policy', function() {return view('system.shippingpolicy');})->name('shipping_policy');
-Route::get('/return_policy', function() {return view('system.returnpolicy');})->name('return_policy');
-Route::get('/admin_policies', function() {return view('system.adminpolicies');})->name('admin_policies');
+// Route::get('/shipping_policy', function() {return view('system.shippingpolicy');})->name('shipping_policy');
+//Route::get('/return_policy', function() {return view('system.returnpolicy');})->name('return_policy');
+//Route::get('/admin_policies', function() {return view('system.adminpolicies');})->name('admin_policies');
 Route::get('/delivery_boy_policies', function() {return view('system.deliveryboypolicies');})->name('delivery_boy_policies');
 Route::get('/seller_policies', function() {return view('system.sellerpolicies');})->name('seller_policies');
 Route::get('/system_updater', function() {return view('system.systemupdater');})->name('system_updater');
-Route::get('/system_registration', function() {return view('system.systemregistration');})->name('system_registration');
+Route::get('/system_registration', function() {return view('system.systemregistration');})->name('system_registration'); 
 
 Route::controller(SystemController::class)->group(function () {  
-    Route::get('/privacy_policy', 'privacy_policy')->name('privacy_policy'); 
-    Route::get('/term_condition', 'term_condition')->name('term_condition');  
-    //Route::get('/system_updater', 'system_updater')->name('system_updater');  
+    Route::get('/privacy_policy', 'privacy_policy')->name('privacy_policy');         
+    Route::get('/term_condition', 'term_condition')->name('term_condition'); 
+    Route::post('/update_privacy', 'update_privacy')->name('update.privacy'); 
+    Route::post('/update_termcondition', 'update_termcondition')->name('update.termcondition');
+    Route::post('/update_privacy', 'update_privacy')->name('update.privacy');
     
+    Route::get('/shipping_policy', 'shipping_policy')->name('shipping_policy');
+    Route::get('/about_us', 'about_us')->name('about_us');  
+    ROute::get('/contact_us', 'contact_us')->name('contact_us');
+    ROute::get('/return_policy', 'return_policy')->name('return_policy');  
+    Route::get('/admin_policies', 'admin_policies')->name('admin_policies');      
+           
+      
 });
 
 Route::get('/firebase', function() {return view('websettings.firebase');})->name('firebase');

@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active">Cash Collection</li>
                     </ol>
                 </div>
@@ -29,7 +29,7 @@
                         <div class="col-md-6 ">
                             <div class="card card-info">
                                 <!-- form start -->
-                                <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/delivery_boys/manage-cash-collection" method="POST" enctype="multipart/form-data">
+                                <form class="form-horizontal form-submit-event" action="#" method="POST" enctype="multipart/form-data">
                                     <div class="card-body">
                                         <input type='hidden' name="delivery_boy_id" id="delivery_boy_id" value='' />
                                         <div class="form-group row">
@@ -69,7 +69,7 @@
                                 <div class="card-header bg-white border-0 h5">Select Delivery Boy</div>
                                 <div class="card-innr">
                                     <div class="gaps-1-5x"></div>
-                                    <table class='table table-striped' id="delivery_boys_details" data-toggle="table" data-url="https://avrluxe.com/admin/delivery_boys/view_delivery_boys" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="transaction_query_params">
+                                    <table class='table table-striped' id="delivery_boys_details" data-toggle="table" data-url="#" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="transaction_query_params">
                                         <thead>
                                             <tr>
                                                 <th data-field="state" data-radio="true"></th>
@@ -128,7 +128,7 @@
                             </div>
                             <input type="hidden" value="₹" name="store_currency">
 
-                            <table class='table table-striped' data-toggle="table" data-show-footer="true" data-url="https://avrluxe.com/admin/delivery_boys/get_cash_collection" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{
+                            <table class='table table-striped' data-toggle="table" data-show-footer="true" data-url="#" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{
                         "fileName": "delivery-boy-cash-collection-list",
                         "ignoreColumn": ["operate"] 
                         }' data-query-params="cash_collection_query_params">

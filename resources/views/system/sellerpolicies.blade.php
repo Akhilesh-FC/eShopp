@@ -14,7 +14,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
             <li class="breadcrumb-item active">Privacy Policy And Terms & Conditions</li>
           </ol>
         </div>
@@ -27,7 +27,7 @@
         <div class="col-md-12">
           <div class="card card-info">
             <!-- form start -->
-            <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/seller_privacy_policy/update-privacy-policy-settings" method="POST" enctype="multipart/form-data">
+            <form class="form-horizontal form-submit-event" action="#" method="POST" enctype="multipart/form-data">
               <div class="card-body pad">
                 <label for="other_images"> Privacy Policy </label>
                 <a href="https://avrluxe.com/admin/seller-privacy-policy/privacy-policy-page" target='_blank' class="btn btn-primary btn-xs" title='View Privacy Policy'><i class='fa fa-eye'></i></a>

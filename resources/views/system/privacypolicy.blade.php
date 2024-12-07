@@ -5,48 +5,58 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    <!-- Privacy Policy Section -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between">
-            <h5>Privacy Policy</h5>
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @elseif(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    <!-- Privacy Policy Section --> 
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Privacy Policy</h5>
         </div>
-
         <div class="card-body">
-            <form action="{{ route('privacy_policy') }}" method="post" enctype="multipart/form-data">
+            <form action="{{ route('update.privacy') }}" method="post" enctype="multipart/form-data">
                 @csrf
-
-                <div class="row mb-2">
-                    <div class="col-sm-12">
-                        <label for="privacyEditor">Description</label>
-                        <textarea id="privacyEditor" name="description">{{$settings[0]->value}}</textarea>
+                <div class="mb-3"> 
+                    <label for="privacyEditor" class="form-label">Description</label>
+                    <input type="hidden" name="id" value="{{ $settings[1]->id}}"
+                    <div class="editor-container">
+                        <textarea id="privacyEditor" name="description">{{ $settings[1]->value ?? '' }}</textarea>
                     </div>
                 </div>
-
-                <div>
-                    <button type="submit" class="btn btn-success btn-sm">Submit</button>
-                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div> 
             </form>
         </div>
-    </div>
+    </div> 
 
     <!-- Terms and Conditions Section -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between">
-            <h5>Terms and Conditions</h5> 
+    <div class="card shadow-sm"> 
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Terms and Conditions</h5>
         </div>
-
-        <div class="card-body">
-            <form action="{{ route('term_condition') }}" method="post" enctype="multipart/form-data">
+        <div class="card-body"> 
+            <form action="{{ route('update.privacy') }}" method="post" enctype="multipart/form-data">
                 @csrf
-                <div class="row mb-2">
-                    <div class="col-sm-12">
-                        <label for="termsEditor">Description</label>
-                        <textarea id="termsEditor" name="description">{{$settings[0]->value}}</textarea>
+                <div class="mb-3"> 
+                    <label for="termsEditor" class="form-label">Description</label>
+                    <input type="hidden" name="id" value="{{ $settings[2]->id}}"
+                    <div class="editor-container">
+                        <textarea id="termsEditor" name="description">{{ $settings[2]->value ?? '' }}</textarea>
                     </div>
                 </div>
-
-                <div>
-                    <button type="submit" class="btn btn-success btn-sm">Submit</button>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">Submit</button>
                 </div>
             </form>
         </div>
@@ -55,61 +65,62 @@
 </div>
 
 <script>
-    // ClassicEditor
-    //     .create(document.querySelector('#editor'))
-    //     .catch(error => { console.error(error); });
-        
+    // Initialize CKEditor with a fixed height
+    function initializeEditor(selector) {
         ClassicEditor
-        .create(document.querySelector('#privacyEditor'))
-        .catch(error => { console.error(error); });
-
-    ClassicEditor
-        .create(document.querySelector('#termsEditor'))
-        .catch(error => { console.error(error); });
-
-    // Image Preview for Slider Images
-    document.getElementById('imageInput').addEventListener('change', handleFileSelectSlider);
-
-    function handleFileSelectSlider(event) {
-        const selectedFiles = event.target.files;
-        const selectedImagesContainer = document.getElementById('selectedImages');
-        selectedImagesContainer.innerHTML = ''; // Clear previous selections
-
-        for (let i = 0; i < selectedFiles.length; i++) {
-            const file = selectedFiles[i];
-            const imageElement = document.createElement('img');
-            imageElement.src = URL.createObjectURL(file);
-            imageElement.style.maxWidth = '100px';
-            imageElement.style.maxHeight = '100px';
-            selectedImagesContainer.appendChild(imageElement);
-        }
+            .create(document.querySelector(selector), {
+                toolbar: [
+                    'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'
+                ]
+            })
+            .then(editor => {
+                editor.ui.view.editable.element.style.height = '250px'; // Fixed height for scrollable content
+                editor.ui.view.editable.element.style.overflowY = 'auto'; // Add vertical scrolling
+            })
+            .catch(error => console.error(error));
     }
 
-    // Image Preview for Thumbnail
-    document.getElementById('thumbnailInput').addEventListener('change', handleFileSelectThumbnail);
-
-    function handleFileSelectThumbnail(event) {
-        const selectedFiles = event.target.files;
-        const selectedImagesContainer = document.getElementById('thumbnailImages');
-        selectedImagesContainer.innerHTML = ''; // Clear previous selections
-
-        for (let i = 0; i < selectedFiles.length; i++) {
-            const file = selectedFiles[i];
-            const thumbnail = document.createElement('canvas');
-            const thumbnailContext = thumbnail.getContext('2d');
-            thumbnail.width = 100;
-            thumbnail.height = 100;
-
-            const imageElement = new Image();
-            imageElement.onload = function() {
-                thumbnailContext.drawImage(imageElement, 0, 0, thumbnail.width, thumbnail.height);
-                const thumbnailElement = document.createElement('img');
-                thumbnailElement.src = thumbnail.toDataURL('image/png');
-                selectedImagesContainer.appendChild(thumbnailElement);
-            };
-            imageElement.src = URL.createObjectURL(file);
-        }
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeEditor('#privacyEditor');
+        initializeEditor('#termsEditor');
+    });
 </script>
 
+<style>
+    .editor-container {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        background: #f9f9f9;
+        max-height: 300px;
+        overflow: hidden;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .card-header {
+        border-bottom: 2px solid #ddd;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+</style>
+
 @endsection
+
+
+

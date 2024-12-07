@@ -14,7 +14,7 @@
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
               <li class="breadcrumb-item active">Fund Transfers</li>
             </ol>
           </div>
@@ -32,7 +32,7 @@
                         <div class="gaps-1-5x"></div>
                          <table class='table-striped' 
                             data-toggle="table"
-                            data-url="https://avrluxe.com/admin/fund_transfer/view_fund_transfers"
+                            data-url="#"
                             data-click-to-select="true"
                             data-side-pagination="server"
                             data-pagination="true"

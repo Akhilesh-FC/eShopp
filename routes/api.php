@@ -34,7 +34,7 @@ Route::controller(ProductApiController::class)->group(function () {
    // Route::get('/orders/{id}', 'show');
     Route::get('/product_list_rating', 'Product_list_rating');
     Route::post('/product/rating', 'productRating');
-    Route::get('/product_explore', 'product_explore');  
+    Route::post('/product_explore', 'product_explore');    
 });
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');

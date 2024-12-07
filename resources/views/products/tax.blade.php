@@ -50,7 +50,7 @@
                         </div>
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' data-toggle="table" data-url="https://avrluxe.com/admin/taxes/get_tax_list" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="queryParams">
+                            <table class='table-striped' data-toggle="table" data-url="#" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="queryParams">
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable="true" data-align='center'>ID</th>

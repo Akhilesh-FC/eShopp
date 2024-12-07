@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a>
+                        <li class="breadcrumb-item"><a href="#">Home</a>
                         </li>
                         <li class="breadcrumb-item active">Products</li>
                     </ol>
@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-info">
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/setting/update_system_settings" method="POST" id="system_setting_form" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" id="system_setting_form" enctype="multipart/form-data">
                             <input type="hidden" id="system_configurations" name="system_configurations" required="" value="1" aria-required="true">
                             <input type="hidden" id="system_timezone_gmt" name="system_timezone_gmt" value="+05:30" aria-required="true">
                             <input type="hidden" id="system_configurations_id" name="system_configurations_id" value="13" aria-required="true">

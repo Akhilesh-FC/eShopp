@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active">Category</li>
                     </ol>
                 </div>
@@ -49,7 +49,7 @@
                         </div>
                         <div class="card-header border-0">
                             <div class="card-tools">
-                                <a href="https://avrluxe.com/admin/category/create-category" class="btn btn-block  btn-outline-primary btn-sm">Add Category</a>
+                                <a href="#" class="btn btn-block  btn-outline-primary btn-sm">Add Category</a>
                             </div>
                         </div>
                         <div class="card-innr" id="list_view_html">
@@ -57,7 +57,7 @@
                                 <h4 class="card-title">Category</h4>
                             </div>
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' id='category_table' data-toggle="table" data-url="https://avrluxe.com/admin/category/category_list" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel","csv"]' data-export-options='{
+                            <table class='table-striped' id='category_table' data-toggle="table" data-url="#" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel","csv"]' data-export-options='{
                         "fileName": "category-list",
                         "ignoreColumn": ["state"] 
                         }' data-query-params="category_query_params">

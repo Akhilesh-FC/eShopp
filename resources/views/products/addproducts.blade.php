@@ -17,7 +17,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active">Products</li>
                     </ol>
                 </div>
@@ -30,7 +30,7 @@
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
-                        <form class="form-horizontal" action="https://avrluxe.com/admin/product/add_product" method="POST" enctype="multipart/form-data" id="save-product">
+                        <form class="form-horizontal" action="#" method="POST" enctype="multipart/form-data" id="save-product">
                                                         <div class="card-body">
 
                                 <div class="form-group col-md-12">

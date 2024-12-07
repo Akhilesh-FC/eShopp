@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active">Email settings</li>
                     </ol>
                 </div>
@@ -27,7 +27,7 @@
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/email_settings/set_email_settings   " method="POST" id="add_product_form" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" id="add_product_form" enctype="multipart/form-data">
                             <!-- card -->
                             <div class="card-body">
                                 <p class="text-muted text-bold">Email SMTP settings, notifications and others related to email.</p>

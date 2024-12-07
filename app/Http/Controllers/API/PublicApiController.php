@@ -80,50 +80,108 @@ class PublicApiController extends Controller
     //         'data' => $product
     //     ], 200);
     // }
-    public function ProductDetails(Request $request)
+//     public function ProductDetails(Request $request)
+//     {
+//     $validator = Validator::make($request->all(), [
+//         'product_id' => 'required'
+//     ]);
+//     $validator->stopOnFirstFailure();
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => $validator->errors()->first()
+//         ], 200);
+//     }
+
+//     // Check if the product ID exists in the products table
+//     $productExists = DB::table('products')
+//         ->where('id', $request->product_id)
+//         ->exists();
+
+//     if (!$productExists) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'No product found for this product ID'
+//         ], 200);
+//     }
+
+//     // Fetch the product details
+//     $product = DB::table('products')
+//         ->where('id', $request->product_id)
+//         ->select(
+//             'products.*'
+//         )
+//         ->first();
+
+//     // Fetch all variants for the product
+//     $variants = DB::table('product_variants')
+//         ->where('product_id', $request->product_id)
+//         ->select(
+//             'special_price',
+//             'price',
+//             'percentage_off',
+//             'size',
+//             'color'
+//         )
+//         ->get();
+
+//     // Fetch cart items for the current user if `user_id` is provided
+//     $userId = $request->input('user_id'); // Optional user ID
+//     $cartItems = [];
+//     if ($userId) {
+//         $cartItems = DB::table('cart')
+//             ->where('user_id', $userId)
+//             ->pluck('product_id') // Get the product IDs from the cart
+//             ->toArray();
+//     }
+
+//     // Add `is_added` parameter to each variant
+//     $variants = $variants->map(function ($variant) use ($cartItems, $request) {
+//         $variant->is_added = in_array($request->product_id, $cartItems) ? 1 : 0;
+//         return $variant;
+//     });
+
+//     // Combine product details with its variants
+//     $product->variants = $variants; 
+
+//     // Return the product details along with its variants 
+//     return response()->json([
+//         "success" => true,
+//         'data' => $product
+//     ], 200);
+// }
+ 
+public function ProductDetails(Request $request)  
 {
-    $validator = Validator::make($request->all(), [
+    $validator = Validator::make($request->all(), [  
         'product_id' => 'required'
     ]);
-    $validator->stopOnFirstFailure();
+    $validator->stopOnFirstFailure(); 
 
     if ($validator->fails()) {
         return response()->json([
-            'status' => false,
+            'success' => false,
             'message' => $validator->errors()->first()
-        ], 400);
+        ], 200);
     }
 
-    // Check if the product ID exists in the products table
     $productExists = DB::table('products')
         ->where('id', $request->product_id)
         ->exists();
 
     if (!$productExists) {
         return response()->json([
-            'status' => 'error',
+            'success' => 'error',
             'message' => 'No product found for this product ID'
         ], 200);
     }
 
-    // Fetch the product details
     $product = DB::table('products')
         ->where('id', $request->product_id)
-        ->select(
-            'id as product_id',
-            'name',
-            'rating',
-            'made_in',
-            'stock',
-            'availability',
-            'no_of_ratings',
-            'item_to_sell',
-            'in_day_to_sell',
-            'product_highlight'
-        )
+        ->select('products.*')
         ->first();
 
-    // Fetch all variants for the product
     $variants = DB::table('product_variants')
         ->where('product_id', $request->product_id)
         ->select(
@@ -135,31 +193,29 @@ class PublicApiController extends Controller
         )
         ->get();
 
-    // Fetch cart items for the current user if `user_id` is provided
     $userId = $request->input('user_id'); // Optional user ID
     $cartItems = [];
     if ($userId) {
         $cartItems = DB::table('cart')
             ->where('user_id', $userId)
-            ->pluck('product_id') // Get the product IDs from the cart
+            ->pluck('product_id')
             ->toArray();
     }
 
-    // Add `is_added` parameter to each variant
-    $variants = $variants->map(function ($variant) use ($cartItems, $request) {
-        $variant->is_added = in_array($request->product_id, $cartItems) ? 1 : 0;
-        return $variant;
-    });
+    $isAdded = in_array($request->product_id, $cartItems) ? 1 : 0; 
 
-    // Combine product details with its variants
-    $product->variants = $variants;
+    $variant = $variants->first();
 
-    // Return the product details along with its variants
+    $productData = (object) array_merge((array) $product, (array) $variant);
+
     return response()->json([
-        'status' => 'success',
-        'data' => $product
+        "success" => true,
+        "is_added" => $isAdded,  
+        "data" => $productData 
     ], 200);
-}
+} 
+
+
 
 
 
@@ -508,7 +564,7 @@ class PublicApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $validator->errors()->first(),
-            ], 422);
+            ], 200);
         }
     
         // Get authenticated user ID
@@ -517,7 +573,7 @@ class PublicApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated. Please log in.',
-            ], 401);
+            ], 200);
         }
     
         $userId = $user->id;
@@ -565,7 +621,7 @@ class PublicApiController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while adding the product to the cart. Please try again.',
                 'error' => $e->getMessage(),
-            ], 500);
+            ], 200);
         }
     }
 
@@ -862,67 +918,62 @@ class PublicApiController extends Controller
     // }
 
 
-  public function getProductsBySubcategory(Request $request)
-{
-    // Fetch subcategory_id from the request (query parameters or request body)
-    $subcategoryId = $request->input('subcategory_id'); 
-
-    // Validate if subcategory_id is provided
-    if (!$subcategoryId) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Subcategory ID is required.',
-        ], 200);
-    }
-
-    // Fetch user_id from the request, but it's not required
-    $userId = $request->input('user_id'); 
-
-    // Fetch products that match the subcategory_id along with price and special_price from product_variants
-    $products = DB::table('products')
-         ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
-         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
-         ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
-         ->orWhere('sub_categories2.id', $subcategoryId)
-         ->get([
-             'products.*',
-             'product_variants.price', // Fetch price from product_variants
-             'product_variants.special_price' // Fetch special price from product_variants
-         ]); // Select relevant fields
-
-    // If a user_id is provided, fetch cart details
-    $cartItems = [];
-    if ($userId) {
-        $cartItems = DB::table('cart')
-            ->where('user_id', $userId)
-            ->pluck('product_id') // Fetch product IDs added to the cart
-            ->toArray(); // Convert collection to array
-    }
-
-    // Add is_added parameter based on cart
-    $products = $products->map(function ($product) use ($cartItems) {
-        $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; // Check directly in the array
-        return $product;
-    });
-
-    // Check if products are found
-    if ($products->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No products found for this subcategory.',
-        ], 200);
-    }
-
-    // Return the products data as a list
-    return response()->json([
-        'success' => true,
-        'data' => $products,
-    ], 200);
-}
-
-
-
+    public function getProductsBySubcategory(Request $request)
+    {
+        // Fetch subcategory_id from the request (query parameters or request body)
+        $subcategoryId = $request->input('subcategory_id'); 
     
+        // Validate if subcategory_id is provided
+        if (!$subcategoryId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subcategory ID is required.',
+            ], 200);
+        }
+    
+        // Fetch user_id from the request, but it's not required
+        $userId = $request->input('user_id'); 
+    
+        // Fetch products that match the subcategory_id along with price and special_price from product_variants
+        $products = DB::table('products')
+             ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
+             ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
+             ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
+             ->orWhere('sub_categories2.id', $subcategoryId)
+             ->get([
+                 'products.*',
+                 'product_variants.price', // Fetch price from product_variants
+                 'product_variants.special_price' // Fetch special price from product_variants
+             ]); // Select relevant fields
+    
+        // If a user_id is provided, fetch cart details
+        $cartItems = [];
+        if ($userId) {
+            $cartItems = DB::table('cart')
+                ->where('user_id', $userId)
+                ->pluck('product_id') // Fetch product IDs added to the cart
+                ->toArray(); // Convert collection to array
+        }
+    
+        // Add is_added parameter based on cart
+        $products = $products->map(function ($product) use ($cartItems) {
+            $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; // Check directly in the array
+            return $product;
+        });
+    
+        // Check if products are found
+        if ($products->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No products found for this subcategory.',
+            ], 200);
+        }
+    
+        // Return the products data as a list
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ], 200);
+    }
 
- 
 }

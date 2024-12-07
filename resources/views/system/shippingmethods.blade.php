@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a>
+                        <li class="breadcrumb-item"><a href="#">Home</a>
                         </li>
                         <li class="breadcrumb-item active">Shipping Methods Settings</li>
                     </ol>
@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-info">
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/Shipping_settings/update_shipping_settings" method="POST" id="payment_setting_form">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" id="payment_setting_form">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="form-group col-md-4">

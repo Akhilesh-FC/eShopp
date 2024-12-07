@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a>
+                        <li class="breadcrumb-item"><a href="#">Home</a>
                         </li>
                         <li class="breadcrumb-item active">Notification Settings</li>
                     </ol>
@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-info">
-                        <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/Notification_settings/update_notification_settings" method="POST" id="payment_setting_form" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event" action="#" method="POST" id="payment_setting_form" enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="form-group">
                                     <div class="card-body">

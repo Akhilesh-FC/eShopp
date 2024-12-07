@@ -14,7 +14,7 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
                             <li class="breadcrumb-item active">Attribute</li>
                         </ol>
                     </div>
@@ -46,7 +46,7 @@
                         <div class="card content-area p-4">
                             <div class="card-header border-0">
                                 <div class="card-tools">
-                                    <a href="https://avrluxe.com/admin/attributes/" class="btn btn-block btn-outline-primary btn-sm">Manage Attribute</a>
+                                    <a href="#" class="btn btn-block btn-outline-primary btn-sm">Manage Attribute</a>
                                 </div>
                             </div>
                             <div class="card-innr">

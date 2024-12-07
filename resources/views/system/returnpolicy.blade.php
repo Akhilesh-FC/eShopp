@@ -1,63 +1,103 @@
 @extends('admin.body.adminmaster')
 @section('admin')
 
-    <form action="{{ route('return_policy') }}" method="get"></form>
-    
-    <div class="content-wrapper">
-  <!-- Content Header (Page header) -->
-  <!-- Main content -->
-  <section class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h4>Return Policy</h4>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
-            <li class="breadcrumb-item active">Return Policy</li>
-          </ol>
-        </div>
-      </div>
-    </div><!-- /.container-fluid -->
-  </section>
-  <section class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card card-info">
-            <!-- form start -->
-            <form class="form-horizontal form-submit-event" action="https://avrluxe.com/admin/privacy_policy/update_return_policy_settings" method="POST" enctype="multipart/form-data">
-              <div class="card-body pad">
-                <label for="other_images"> Return Policy </label>
-                <a href="https://avrluxe.com/admin/privacy-policy/return-policy-page" target='_blank' class="btn btn-primary btn-xs" title='View return Policy'><i class='fa fa-eye'></i></a>
-                <div class="mb-3">
-                  <textarea name="return_policy_input_description" class="textarea addr_editor" placeholder="Place some text here text">
-                                            </textarea>
-                </div>
-              </div>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
 
+<div class="container-xxl flex-grow-1 container-p-y">
 
-              <div class="form-group">
-                <button type="reset" class="btn btn-warning">Reset</button>
-                <button type="submit" class="btn btn-success" id="submit_btn">Return Policy</button>
-              </div>
-          </div>
-
-          <div class="d-flex justify-content-center">
-            <div class="form-group" id="error_box">
-            </div>
-          </div>
-          <!-- /.card-body -->
-          </form>
-        </div>
-        <!--/.card-->
-      </div>
-      <!--/.col-md-12-->
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <!-- /.row -->
-</div><!-- /.container-fluid -->
-</section>
-    
-    
+    @elseif(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    <!-- Privacy Policy Section --> 
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Return Policy</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('update.privacy') }}" method="post" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-3"> 
+                    <label for="privacyEditor" class="form-label">Description</label>
+                    <input type="hidden" name="id" value="{{ $settings[8]->id}}"
+                    <div class="editor-container">
+                        <textarea id="privacyEditor" name="description">{{ $settings[8]->value ?? '' }}</textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div> 
+            </form>
+        </div>
+    </div> 
+</div>
+
+<script>
+    // Initialize CKEditor with a fixed height
+    function initializeEditor(selector) {
+        ClassicEditor
+            .create(document.querySelector(selector), {
+                toolbar: [
+                    'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'
+                ]
+            })
+            .then(editor => {
+                editor.ui.view.editable.element.style.height = '250px'; // Fixed height for scrollable content
+                editor.ui.view.editable.element.style.overflowY = 'auto'; // Add vertical scrolling
+            })
+            .catch(error => console.error(error));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeEditor('#privacyEditor');
+        initializeEditor('#termsEditor');
+    });
+</script>
+
+<style>
+    .editor-container {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        background: #f9f9f9;
+        max-height: 300px;
+        overflow: hidden;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .card-header {
+        border-bottom: 2px solid #ddd;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+</style>
+
 @endsection
+
+
+

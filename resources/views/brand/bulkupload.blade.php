@@ -13,7 +13,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
                         <li class="breadcrumb-item active">Products</li>
                     </ol>
                 </div>
@@ -36,7 +36,7 @@
                     <div class="card card-info">
 
                         <!-- form start -->
-                        <form class="form-horizontal" action="https://avrluxe.com/admin/brand/process_bulk_upload" method="POST" id="bulk_upload_form">
+                        <form class="form-horizontal" action="#" method="POST" id="bulk_upload_form">
                             <div class="card-body">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -66,9 +66,9 @@
                                 <div class="form-group row">
                                     <div class="card-body pad">
                                         <div class="form-group">
-                                            <a href="https://avrluxe.com/uploads/brand-bulk-upload-sample.csv" class="btn btn-info mb-3 " download="brand-bulk-upload-sample.csv">Bulk upload sample file <i class="fas fa-download"></i></a>
+                                            <a href="#" class="btn btn-info mb-3 " download="brand-bulk-upload-sample.csv">Bulk upload sample file <i class="fas fa-download"></i></a>
 
-                                            <a href="https://avrluxe.com/uploads/brand-bulk-update-sample.csv" class="btn btn-info mb-3" download="brand-bulk-update-sample.csv">Bulk update sample file <i class="fas fa-download"></i></a>
+                                            <a href="#" class="btn btn-info mb-3" download="brand-bulk-update-sample.csv">Bulk update sample file <i class="fas fa-download"></i></a>
 
                                         </div>
                                     </div>
