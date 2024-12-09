@@ -1,6 +1,8 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SystemController;
+use App\Http\Controllers\CustomerController;   
+use App\Http\Controllers\CategoriesController;    
 
 // Route::get('/', function () {return view('welcome');});
 Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
@@ -9,8 +11,12 @@ Route::get('/orders', function () {return view('orders.orders');})->name('orders
 Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');
 Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
 //=============================Categories Routes=================================//
-Route::get('/categories', function() {return view('categories.categories');})->name('categories');
-Route::get('/categories_order', function() {return view('categories.categorieorder');})->name('categories_order');
+
+Route::controller(CategoriesController::class)->group(function() { 
+    Route::get('/category', 'ViewCategory')->name('category'); 
+    Route::get('/category_order', function () {return view('category.categorieorde'); })->name('categories_order');
+});
+
 //=============================Brand Routes=================================//
 Route::get('/brand', function() {return view('brand.brand');})->name('brand');
 Route::get('/bulk_upload', function() {return view('brand.bulkupload');})->name('bulk_upload');
@@ -47,14 +53,14 @@ Route::get('/paymentrequest', function() {return view('paymentrequest');})->name
 Route::get('/manage_section', function() {return view('featuredSection.managesection');})->name('manage_section');
 Route::get('/section_order', function() {return view('featuredSection.sectionorder');})->name('section_order');
 
-//Route::get('/view_customer', function() {return view('customer.viewcustomer');})->name('view_customer');
 
-Route::controller(CustomerController::class)->group(function () {  
-    Route::get('/view_customer', 'viewCustomers')->name('view_customer');         
-   
+Route::controller(CustomerController::class)->group(function () {   
+    Route::get('/view_customer', 'ViewCustomers')->name('view_customer');      
+    Route::get('/view_address', 'ViewAddress')->name('address');        
+    
 });
 
-Route::get('/address', function() {return view('customer.address');})->name('address');
+// Route::get('/address', function() {return view('customer.address');})->name('address');
 Route::get('/transaction', function() {return view('customer.transaction');})->name('transaction');
 Route::get('/wallet_transactions', function() {return view('customer.wallettransaction');})->name('wallet_transactions');
 
@@ -69,12 +75,7 @@ Route::get('/payments_methods',  function() {return view('system.paymetmethods')
 Route::get('/shipping_methods', function() {return view('system.shippingmethods');})->name('shipping_methods');
 Route::get('/time_slots', function() {return view('system.timeslots');})->name('time_slots');
 Route::get('/notification_settings', function() {return view('system.notificationsettings');})->name('notification_settings');
-//Route::get('/contact_us', function()  {return view('system.contactus');})->name('contact_us');
-//Route::get('/about_us', function() { return view('system.aboutus');})->name('about_us');
-// Route::get('/privacy_policy', function() {return view('system.privacypolicy');})->name('privacy_policy');
-// Route::get('/shipping_policy', function() {return view('system.shippingpolicy');})->name('shipping_policy');
-//Route::get('/return_policy', function() {return view('system.returnpolicy');})->name('return_policy');
-//Route::get('/admin_policies', function() {return view('system.adminpolicies');})->name('admin_policies');
+
 Route::get('/delivery_boy_policies', function() {return view('system.deliveryboypolicies');})->name('delivery_boy_policies');
 Route::get('/seller_policies', function() {return view('system.sellerpolicies');})->name('seller_policies');
 Route::get('/system_updater', function() {return view('system.systemupdater');})->name('system_updater');
