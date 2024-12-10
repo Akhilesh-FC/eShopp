@@ -14,7 +14,17 @@ Route::get('/system_notification', function () {return view('orders.sysnotic');}
 
 Route::controller(CategoriesController::class)->group(function() { 
     Route::get('/category', 'ViewCategory')->name('category'); 
-    Route::get('/category_order', function () {return view('category.categorieorde'); })->name('categories_order');
+    Route::get('/category_order', function () {return view('category.categorieorder'); })->name('categories_order');
+    
+    Route::get('/categories.create','create' )->name('category.create');
+    Route::post('/categories.store', 'store')->name('category.store');
+    
+    Route::post('/categories/update/{id}', 'update')->name('category.update');
+    Route::post('/categories/delete/{id}', 'destroy')->name('category.delete');
+    Route::get('/categories/toggle-status/{id}', 'toggleStatus')->name('category.toggleStatus');
+    Route::get('category/edit/{id}', 'edit')->name('category.edit');
+    
+
 });
 
 //=============================Brand Routes=================================//

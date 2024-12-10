@@ -7,11 +7,16 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
+                        <!-- Header Section -->
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                             <h3 class="card-title">Categories</h3>
+                            <a href="{{ route('category.create') }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Add Category
+                            </a>
                         </div>
+
+                        <!-- Table Section -->
                         <div class="card-body">
-                            <!-- Make table responsive -->
                             <div class="table-responsive">
                                 <table class="table table-hover table-bordered">
                                     <thead class="thead-dark">
@@ -20,51 +25,56 @@
                                             <th>Image</th>
                                             <th>Banner</th>
                                             <th>Status</th>
-                                            <th>Action</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($viewCategories as $categories)
+                                        @forelse($viewCategories as $category)
                                             <tr>
-                                                <td>{{ $categories->name }}</td>
-                                                
-                                                <!-- Show Image -->
+                                                <!-- Category Name -->
+                                                <td>{{ $category->name }}</td> 
+
+                                                <!-- Category Image -->
                                                 <td>
-                                                    @if($categories->image)
-                                                        <img src="{{ $categories->image }}" alt="Category Image" class="img-thumbnail" style="max-width: 100px; height: auto;">
-                                                    @else
-                                                        <span>No Image</span>
-                                                    @endif  
-                                                </td>
-                                                
-                                                <!-- Show Banner -->
-                                                <td>
-                                                    @if($categories->banner) 
-                                                        <!-- Display the image if the URL is valid -->
-                                                        <img src="{{ $categories->banner }}" alt="Category Banner" class="img-fluid" style="max-width: 100px; height: 50;"> 
-                                                    @else
-                                                        <span>No Banner</span> 
-                                                    @endif 
+                                                    @if($category->image) 
+                                                        <img src="{{ $category->image }}" alt="Category Image" class="img-thumbnail" style="max-width: 100px; height: auto;">    
+                                                        @else 
+                                                        <span>No Image</span> 
+                                                    @endif
                                                 </td>
 
-                                                 
-                                                <!-- Show Status -->
+                                                <!-- Category Banner -->
                                                 <td>
-                                                    <span class="badge {{ $categories->status == 1 ? 'badge-success' : 'badge-danger' }}">
-                                                        {{ $categories->status == 1 ? 'Active' : 'Inactive' }} 
+                                                    @if($category->banner)
+                                                        <img src="{{ $category->banner }}" alt="Banner" class="img-thumbnail" style="max-width: 100px;">
+                                                    @else
+                                                        <span>No Banner</span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Status -->
+                                                <td>
+                                                    <span class="badge {{ $category->status == 1 ? 'badge-success' : 'badge-danger' }}">
+                                                        {{ $category->status == 1 ? 'Active' : 'Inactive' }}
                                                     </span>
                                                 </td>
-                                                
+
                                                 <!-- Action Buttons -->
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <a href="#" class="btn btn-sm btn-warning mr-1" title="Edit">
+                                                        <!-- Delete -->
+                                                        <form action="{{ route('category.delete', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?')">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-danger mr-1" title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                        <a href="{{ route('category.edit', $category->id) }}" class="btn btn-sm btn-warning mr-1" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="#" class="btn btn-sm btn-danger mr-1" title="Delete">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
-                                                        <a href="#" class="btn btn-sm btn-info mr-1" title="View">
+
+                                                        <!-- Activate/Deactivate -->
+                                                        <a href="{{ route('category.toggleStatus', $category->id) }}" class="btn btn-sm btn-info" title="Activate/Deactivate">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                     </div>
@@ -80,8 +90,8 @@
                             </div>
 
                             <!-- Pagination Section -->
-                            <div class="row mb-3">
-                                <div class="col-md-6"> 
+                            <div class="row">
+                                <div class="col-md-6">
                                     <form action="{{ route('category') }}" method="GET">
                                         <label for="per_page">Rows per page:</label>
                                         <select name="per_page" id="per_page" class="form-control d-inline-block w-auto" onchange="this.form.submit()">
@@ -92,18 +102,17 @@
                                         </select>
                                     </form>
                                 </div>
-                                <div class="col-md-6 text-right"> 
+                                <div class="col-md-6 text-right">
                                     <p>
                                         Showing {{ $viewCategories->firstItem() }} to {{ $viewCategories->lastItem() }} of {{ $viewCategories->total() }} rows
                                     </p>
-                                </div>  
+                                </div>
                             </div>
 
-                            <!-- Pagination links -->
+                            <!-- Pagination Links -->
                             <div class="d-flex justify-content-center">
                                 {{ $viewCategories->appends(['per_page' => request('per_page')])->links('pagination::bootstrap-4') }}
                             </div>
-
                         </div>
                     </div>
                 </div>

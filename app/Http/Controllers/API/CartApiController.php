@@ -297,9 +297,9 @@ class CartApiController extends Controller
     }
 
 
-    public function removeFromCart(Request $request)
+    public function removeFromCart(Request $request) 
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [ 
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id', 
         ]);
@@ -311,7 +311,7 @@ class CartApiController extends Controller
                         'status' => false,
                        'message' => $validator->errors()->first()
                       ]; 
-                return response()->json($response,400);
+                return response()->json($response,200);
         }
         
     
@@ -552,157 +552,106 @@ class CartApiController extends Controller
         ], 200);
     }
 
-    public function removeFromFavorite(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'product_id' => 'required|integer|exists:products,id',
-        ]);
+    // public function removeFromFavorite(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required',
+    //         'product_id' => 'required|integer|exists:products,id',
+    //     ]);
 
-        $validator->stopOnFirstFailure();
+    //     $validator->stopOnFirstFailure();
         
-        if($validator->fails()){
-         $response = [
-                        'status' => false,
-                       'message' => $validator->errors()->first()
-                      ]; 
-                return response()->json($response,200);
-        }
-        $userid = $request->user_id;
-        if($userid == "null" && $userid == null){
-        $existingFavorite = DB::table('favorites')
-            ->where('user_id', $userid)
-            ->where('product_id', $request->product_id)
-            ->first();
+    //     if($validator->fails()){
+    //      $response = [
+    //                     'status' => false,
+    //                   'message' => $validator->errors()->first()
+    //                   ]; 
+    //             return response()->json($response,200);
+    //     }
+    //     $userid = $request->user_id;
+    //     if($userid == "null" && $userid == null){
+    //     $existingFavorite = DB::table('favorites')
+    //         ->where('user_id', $userid)
+    //         ->where('product_id', $request->product_id)
+    //         ->first();
     
-        if (!$existingFavorite) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product not found in favorites',
-            ], 200);
-        }
+    //     if (!$existingFavorite) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Product not found in favorites',
+    //         ], 200);
+    //     }
 
-        // Remove the product from favorites
-        DB::table('favorites')
-            ->where('user_id', $request->user_id)
-            ->where('product_id', $request->product_id)
-            ->delete();
+    //     // Remove the product from favorites
+    //     DB::table('favorites')
+    //         ->where('user_id', $request->user_id)
+    //         ->where('product_id', $request->product_id)
+    //         ->delete();
 
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product removed from favorites successfully',
+    //     ], 200);
+    //     }else{
+    //       return response()->json([
+    //         'success' => false,
+    //         'message' => 'You Are Not Login.! Please Login First.....!',
+    //     ], 200); 
+    //     }
+    // }
+
+public function removeFromFavorite(Request $request)
+{
+    // Validate the input data
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer|exists:users,id', // Assuming user_id relates to users table
+        'product_id' => 'required|integer|exists:products,id',
+    ]);
+
+    $validator->stopOnFirstFailure();
+
+    // If validation fails, return the first error
+    if ($validator->fails()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Product removed from favorites successfully',
+            'status' => false,
+            'message' => $validator->errors()->first(),
         ], 200);
-        }else{
-           return response()->json([
-            'success' => false,
-            'message' => 'You Are Not Login.! Please Login First...!',
-        ], 200); 
-        }
     }
 
+    $userid = $request->user_id;
 
-// public function viewFav(Request $request)
-// {
-//     $request->validate([
-//         'user_id' => 'required|integer|exists:users,id', 
-//     ]);
+    // Check if user_id is valid
+    if (empty($userid)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You are not logged in. Please log in first.',
+        ], 200);
+    }
 
-//     $favoriteItems = DB::table('favorites')
-//         ->join('products', 'favorites.product_id', '=', 'products.id')
-//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
-//         ->leftJoin('product_rating', 'products.id', '=', 'product_rating.product_id') // Join with product_rating table to fetch ratings
-//         ->select(
-//             'favorites.id as favorite_item_id',
-//             'favorites.product_id',
-//             'products.*', // Select all fields from the products table
-//             'product_variants.price as product_price', // Price from product_variants table
-//             'product_variants.special_price as product_special_price', // Special price from product_variants table
-//             'product_variants.percentage_off', // Discount percentage from product_variants table
-//             'product_rating.rating as product_rating' // Rating from product_rating table
+    // Check if the favorite exists
+    $existingFavorite = DB::table('favorites')
+        ->where('user_id', $userid)
+        ->where('product_id', $request->product_id)
+        ->first();
 
-//         )
-//         ->where('favorites.user_id', $request->user_id)
-//         ->get();
+    if (!$existingFavorite) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Product not found in favorites.',
+        ], 200);
+    }
 
-//     if ($favoriteItems->isEmpty()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'No items in favorites',
-//             'data' => []
-//         ], 200);
-//     }
+    // Remove the product from favorites
+    DB::table('favorites')
+        ->where('user_id', $userid)
+        ->where('product_id', $request->product_id)
+        ->delete();
 
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Favorites retrieved successfully',
-//         'data' => $favoriteItems,
-//     ], 200);
-// }
-//     public function deleteFromCart(Request $request)
-//     {
-//         // Validate the request
-//         $request->validate([
-//             'user_id' => 'required|integer|exists:users,id', // Ensure user exists
-//             'product_id' => 'required|integer|exists:products,id', // Ensure product exists
-//         ]);
-    
-//         // Check if the product exists in the cart
-//         $cartItem = DB::table('cart')
-//             ->where('user_id', $request->user_id)
-//             ->where('product_id', $request->product_id)
-//             ->first();
-    
-//         if (!$cartItem) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'Product is not in the cart',
-//             ], 404);
-//         }
-    
-//         // Remove the product from the cart
-//         DB::table('cart')
-//             ->where('user_id', $request->user_id)
-//             ->where('product_id', $request->product_id)
-//             ->delete();
-    
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Product removed from the cart successfully',
-//         ], 200);
-//     }
-    //     public function removeFromFavorite(Request $request)
-//     {
-//     // Validate incoming request
-//     $request->validate([
-//         'user_id' => 'required|integer|exists:users,id', // Ensure user exists
-//         'product_id' => 'required|integer|exists:products,id', // Ensure product exists
-//     ]);
-
-//     // Check if the product exists in the user's favorites
-//     $existingFavorite = DB::table('favorites')
-//         ->where('user_id', $request->user_id)
-//         ->where('product_id', $request->product_id)
-//         ->first();
-
-//     if (!$existingFavorite) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Product is not in your favorites',
-//         ], 404);
-//     }
-
-//     // Remove the product from favorites
-//     DB::table('favorites')
-//         ->where('user_id', $request->user_id)
-//         ->where('product_id', $request->product_id)
-//         ->delete();
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Product removed from favorites successfully',
-//     ], 200);
-// }
-
+    return response()->json([
+        'success' => true,
+        'message' => 'Product removed from favorites successfully.',
+    ], 200);
+}
 
 
 
