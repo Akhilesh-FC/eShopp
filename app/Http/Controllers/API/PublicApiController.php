@@ -14,6 +14,69 @@ use Illuminate\Support\Str;
 class PublicApiController extends Controller
 {
  
+// public function ProductDetails(Request $request)  
+// {
+//     $validator = Validator::make($request->all(), [  
+//         'product_id' => 'required'
+//     ]);
+//     $validator->stopOnFirstFailure(); 
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => $validator->errors()->first()
+//         ], 200);
+//     }
+
+//     $productExists = DB::table('products')
+//         ->where('id', $request->product_id)
+//         ->exists();
+
+//     if (!$productExists) {
+//         return response()->json([
+//             'success' => 'error',
+//             'message' => 'No product found for this product ID'
+//         ], 200);
+//     }
+
+//     $product = DB::table('products')
+//         ->where('id', $request->product_id)
+//         ->select('products.*')
+//         ->first();
+
+//     $variants = DB::table('product_variants')
+//         ->where('product_id', $request->product_id)
+//         ->select(
+//             'special_price',
+//             'price',
+//             'percentage_off',
+//             'size',
+//             'color'
+//         )
+//         ->get();
+
+//     $userId = $request->input('user_id'); // Optional user ID
+//     $cartItems = [];
+//     if ($userId) {
+//         $cartItems = DB::table('cart')
+//             ->where('user_id', $userId)
+//             ->pluck('product_id')
+//             ->toArray();
+//     }
+
+//     $isAdded = in_array($request->product_id, $cartItems) ? 1 : 0; 
+
+//     $variant = $variants->first();
+
+//     $productData = (object) array_merge((array) $product, (array) $variant);
+
+//     return response()->json([
+//         "success" => true,
+//         "is_added" => $isAdded,  
+//         "data" => $productData 
+//     ], 200);
+// } 
+
 public function ProductDetails(Request $request)  
 {
     $validator = Validator::make($request->all(), [  
@@ -28,6 +91,7 @@ public function ProductDetails(Request $request)
         ], 200);
     }
 
+    // Check if the product exists
     $productExists = DB::table('products')
         ->where('id', $request->product_id)
         ->exists();
@@ -39,11 +103,13 @@ public function ProductDetails(Request $request)
         ], 200);
     }
 
+    // Fetch product details
     $product = DB::table('products')
         ->where('id', $request->product_id)
         ->select('products.*')
         ->first();
 
+    // Fetch product variants
     $variants = DB::table('product_variants')
         ->where('product_id', $request->product_id)
         ->select(
@@ -57,25 +123,38 @@ public function ProductDetails(Request $request)
 
     $userId = $request->input('user_id'); // Optional user ID
     $cartItems = [];
+    $favoriteItems = [];
+    
     if ($userId) {
+        // Check if the product is added to the cart
         $cartItems = DB::table('cart')
+            ->where('user_id', $userId)
+            ->pluck('product_id')
+            ->toArray();
+
+        // Check if the product is added to favorites
+        $favoriteItems = DB::table('favorites')
             ->where('user_id', $userId)
             ->pluck('product_id')
             ->toArray();
     }
 
-    $isAdded = in_array($request->product_id, $cartItems) ? 1 : 0; 
+    $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
+    $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
 
     $variant = $variants->first();
 
+    // Merge product and variant data
     $productData = (object) array_merge((array) $product, (array) $variant);
 
     return response()->json([
         "success" => true,
-        "is_added" => $isAdded,  
+        "is_added" => $isAddedToCart,  
+        "is_added_to_fav" => $isAddedToFavorites,
         "data" => $productData 
     ], 200);
-} 
+}
+
 
     public function register(Request $request)
     {
@@ -239,81 +318,6 @@ public function ProductDetails(Request $request)
         ], 200);
     }
     
-//     public function getProductsBySubcategory(Request $request)
-//     {
-    
-//     $subcategoryId = $request->input('subcategory_id');
-//     $userid = $request->input('user_id');
-
-//     if (!$subcategoryId) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Subcategory ID is required.',
-//         ], 200);
-//     }
-
-//     $baseUrl = env('APP_URL'); 
-
-//     // Fetch products that match the subcategory_id along with price and special_price from product_variants
-//     $products = DB::table('products')
-//          ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
-//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
-//         ->where('products.category_id', $subcategoryId) 
-//          ->orWhere('sub_categories2.id', $subcategoryId)
-//         ->get([
-//             'products.*',
-//             'product_variants.price', 
-//             'product_variants.special_price' 
-//         ]);  
-        
-//         foreach($products as $item){
-// 				$product_id=$item->id;
-// 				echo "$product_id";
-//       //$cart = DB::select("SELECT count(id) as count FROM `cart` WHERE `user_id` = ?", [$userid]); 
-//       $cart = DB::select("SELECT * FROM `cart` WHERE `user_id` = ? AND `product_id` = ?", [$userid, $product_id]);
-     
-//         }
-//         die;
-// $count = $cart[0]->product_id;
-
-// $status = $count == $product_id ? 1 : 0;     
-
-// if ($products) {
-//     $data = [
-//         'products' => $products,
-//         'is_added' => $status,
-//     ];
-//     return response()->json([
-//         'success' => true, 
-//         'data' => $data,
-//     ], 200);
-// } else {
-//     $data = [
-//         'products' => [],
-//         'is_added' => $status,
-//     ];
-//     return response()->json([
-//         'success' => false,
-//         'message' => 'No products found for this subcategory.',
-//         'data' => $data,
-//     ], 200);
-// }
-
-//     // if ($products->isEmpty()) {
-//     //     return response()->json([
-//     //         'success' => false,
-//     //         'message' => 'No products found for this subcategory.',
-//     //     ], 200);
-//     // }
-
-//     // return response()->json([
-//     //     'success' => true,
-//     //     'data' => $products,
-//     // ], 200);
-//     }
-    
-
-
 // public function getProductsBySubcategory(Request $request)
 // {
 //     // Fetch subcategory_id from the request (query parameters or request body)
@@ -704,12 +708,68 @@ public function ProductDetails(Request $request)
         }
     }
     
+    // public function getProductsBySubcategory(Request $request)
+    // {
+    //     // Fetch subcategory_id from the request (query parameters or request body)
+    //     $subcategoryId = $request->input('subcategory_id'); 
+    
+    //     // Validate if subcategory_id is provided
+    //     if (!$subcategoryId) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Subcategory ID is required.',
+    //         ], 200);
+    //     }
+    
+    //     // Fetch user_id from the request, but it's not required
+    //     $userId = $request->input('user_id'); 
+    
+    //     // Fetch products that match the subcategory_id along with price and special_price from product_variants
+    //     $products = DB::table('products')
+    //          ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
+    //          ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
+    //          ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
+    //          ->orWhere('sub_categories2.id', $subcategoryId)
+    //          ->get([
+    //              'products.*',
+    //              'product_variants.price', // Fetch price from product_variants
+    //              'product_variants.special_price' // Fetch special price from product_variants
+    //          ]); // Select relevant fields
+    
+    //     // If a user_id is provided, fetch cart details
+    //     $cartItems = [];
+    //     if ($userId) {
+    //         $cartItems = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id') // Fetch product IDs added to the cart
+    //             ->toArray(); // Convert collection to array
+    //     }
+    
+    //     // Add is_added parameter based on cart
+    //     $products = $products->map(function ($product) use ($cartItems) {
+    //         $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; // Check directly in the array
+    //         return $product;
+    //     });
+    
+    //     // Check if products are found
+    //     if ($products->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No products found for this subcategory.',
+    //         ], 200);
+    //     }
+    
+    //     // Return the products data as a list
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $products,
+    //     ], 200);
+    // }
+    
     public function getProductsBySubcategory(Request $request)
     {
-        // Fetch subcategory_id from the request (query parameters or request body)
         $subcategoryId = $request->input('subcategory_id'); 
     
-        // Validate if subcategory_id is provided
         if (!$subcategoryId) {
             return response()->json([
                 'success' => false,
@@ -717,37 +777,40 @@ public function ProductDetails(Request $request)
             ], 200);
         }
     
-        // Fetch user_id from the request, but it's not required
         $userId = $request->input('user_id'); 
     
-        // Fetch products that match the subcategory_id along with price and special_price from product_variants
         $products = DB::table('products')
-             ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
-             ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
-             ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
-             ->orWhere('sub_categories2.id', $subcategoryId)
-             ->get([
-                 'products.*',
-                 'product_variants.price', // Fetch price from product_variants
-                 'product_variants.special_price' // Fetch special price from product_variants
-             ]); // Select relevant fields
+            ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
+            ->where('products.category_id', $subcategoryId) 
+            ->orWhere('sub_categories2.id', $subcategoryId)
+            ->get([
+                'products.*',
+                'product_variants.price', 
+                'product_variants.special_price'
+            ]); 
     
-        // If a user_id is provided, fetch cart details
         $cartItems = [];
+        $favoriteItems = [];
         if ($userId) {
+          
             $cartItems = DB::table('cart')
                 ->where('user_id', $userId)
-                ->pluck('product_id') // Fetch product IDs added to the cart
-                ->toArray(); // Convert collection to array
+                ->pluck('product_id') 
+                ->toArray(); 
+    
+            $favoriteItems = DB::table('favorites')
+                ->where('user_id', $userId)
+                ->pluck('product_id') 
+                ->toArray(); 
         }
     
-        // Add is_added parameter based on cart
-        $products = $products->map(function ($product) use ($cartItems) {
-            $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; // Check directly in the array
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+            $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; 
+            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; 
             return $product;
         });
     
-        // Check if products are found
         if ($products->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -755,11 +818,13 @@ public function ProductDetails(Request $request)
             ], 200);
         }
     
-        // Return the products data as a list
         return response()->json([
             'success' => true,
             'data' => $products,
         ], 200);
     }
+
+
+
 
 }

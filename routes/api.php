@@ -44,8 +44,9 @@ Route::controller(CartApiController::class)->group(function () {
     Route::post('/deleteFromCart', 'deleteFromCart');   
  
     Route::post('/addtofav', 'addToFavorite'); 
-    Route::post('/view_fav', 'viewFavorites');  
-    Route::post('/removeFromFavorite', 'removeFromFavorite');
+    Route::post('/view_fav', 'viewFavorites');   
+    Route::post('/removeFromFavorite', 'removeFromFavorite'); 
+    Route::post('/checkout', 'checkout');  
 
 });
 Route::controller(AddressApiController::class)->group(function() {

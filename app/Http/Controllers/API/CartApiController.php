@@ -13,43 +13,6 @@ use Illuminate\Support\Str;
 
 class CartApiController extends Controller
 {
-
-    // public function addToCart(Request $request)
-    // {
-    //     $request->validate([
-    //         'user_id' => 'required|integer|exists:users,id', 
-    //         'product_id' => 'required|integer|exists:products,id',
-    //         'quantity' => 'required|integer|min:1', 
-    //     ]);
-    
-    //     $existingCartItem = DB::table('cart')
-    //         ->where('user_id', $request->user_id)
-    //         ->where('product_id', $request->product_id)
-    //         ->first();
-    
-    //     if ($existingCartItem) {
-    //         DB::table('cart')
-    //             ->where('user_id', $request->user_id)
-    //             ->where('product_id', $request->product_id)
-    //             ->update([
-    //                 'quantity' => $existingCartItem->quantity + $request->quantity
-    //             ]);
-    //     } else {
-
-    //         DB::table('cart')->insert([
-    //             'user_id' => $request->user_id,
-    //             'product_id' => $request->product_id,
-    //             'quantity' => $request->quantity,
-    //             'created_at' => now(), 
-    //             'updated_at' => now(),
-    //         ]);
-    //     }
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Product added to the cart successfully',
-    //     ], 200);
-    // }
     
     public function addToCart(Request $request)
     {
@@ -103,148 +66,58 @@ class CartApiController extends Controller
             'message' => 'Product added to the cart successfully',
         ], 200);
     }
-    
-//     public function viewCart(Request $request)
-//     {
-//             $validator = Validator::make($request->all(), [
-//             'user_id' => 'required|integer', 
-//         ]);
-
-//         $validator->stopOnFirstFailure();
-        
-//     if($validator->fails()){
-//          $response = [
-//                         'status' => false,
-//                       'message' => $validator->errors()->first()
-//                       ]; 
-//                 return response()->json($response,400);
-//     }
-
-//     $cartItems = DB::table('cart')
-//         ->join('products', 'cart.product_id', '=', 'products.id')
-//         ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
-//         ->select(
-//             'cart.id as cart_item_id',
-//             'cart.product_id',
-//             'products.name as product_name',
-//             'products.description as product_description',
-//             'product_variants.price as product_price', // Price from product_variants table
-//             'cart.quantity',
-//             DB::raw('product_variants.price * cart.quantity as total_price') // Total price calculated using product_variants.price
-//         )
-//         ->where('cart.user_id', $request->user_id)
-//         ->get();
-
-//     if ($cartItems->isEmpty()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'No items in the cart',
-//             'data' => []
-//         ], 200);
-//     }
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Cart retrieved successfully',
-//         'data' => $cartItems,
-//     ], 200);
-// }
 
     public function viewCart(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|string', 
-        ]);
-    
-        $validator->stopOnFirstFailure();
-    
-        if ($validator->fails()) {
-            $response = [
-                'status' => false,
-                'message' => $validator->errors()->first()
-            ]; 
-            return response()->json($response, 400);
-        }
-    
-        $cartItems = DB::table('cart')
-            ->join('products', 'cart.product_id', '=', 'products.id')
-            ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
-            ->select(
-                'cart.id as cart_item_id',
-                'cart.product_id',
-                'products.*', // Select all columns from the products table
-                'product_variants.price as product_price', // Price from product_variants table
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off',
-                'cart.quantity',
-                DB::raw('product_variants.special_price * cart.quantity as total_price') // Total price calculated using product_variants.price
-            )
-            ->where('cart.user_id', $request->user_id)
-            ->get();
-    
-        if ($cartItems->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No items in the cart',
-                'data' => []
-            ], 200);
-        }
-    
+{
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|string',
+    ]);
+
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
+        $response = [
+            'status' => false,
+            'message' => $validator->errors()->first()
+        ];
+        return response()->json($response, 400);
+    }
+
+    $cartItems = DB::table('cart')
+        ->join('products', 'cart.product_id', '=', 'products.id')
+        ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
+        ->select(
+            'cart.id as cart_item_id',
+            'cart.product_id',
+            'products.*', // Select all columns from the products table
+            'product_variants.price as product_price', // Price from product_variants table
+            'product_variants.special_price as special_price',
+            'product_variants.percentage_off as percentage_off',
+            'cart.quantity',
+            DB::raw('product_variants.special_price * cart.quantity as total_price') // Total price calculated using product_variants.price
+        )
+        ->where('cart.user_id', $request->user_id)
+        ->get();
+
+    if ($cartItems->isEmpty()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Cart retrieved successfully',
-            'data' => $cartItems,
+            'success' => false,
+            'message' => 'No items in the cart',
+            'data' => []
         ], 200);
     }
 
+    // Calculate the final total price
+    $finalTotalPrice = $cartItems->sum('total_price'); // Use Laravel's collection `sum()` method
 
-//     public function updateFromCart(Request $request)
-//     {
-    
-//     $validator = Validator::make($request->all(), [
-//         'user_id' => 'required|integer|exists:users,id', 
-//         'product_id' => 'required|integer|exists:products,id', 
-//         'quantity' => 'required|integer|min:1', 
-//         ]);
+    return response()->json([
+        'success' => true,
+        'message' => 'Cart retrieved successfully',
+        'data' => $cartItems,
+        'final_total_price' => $finalTotalPrice // Add the final total price here
+    ], 200);
+}
 
-//         $validator->stopOnFirstFailure();
-        
-//     if($validator->fails()){
-//          $response = [
-//                         'status' => false,
-//                       'message' => $validator->errors()->first()
-//                       ]; 
-//                 return response()->json($response,400);
-//     }
-
-//     $existingCartItem = DB::table('cart')
-//         ->where('user_id', $request->user_id)
-//         ->where('product_id', $request->product_id)
-//         ->first();
-
-//     if ($existingCartItem) {
-//         // Update the quantity by adding the new quantity to the existing quantity
-//         DB::table('cart')
-//             ->where('user_id', $request->user_id)
-//             ->where('product_id', $request->product_id)
-//             ->update([
-//                 'quantity' => $request->quantity, // Add new quantity to existing
-//                 //$existingCartItem->quantity += $request->quantity;
-//                 'updated_at' => now(),
-//             ]);
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Cart updated successfully',
-//         ], 200);
-//     } else {
-//         // Product not found in the cart
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Product not found in the cart',
-//         ], 200);
-//     }
-// }
 
     public function updateFromCart(Request $request)
     {
@@ -552,54 +425,6 @@ class CartApiController extends Controller
         ], 200);
     }
 
-    // public function removeFromFavorite(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'user_id' => 'required',
-    //         'product_id' => 'required|integer|exists:products,id',
-    //     ]);
-
-    //     $validator->stopOnFirstFailure();
-        
-    //     if($validator->fails()){
-    //      $response = [
-    //                     'status' => false,
-    //                   'message' => $validator->errors()->first()
-    //                   ]; 
-    //             return response()->json($response,200);
-    //     }
-    //     $userid = $request->user_id;
-    //     if($userid == "null" && $userid == null){
-    //     $existingFavorite = DB::table('favorites')
-    //         ->where('user_id', $userid)
-    //         ->where('product_id', $request->product_id)
-    //         ->first();
-    
-    //     if (!$existingFavorite) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Product not found in favorites',
-    //         ], 200);
-    //     }
-
-    //     // Remove the product from favorites
-    //     DB::table('favorites')
-    //         ->where('user_id', $request->user_id)
-    //         ->where('product_id', $request->product_id)
-    //         ->delete();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Product removed from favorites successfully',
-    //     ], 200);
-    //     }else{
-    //       return response()->json([
-    //         'success' => false,
-    //         'message' => 'You Are Not Login.! Please Login First.....!',
-    //     ], 200); 
-    //     }
-    // }
-
 public function removeFromFavorite(Request $request)
 {
     // Validate the input data
@@ -652,6 +477,219 @@ public function removeFromFavorite(Request $request)
         'message' => 'Product removed from favorites successfully.',
     ], 200);
 }
+
+
+    // public function checkout(Request $request)
+    // { 
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer|exists:users,id',
+    //         'total_price' => 'required|numeric|min:1', 
+    //         'address_id' => 'required|integer|exists:addresses,id', 
+    //         'paymode' => 'required|in:0,1',
+    //     ]);
+    
+    //     $validator->stopOnFirstFailure();
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+        
+    //     $userId = $request->input('user_id');
+    //     $totalPrice = $request->input('total_price');
+    //     $addressId = $request->input('address_id');
+    //     $paymode = $request->input('paymode');
+    
+    //     if ($paymode == 1) {
+           
+    //         $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
+    
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Make Payment to confirm order.',
+    //             'data' => [
+    //                 'payment_url' => $paymentUrl,
+    //                 'paymode' => 'Online',
+    //             ],
+    //         ], 200);
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Order Placed successfully.',
+    //         'data' => [
+    //             'paymode' => 'COD',
+    //             'total_price' => $totalPrice,
+    //             'address_id' => $addressId,
+    //         ],
+    //     ], 200);
+    // }
+    
+    // public function checkout(Request $request)
+    // { 
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer|exists:users,id',
+    //         'total_price' => 'required|numeric|min:1', 
+    //         'address_id' => 'required|integer|exists:addresses,id', 
+    //         'coupon_applied' => 'nullable|string', 
+    //         'paymode' => 'required|in:0,1',
+    //     ]);
+    
+    //     $validator->stopOnFirstFailure();
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+    
+    //     $userId = $request->input('user_id');
+    //     $totalPrice = $request->input('total_price');
+    //     $addressId = $request->input('address_id');
+    //     $paymode = $request->input('paymode');
+    //     $couponApplied = $request->input('coupon_applied', null); 
+    
+        
+    //     if (!empty($couponApplied)) {
+            
+    //         $isCouponValid = $this->validateCoupon($couponApplied);
+    //         if (!$isCouponValid) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid coupon code.',
+    //             ], 200);
+    //         }
+    
+    //         $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+    //     }
+    
+    //     if ($paymode == 1) {
+    //         $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
+    
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Make Payment to confirm order.',
+    //             'data' => [
+    //                 'payment_url' => $paymentUrl,
+    //                 'paymode' => 'Online',
+    //                 'total_price' => $totalPrice,
+    //                 'coupon_applied' => $couponApplied,
+    //             ],
+    //         ], 200);
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Order Placed successfully.',
+    //         'data' => [
+    //             'paymode' => 'COD',
+    //             'total_price' => $totalPrice,
+    //             //'address_id' => $addressId,
+    //             'coupon_applied' => $couponApplied,
+    //         ],
+    //     ], 200);
+    // }
+
+    public function checkout(Request $request)
+{ 
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer|exists:users,id',
+        'total_price' => 'required|numeric|min:1', 
+        'address_id' => 'required|integer|exists:addresses,id', 
+        'coupon_applied' => 'nullable|string', 
+        'paymode' => 'required|in:0,1',
+    ]);
+
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first(),
+        ], 200);
+    }
+
+    $userId = $request->input('user_id');
+    $totalPrice = $request->input('total_price');
+    $addressId = $request->input('address_id');
+    $paymode = $request->input('paymode');
+    $couponApplied = $request->input('coupon_applied', null); 
+    
+    // Apply coupon logic if a coupon is provided
+    if (!empty($couponApplied)) {
+        $isCouponValid = $this->validateCoupon($couponApplied);
+        if (!$isCouponValid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid coupon code.',
+            ], 200);
+        }
+
+        $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+    }
+
+    // Create the order and store it in the database
+    $orderData = [
+        'user_id' => $userId,
+        'address_id' => $addressId,
+        'final_total' => $totalPrice,
+        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+
+    $orderId = \DB::table('orders')->insertGetId($orderData);
+
+    if ($paymode == 1) {
+        $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Make Payment to confirm order.',
+            'data' => [
+                'payment_url' => $paymentUrl,
+                'paymode' => 'Online',
+                'final_total' => $totalPrice,
+                'coupon_applied' => $couponApplied,
+                'order_id' => $orderId,
+            ],
+        ], 200);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Order Placed successfully.',
+        'data' => [
+            'paymode' => 'COD',
+            'final_total' => $totalPrice,
+            'coupon_applied' => $couponApplied,
+            'order_id' => $orderId,
+        ],
+    ], 200);
+}
+
+
+
+
+// // Example function to validate coupon (Replace with actual implementation)
+// private function validateCoupon($coupon)
+// {
+//     // Example: Check if coupon exists in a `coupons` table and is valid
+//     return \DB::table('coupons')->where('code', $coupon)->where('is_active', 1)->exists();
+// }
+
+// // Example function to apply coupon discount (Replace with actual implementation)
+// private function applyCouponDiscount($totalPrice, $coupon)
+// {
+//     // Example: Fetch discount percentage or amount from `coupons` table
+//     $discount = \DB::table('coupons')->where('code', $coupon)->value('discount_amount');
+//     return $totalPrice - $discount;
+// }
+
+
 
 
 
