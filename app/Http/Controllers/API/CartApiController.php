@@ -68,56 +68,55 @@ class CartApiController extends Controller
     }
 
     public function viewCart(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'user_id' => 'required|string',
-    ]);
-
-    $validator->stopOnFirstFailure();
-
-    if ($validator->fails()) {
-        $response = [
-            'status' => false,
-            'message' => $validator->errors()->first()
-        ];
-        return response()->json($response, 400);
-    }
-
-    $cartItems = DB::table('cart')
-        ->join('products', 'cart.product_id', '=', 'products.id')
-        ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
-        ->select(
-            'cart.id as cart_item_id',
-            'cart.product_id',
-            'products.*', // Select all columns from the products table
-            'product_variants.price as product_price', // Price from product_variants table
-            'product_variants.special_price as special_price',
-            'product_variants.percentage_off as percentage_off',
-            'cart.quantity',
-            DB::raw('product_variants.special_price * cart.quantity as total_price') // Total price calculated using product_variants.price
-        )
-        ->where('cart.user_id', $request->user_id)
-        ->get();
-
-    if ($cartItems->isEmpty()) {
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string',
+        ]);
+    
+        $validator->stopOnFirstFailure();
+    
+        if ($validator->fails()) {
+            $response = [
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ];
+            return response()->json($response, 400);
+        }
+    
+        $cartItems = DB::table('cart')
+            ->join('products', 'cart.product_id', '=', 'products.id')
+            ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id')
+            ->select(
+                'cart.id as cart_item_id',
+                'cart.product_id',
+                'products.*', // Select all columns from the products table
+                'product_variants.price as product_price', // Price from product_variants table
+                'product_variants.special_price as special_price',
+                'product_variants.percentage_off as percentage_off',
+                'cart.quantity',
+                DB::raw('product_variants.special_price * cart.quantity as total_price') // Total price calculated using product_variants.price
+            )
+            ->where('cart.user_id', $request->user_id)
+            ->get();
+    
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No items in the cart',
+                'data' => []
+            ], 200);
+        }
+    
+        // Calculate the final total price
+        $finalTotalPrice = $cartItems->sum('total_price'); // Use Laravel's collection `sum()` method
+    
         return response()->json([
-            'success' => false,
-            'message' => 'No items in the cart',
-            'data' => []
+            'success' => true,
+            'message' => 'Cart retrieved successfully',
+            'data' => $cartItems,
+            'final_total_price' => $finalTotalPrice // Add the final total price here
         ], 200);
     }
-
-    // Calculate the final total price
-    $finalTotalPrice = $cartItems->sum('total_price'); // Use Laravel's collection `sum()` method
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Cart retrieved successfully',
-        'data' => $cartItems,
-        'final_total_price' => $finalTotalPrice // Add the final total price here
-    ], 200);
-}
-
 
     public function updateFromCart(Request $request)
     {
@@ -137,22 +136,20 @@ class CartApiController extends Controller
             return response()->json($response, 200);
         }
     
-        // Get the existing cart item
+        
         $existingCartItem = DB::table('cart')
             ->where('user_id', $request->user_id)
             ->where('product_id', $request->product_id)
             ->first();
     
         if ($existingCartItem) {
-            // Increment the existing quantity by the new quantity from the request
             $newQuantity = $request->quantity;
     
-            // Update the cart with the new quantity
             DB::table('cart')
                 ->where('user_id', $request->user_id)
                 ->where('product_id', $request->product_id)
                 ->update([
-                    'quantity' => $newQuantity, // Add the new quantity to the existing quantity
+                    'quantity' => $newQuantity, 
                     'updated_at' => now(),
                 ]);
     
@@ -161,14 +158,12 @@ class CartApiController extends Controller
                 'message' => 'Cart updated successfully',
             ], 200);
         } else {
-            // If the product is not found in the cart
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found in the cart',
             ], 200);
         }
     }
-
 
     public function removeFromCart(Request $request) 
     {
@@ -197,7 +192,6 @@ class CartApiController extends Controller
             $newQuantity = $existingCartItem->quantity - $request->quantity;
     
             if ($newQuantity > 0) {
-                // Update the cart item with the reduced quantity
                 DB::table('cart')
                     ->where('user_id', $request->user_id)
                     ->where('product_id', $request->product_id)
@@ -211,7 +205,6 @@ class CartApiController extends Controller
                     'message' => 'Product quantity reduced successfully in the cart.',
                 ], 200);
             } else {
-                // Remove the item from the cart if quantity becomes zero or less
                 DB::table('cart')
                     ->where('user_id', $request->user_id)
                     ->where('product_id', $request->product_id)
@@ -232,7 +225,6 @@ class CartApiController extends Controller
     
     public function deleteFromCart(Request $request)
     {
-        // Validate request
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id', 
@@ -248,14 +240,12 @@ class CartApiController extends Controller
             return response()->json($response, 200);  
         } 
     
-        // Check if the item exists in the cart
         $existingCartItem = DB::table('cart')
             ->where('user_id', $request->user_id)
             ->where('product_id', $request->product_id)
             ->first();
     
         if ($existingCartItem) {
-            // Delete the item from the cart
             DB::table('cart')
                 ->where('user_id', $request->user_id)
                 ->where('product_id', $request->product_id)
@@ -266,7 +256,6 @@ class CartApiController extends Controller
                 'message' => 'Product deleted from the cart successfully.',
             ], 200);
         } else {
-            // Product not found in the cart
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found in the cart.',
@@ -274,93 +263,163 @@ class CartApiController extends Controller
         }
     }
 
+    // public function addToFavorite(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer|exists:users,id', 
+    //         'product_id' => 'required|integer|exists:products,id',
+    //         ]);
+    
+    //         $validator->stopOnFirstFailure();
+            
+    //         if($validator->fails()){
+    //             $response = [
+    //                         'status' => false,
+    //                       'message' => $validator->errors()->first()
+    //                       ]; 
+    //                 return response()->json($response,200);
+    //     }
+
+    //     $existingFavorite = DB::table('favorites')
+    //         ->where('user_id', $request->user_id)
+    //         ->where('product_id', $request->product_id)
+    //         ->first();
+    
+    //     if ($existingFavorite) {
+    //         DB::table('favorites')
+    //             ->where('user_id', $request->user_id)
+    //             ->where('product_id', $request->product_id)
+    //             ->update([
+    //                 'quantity' => $existingFavorite->quantity + $request->quantity,
+    //                 'updated_at' => now(),
+    //             ]);
+    
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Product quantity updated in favorites successfully',
+    //         ], 200);
+    //     }
+
+    //     DB::table('favorites')->insert([
+    //         'user_id' => $request->user_id,
+    //         'product_id' => $request->product_id,
+    //         'quantity' => $request->quantity,
+    //         'created_at' => now(), 
+    //         'updated_at' => now(),
+    //     ]);
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product added to favorites successfully',
+    //     ], 200);
+    // }
     
     public function addToFavorite(Request $request)
     {
+        // Validate the incoming request
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer|exists:users,id', 
+            'user_id' => 'required|integer|exists:users,id',
             'product_id' => 'required|integer|exists:products,id',
-            ]);
-    
-            $validator->stopOnFirstFailure();
-            
-            if($validator->fails()){
-                $response = [
-                            'status' => false,
-                           'message' => $validator->errors()->first()
-                          ]; 
-                    return response()->json($response,200);
+            'fav_status' => 'required|integer|in:0,1',  // Ensure fav_status is either 0 or 1
+        ]);
+        
+        $validator->stopOnFirstFailure();
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ], 200);
         }
-
-        $existingFavorite = DB::table('favorites')
-            ->where('user_id', $request->user_id)
-            ->where('product_id', $request->product_id)
-            ->first();
     
-        if ($existingFavorite) {
-            // If the product is already in favorites, update the quantity
-            DB::table('favorites')
+        // If the request is to add the product to favorites (fav_status = 1)
+        if ($request->fav_status == 1) {
+            // Check if the product is already in favorites
+            $existingFavorite = DB::table('favorites')
                 ->where('user_id', $request->user_id)
                 ->where('product_id', $request->product_id)
-                ->update([
-                    'quantity' => $existingFavorite->quantity + $request->quantity,
-                    'updated_at' => now(),
-                ]);
+                ->first();
+    
+            // If the product is not in favorites, insert it with fav_status = 1
+            DB::table('favorites')->insert([
+                'user_id' => $request->user_id,
+                'product_id' => $request->product_id, 
+                'status' => 1, // Mark it as favorite
+                'created_at' => now(),
+                'updated_at' => now(), 
+            ]);
     
             return response()->json([
                 'success' => true,
-                'message' => 'Product quantity updated in favorites successfully',
+                'message' => 'Product added to favorites successfully',
             ], 200);
         }
-
-        // If the product is not in favorites, insert a new record
-        DB::table('favorites')->insert([
-            'user_id' => $request->user_id,
-            'product_id' => $request->product_id,
-            'quantity' => $request->quantity,
-            'created_at' => now(), 
-            'updated_at' => now(),
-        ]);
     
-        return response()->json([
-            'success' => true,
-            'message' => 'Product added to favorites successfully',
-        ], 200);
+        // If the request is to remove the product from favorites (fav_status = 0)
+        if ($request->fav_status == 0) {
+            $existingFavorite = DB::table('favorites')
+                ->where('user_id', $request->user_id)
+                ->where('product_id', $request->product_id)
+                ->first();
+    
+            if ($existingFavorite) {
+                // If the product is in favorites, delete it from the favorites table
+                DB::table('favorites')
+                    ->where('user_id', $request->user_id)
+                    ->where('product_id', $request->product_id)
+                    ->delete(); // Delete the record from the favorites table
+    
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Product removed from favorites successfully',
+                ], 200);
+            }
+    
+            // If the product is not in favorites, return an error message
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found in favorites',
+            ], 200);
+        }
     }
 
-    // public function viewFav(Request $request)
+    // public function viewFavorites(Request $request)
     // {
     //     $validator = Validator::make($request->all(), [
-    //         'user_id' => 'required|integer', 
+    //         'user_id' => 'required|integer',
     //     ]);
-
-    //     $validator->stopOnFirstFailure();
         
-    // if($validator->fails()){
-    //      $response = [
-    //                     'status' => false,
-    //                   'message' => $validator->errors()->first()
-    //                   ]; 
-    //             return response()->json($response,400);
-    // }
+    //     $validator->stopOnFirstFailure();
+    
+    //     if ($validator->fails()) {
+    //         $response = [
+    //             'status' => false,
+    //             'message' => $validator->errors()->first()
+    //         ];
+    //         return response()->json($response, 200);
+    //     }
     
     //     $favoriteItems = DB::table('favorites')
     //         ->join('products', 'favorites.product_id', '=', 'products.id')
-    //         ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+    //         ->join('product_variants', 'favorites.product_id', '=', 'product_variants.product_id')
     //         ->select(
     //             'favorites.id as favorite_item_id',
     //             'favorites.product_id',
-    //             'products.name as product_name',
-    //             'products.description as product_description',
-    //             'product_variants.special_price as product_price' // Price from product_variants table
+    //             'products.*', 
+    //             'product_variants.price as product_price', 
+    //             'product_variants.special_price as special_price',
+    //             'product_variants.percentage_off as percentage_off',
+    //             DB::raw('product_variants.special_price as total_price') 
     //         )
     //         ->where('favorites.user_id', $request->user_id)
     //         ->get();
+            
+            
     
     //     if ($favoriteItems->isEmpty()) {
     //         return response()->json([
     //             'success' => false,
-    //             'message' => 'No items in favorites',
+    //             'message' => 'No favorite items found',
     //             'data' => []
     //         ], 200);
     //     }
@@ -374,16 +433,12 @@ class CartApiController extends Controller
     
     public function viewFavorites(Request $request)
     {
-        // Validate the user ID
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
         ]);
         
-    
-        // Stop on the first failure
         $validator->stopOnFirstFailure();
     
-        // Return validation errors if any
         if ($validator->fails()) {
             $response = [
                 'status' => false,
@@ -392,23 +447,24 @@ class CartApiController extends Controller
             return response()->json($response, 200);
         }
     
-        // Get the favorites data from the database
+        $userId = $request->user_id;
+    
+        // Fetch all favorite items along with product details and variant details
         $favoriteItems = DB::table('favorites')
             ->join('products', 'favorites.product_id', '=', 'products.id')
             ->join('product_variants', 'favorites.product_id', '=', 'product_variants.product_id')
             ->select(
                 'favorites.id as favorite_item_id',
                 'favorites.product_id',
-                'products.*', // Select all columns from the products table
-                'product_variants.price as product_price', // Price from product_variants table
+                'products.*', 
+                'product_variants.price as product_price', 
                 'product_variants.special_price as special_price',
                 'product_variants.percentage_off as percentage_off',
-                DB::raw('product_variants.special_price as total_price') // You can adjust the total price calculation if needed
+                DB::raw('product_variants.special_price as total_price') 
             )
-            ->where('favorites.user_id', $request->user_id)
+            ->where('favorites.user_id', $userId)
             ->get();
     
-        // Check if no favorite items found
         if ($favoriteItems->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -417,74 +473,121 @@ class CartApiController extends Controller
             ], 200);
         }
     
-        // Return the response with favorite items data
+        // Fetch all product IDs in the cart for the user
+        $cartItems = DB::table('cart')
+            ->where('user_id', $userId)
+            ->pluck('product_id')
+            ->toArray();
+    
+        // Add 'is_added_to_cart' to each favorite item
+        $favoriteItems = $favoriteItems->map(function ($item) use ($cartItems) {
+            $item->is_added_to_cart = in_array($item->product_id, $cartItems) ? 1 : 0;
+            return $item;
+        });
+    
         return response()->json([
             'success' => true,
             'message' => 'Favorites retrieved successfully',
             'data' => $favoriteItems,
         ], 200);
     }
+    
 
-public function removeFromFavorite(Request $request)
-{
-    // Validate the input data
-    $validator = Validator::make($request->all(), [
-        'user_id' => 'required|integer|exists:users,id', // Assuming user_id relates to users table
-        'product_id' => 'required|integer|exists:products,id',
-    ]);
-
-    $validator->stopOnFirstFailure();
-
-    // If validation fails, return the first error
-    if ($validator->fails()) {
+    public function removeFromFavorite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id', 
+            'product_id' => 'required|integer|exists:products,id',
+        ]);
+    
+        $validator->stopOnFirstFailure();
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 200);
+        }
+    
+        $userid = $request->user_id;
+    
+        if (empty($userid)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not logged in. Please log in first.',
+            ], 200);
+        }
+    
+        $existingFavorite = DB::table('favorites')
+            ->where('user_id', $userid)
+            ->where('product_id', $request->product_id)
+            ->first();
+    
+        if (!$existingFavorite) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found in favorites.',
+            ], 200);
+        }
+    
+        DB::table('favorites')
+            ->where('user_id', $userid)
+            ->where('product_id', $request->product_id)
+            ->delete();
+    
         return response()->json([
-            'status' => false,
-            'message' => $validator->errors()->first(),
+            'success' => true,
+            'message' => 'Product removed from favorites successfully.',
         ], 200);
     }
-
-    $userid = $request->user_id;
-
-    // Check if user_id is valid
-    if (empty($userid)) {
+    
+    public function deletefromfav(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
+            'product_id' => 'required|integer|exists:products,id',
+        ]);
+    
+        $validator->stopOnFirstFailure(); 
+    
+        if ($validator->fails()) {
+            return response()->json([ 
+                'status' => false,
+                'message' => $validator->errors()->first() 
+            ], 200);
+        }
+    
+        $existingFavItem = DB::table('favorites') 
+            ->where('user_id', $request->user_id)
+            ->where('product_id', $request->product_id) 
+            ->first();
+    
+        if ($existingFavItem) { 
+            DB::table('favorites')
+                ->where('user_id', $request->user_id)
+                ->where('product_id', $request->product_id)
+                ->delete();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Product removed from cart successfully',
+            ], 200);
+        }
+    
         return response()->json([
             'success' => false,
-            'message' => 'You are not logged in. Please log in first.',
+            'message' => 'Product not found in the cart', 
         ], 200);
     }
 
-    // Check if the favorite exists
-    $existingFavorite = DB::table('favorites')
-        ->where('user_id', $userid)
-        ->where('product_id', $request->product_id)
-        ->first();
-
-    if (!$existingFavorite) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Product not found in favorites.',
-        ], 200);
-    }
-
-    // Remove the product from favorites
-    DB::table('favorites')
-        ->where('user_id', $userid)
-        ->where('product_id', $request->product_id)
-        ->delete();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Product removed from favorites successfully.',
-    ], 200);
-}
-
-
+    
     // public function checkout(Request $request)
     // { 
     //     $validator = Validator::make($request->all(), [
     //         'user_id' => 'required|integer|exists:users,id',
     //         'total_price' => 'required|numeric|min:1', 
     //         'address_id' => 'required|integer|exists:addresses,id', 
+    //         'coupon_applied' => 'nullable|string', 
     //         'paymode' => 'required|in:0,1',
     //     ]);
     
@@ -496,14 +599,37 @@ public function removeFromFavorite(Request $request)
     //             'message' => $validator->errors()->first(),
     //         ], 200);
     //     }
-        
+    
     //     $userId = $request->input('user_id');
     //     $totalPrice = $request->input('total_price');
     //     $addressId = $request->input('address_id');
     //     $paymode = $request->input('paymode');
+    //     $couponApplied = $request->input('coupon_applied', null); 
+        
+    //     if (!empty($couponApplied)) {
+    //         $isCouponValid = $this->validateCoupon($couponApplied);
+    //         if (!$isCouponValid) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid coupon code.',
+    //             ], 200);
+    //         }
+    
+    //         $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+    //     }
+    
+    //     $orderData = [
+    //         'user_id' => $userId,
+    //         'address_id' => $addressId,
+    //         'final_total' => $totalPrice,
+    //         'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+    //         'created_at' => now(),
+    //         'updated_at' => now(),
+    //     ];
+    
+    //     $orderId = \DB::table('orders')->insertGetId($orderData);
     
     //     if ($paymode == 1) {
-           
     //         $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
     
     //         return response()->json([
@@ -512,6 +638,9 @@ public function removeFromFavorite(Request $request)
     //             'data' => [
     //                 'payment_url' => $paymentUrl,
     //                 'paymode' => 'Online',
+    //                 'final_total' => $totalPrice,
+    //                 'coupon_applied' => $couponApplied,
+    //                 'order_id' => $orderId,
     //             ],
     //         ], 200);
     //     }
@@ -521,8 +650,9 @@ public function removeFromFavorite(Request $request)
     //         'message' => 'Order Placed successfully.',
     //         'data' => [
     //             'paymode' => 'COD',
-    //             'total_price' => $totalPrice,
-    //             'address_id' => $addressId,
+    //             'final_total' => $totalPrice,
+    //             'coupon_applied' => $couponApplied,
+    //             'order_id' => $orderId,
     //         ],
     //     ], 200);
     // }
@@ -551,10 +681,8 @@ public function removeFromFavorite(Request $request)
     //     $addressId = $request->input('address_id');
     //     $paymode = $request->input('paymode');
     //     $couponApplied = $request->input('coupon_applied', null); 
-    
         
     //     if (!empty($couponApplied)) {
-            
     //         $isCouponValid = $this->validateCoupon($couponApplied);
     //         if (!$isCouponValid) {
     //             return response()->json([
@@ -566,6 +694,19 @@ public function removeFromFavorite(Request $request)
     //         $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
     //     }
     
+    //     $orderData = [
+    //         'user_id' => $userId,
+    //         'address_id' => $addressId,
+    //         'final_total' => $totalPrice,
+    //         'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+    //         'created_at' => now(),
+    //         'updated_at' => now(),
+    //     ];
+    
+    //     $orderId = \DB::table('orders')->insertGetId($orderData);
+    
+    //     \DB::table('cart')->where('user_id', $userId)->delete();
+    
     //     if ($paymode == 1) {
     //         $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
     
@@ -575,8 +716,9 @@ public function removeFromFavorite(Request $request)
     //             'data' => [
     //                 'payment_url' => $paymentUrl,
     //                 'paymode' => 'Online',
-    //                 'total_price' => $totalPrice,
+    //                 'final_total' => $totalPrice,
     //                 'coupon_applied' => $couponApplied,
+    //                 'order_id' => $orderId,
     //             ],
     //         ], 200);
     //     }
@@ -586,72 +728,98 @@ public function removeFromFavorite(Request $request)
     //         'message' => 'Order Placed successfully.',
     //         'data' => [
     //             'paymode' => 'COD',
-    //             'total_price' => $totalPrice,
-    //             //'address_id' => $addressId,
+    //             'final_total' => $totalPrice,
     //             'coupon_applied' => $couponApplied,
+    //             'order_id' => $orderId,
     //         ],
     //     ], 200);
     // }
 
+
     public function checkout(Request $request)
-{ 
-    $validator = Validator::make($request->all(), [
-        'user_id' => 'required|integer|exists:users,id',
-        'total_price' => 'required|numeric|min:1', 
-        'address_id' => 'required|integer|exists:addresses,id', 
-        'coupon_applied' => 'nullable|string', 
-        'paymode' => 'required|in:0,1',
-    ]);
-
-    $validator->stopOnFirstFailure();
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first(),
-        ], 200);
-    }
-
-    $userId = $request->input('user_id');
-    $totalPrice = $request->input('total_price');
-    $addressId = $request->input('address_id');
-    $paymode = $request->input('paymode');
-    $couponApplied = $request->input('coupon_applied', null); 
+    { 
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
+            'total_price' => 'required|numeric|min:1', 
+            'address_id' => 'required|integer|exists:addresses,id', 
+            'coupon_applied' => 'nullable|string', 
+            'paymode' => 'required|in:0,1',
+        ]);
     
-    // Apply coupon logic if a coupon is provided
-    if (!empty($couponApplied)) {
-        $isCouponValid = $this->validateCoupon($couponApplied);
-        if (!$isCouponValid) {
+        $validator->stopOnFirstFailure();
+    
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid coupon code.',
+                'message' => $validator->errors()->first(),
             ], 200);
         }
-
-        $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
-    }
-
-    // Create the order and store it in the database
-    $orderData = [
-        'user_id' => $userId,
-        'address_id' => $addressId,
-        'final_total' => $totalPrice,
-        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ];
-
-    $orderId = \DB::table('orders')->insertGetId($orderData);
-
-    if ($paymode == 1) {
-        $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
-
+    
+        $userId = $request->input('user_id');
+        $totalPrice = $request->input('total_price');
+        $addressId = $request->input('address_id');
+        $paymode = $request->input('paymode');
+        $couponApplied = $request->input('coupon_applied', null);
+    
+        // Check if the address belongs to the user
+        $addressExists = \DB::table('addresses')
+            ->where('id', $addressId)
+            ->where('user_id', $userId)
+            ->exists();
+    
+        if (!$addressExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided address does not belong to the specified user.',
+            ], 200);
+        }
+    
+        if (!empty($couponApplied)) {
+            $isCouponValid = $this->validateCoupon($couponApplied);
+            if (!$isCouponValid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid coupon code.',
+                ], 200);
+            }
+    
+            $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+        }
+    
+        $orderData = [
+            'user_id' => $userId,
+            'address_id' => $addressId,
+            'final_total' => $totalPrice,
+            'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    
+        $orderId = \DB::table('orders')->insertGetId($orderData);
+    
+        \DB::table('cart')->where('user_id', $userId)->delete();
+    
+        if ($paymode == 1) {
+            $paymentUrl = "https://paymentgateway.com/checkout?user_id=$userId&amount=$totalPrice";
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Make Payment to confirm order.',
+                'data' => [
+                    'payment_url' => $paymentUrl,
+                    'paymode' => 'Online',
+                    'final_total' => $totalPrice,
+                    'coupon_applied' => $couponApplied,
+                    'order_id' => $orderId,
+                ],
+            ], 200);
+        }
+    
         return response()->json([
             'success' => true,
-            'message' => 'Make Payment to confirm order.',
+            'message' => 'Order Placed successfully.',
             'data' => [
-                'payment_url' => $paymentUrl,
-                'paymode' => 'Online',
+                'paymode' => 'COD',
                 'final_total' => $totalPrice,
                 'coupon_applied' => $couponApplied,
                 'order_id' => $orderId,
@@ -659,19 +827,8 @@ public function removeFromFavorite(Request $request)
         ], 200);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Order Placed successfully.',
-        'data' => [
-            'paymode' => 'COD',
-            'final_total' => $totalPrice,
-            'coupon_applied' => $couponApplied,
-            'order_id' => $orderId,
-        ],
-    ], 200);
-}
-
-
+    
+    
 
 
 // // Example function to validate coupon (Replace with actual implementation)

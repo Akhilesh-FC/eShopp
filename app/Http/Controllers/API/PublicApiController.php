@@ -13,148 +13,85 @@ use Illuminate\Support\Str;
 
 class PublicApiController extends Controller
 {
- 
-// public function ProductDetails(Request $request)  
-// {
-//     $validator = Validator::make($request->all(), [  
-//         'product_id' => 'required'
-//     ]);
-//     $validator->stopOnFirstFailure(); 
-
-//     if ($validator->fails()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => $validator->errors()->first()
-//         ], 200);
-//     }
-
-//     $productExists = DB::table('products')
-//         ->where('id', $request->product_id)
-//         ->exists();
-
-//     if (!$productExists) {
-//         return response()->json([
-//             'success' => 'error',
-//             'message' => 'No product found for this product ID'
-//         ], 200);
-//     }
-
-//     $product = DB::table('products')
-//         ->where('id', $request->product_id)
-//         ->select('products.*')
-//         ->first();
-
-//     $variants = DB::table('product_variants')
-//         ->where('product_id', $request->product_id)
-//         ->select(
-//             'special_price',
-//             'price',
-//             'percentage_off',
-//             'size',
-//             'color'
-//         )
-//         ->get();
-
-//     $userId = $request->input('user_id'); // Optional user ID
-//     $cartItems = [];
-//     if ($userId) {
-//         $cartItems = DB::table('cart')
-//             ->where('user_id', $userId)
-//             ->pluck('product_id')
-//             ->toArray();
-//     }
-
-//     $isAdded = in_array($request->product_id, $cartItems) ? 1 : 0; 
-
-//     $variant = $variants->first();
-
-//     $productData = (object) array_merge((array) $product, (array) $variant);
-
-//     return response()->json([
-//         "success" => true,
-//         "is_added" => $isAdded,  
-//         "data" => $productData 
-//     ], 200);
-// } 
-
-public function ProductDetails(Request $request)  
-{
-    $validator = Validator::make($request->all(), [  
-        'product_id' => 'required'
-    ]);
-    $validator->stopOnFirstFailure(); 
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first()
-        ], 200);
-    }
-
-    // Check if the product exists
-    $productExists = DB::table('products')
-        ->where('id', $request->product_id)
-        ->exists();
-
-    if (!$productExists) {
-        return response()->json([
-            'success' => 'error',
-            'message' => 'No product found for this product ID'
-        ], 200);
-    }
-
-    // Fetch product details
-    $product = DB::table('products')
-        ->where('id', $request->product_id)
-        ->select('products.*')
-        ->first();
-
-    // Fetch product variants
-    $variants = DB::table('product_variants')
-        ->where('product_id', $request->product_id)
-        ->select(
-            'special_price',
-            'price',
-            'percentage_off',
-            'size',
-            'color'
-        )
-        ->get();
-
-    $userId = $request->input('user_id'); // Optional user ID
-    $cartItems = [];
-    $favoriteItems = [];
     
-    if ($userId) {
-        // Check if the product is added to the cart
-        $cartItems = DB::table('cart')
-            ->where('user_id', $userId)
-            ->pluck('product_id')
-            ->toArray();
-
-        // Check if the product is added to favorites
-        $favoriteItems = DB::table('favorites')
-            ->where('user_id', $userId)
-            ->pluck('product_id')
-            ->toArray();
+    public function ProductDetails(Request $request)  
+    {
+        $validator = Validator::make($request->all(), [  
+            'product_id' => 'required'
+        ]);
+        $validator->stopOnFirstFailure(); 
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+    
+        // Check if the product exists
+        $productExists = DB::table('products')
+            ->where('id', $request->product_id)
+            ->exists();
+    
+        if (!$productExists) {
+            return response()->json([
+                'success' => 'error',
+                'message' => 'No product found for this product ID'
+            ], 200);
+        }
+    
+        // Fetch product details
+        $product = DB::table('products')
+            ->where('id', $request->product_id)
+            ->select('products.*')
+            ->first();
+    
+        // Fetch product variants
+        $variants = DB::table('product_variants')
+            ->where('product_id', $request->product_id)
+            ->select(
+                'special_price',
+                'price',
+                'percentage_off',
+                'size',
+                'color'
+            )
+            ->get();
+    
+        $userId = $request->input('user_id'); // Optional user ID
+        $cartItems = [];
+        $favoriteItems = [];
+        
+        if ($userId) {
+            // Check if the product is added to the cart
+            $cartItems = DB::table('cart')
+                ->where('user_id', $userId)
+                ->pluck('product_id')
+                ->toArray();
+    
+            // Check if the product is added to favorites
+            $favoriteItems = DB::table('favorites')
+                ->where('user_id', $userId)
+                ->pluck('product_id')
+                ->toArray();
+        }
+    
+        $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
+        $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
+    
+        $variant = $variants->first();
+    
+        // Merge product and variant data
+        $productData = (object) array_merge((array) $product, (array) $variant);
+    
+        return response()->json([
+            "success" => true,
+            "is_added" => $isAddedToCart,  
+            "is_added_to_fav" => $isAddedToFavorites,
+            "data" => $productData 
+        ], 200);
     }
-
-    $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
-    $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
-
-    $variant = $variants->first();
-
-    // Merge product and variant data
-    $productData = (object) array_merge((array) $product, (array) $variant);
-
-    return response()->json([
-        "success" => true,
-        "is_added" => $isAddedToCart,  
-        "is_added_to_fav" => $isAddedToFavorites,
-        "data" => $productData 
-    ], 200);
-}
-
+    
 
     public function register(Request $request)
     {
@@ -497,7 +434,7 @@ public function ProductDetails(Request $request)
             ->first();
     
         if (!$user) {
-            return response()->json(['error' => 'User not found'], 400);
+            return response()->json(['error' => 'User not found'], 200);
         }
     
         // Validate the input fields

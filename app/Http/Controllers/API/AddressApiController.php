@@ -68,36 +68,79 @@ class AddressApiController extends Controller
     } 
 
     
+    // public function view_address(Request $request)  
+    // {
+    //     // Validate the incoming request for user_id
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer', 
+    //     ]);
+    
+    //     $validator->stopOnFirstFailure();
+        
+    //     if ($validator->fails()) {
+    //         $response = [
+    //             'status' => false,
+    //             'message' => $validator->errors()->first()
+    //         ]; 
+    //         return response()->json($response, 200);
+    //     }
+        
+    //     // Get all addresses for the given user
+    //     $addresses = DB::table('addresses')->where('user_id', $request->user_id)->get();
+    
+    //     if ($addresses->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No addresses found for this user.',
+                
+    //         ], 200); 
+    //     }
+    
+    //     // Return success response with the user's addresses
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Addresses fetched successfully.',
+    //         'data'    => $addresses,
+    //     ], 200);
+    // }
+
+
     public function view_address(Request $request)  
     {
-        // Validate the incoming request for user_id
-        $validator = Validator::make($request->all(), [
+        if (!$request->has('user_id') || $request->user_id === null) { 
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required.',
+                'data'    => [], 
+            ], 200); 
+        }
+    
+        $validator = Validator::make($request->all(), [  
             'user_id' => 'required|integer', 
         ]);
     
-        $validator->stopOnFirstFailure();
+        $validator->stopOnFirstFailure(); 
         
         if ($validator->fails()) {
-            $response = [
-                'status' => false,
-                'message' => $validator->errors()->first()
-            ]; 
-            return response()->json($response, 400);
-        }
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(), 
+                'data'    => [], 
+            ], 200);
+        } 
         
-        // Get all addresses for the given user
         $addresses = DB::table('addresses')->where('user_id', $request->user_id)->get();
     
         if ($addresses->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'No addresses found for this user.'
-            ], 404);
+                'message' => 'No addresses found for this user.', 
+                'data'    => [], 
+            ], 200); 
         }
     
-        // Return success response with the user's addresses
         return response()->json([
-            'success' => true,
+            'success' => true, 
             'message' => 'Addresses fetched successfully.',
             'data'    => $addresses,
         ], 200);
@@ -106,7 +149,6 @@ class AddressApiController extends Controller
     
     public function edit_address(Request $request)
     {
-        // Validate the incoming request 
         $validator = Validator::make($request->all(), [
             'address_id'    => 'required|integer|exists:addresses,id', 
             'user_id'       => 'required|integer',

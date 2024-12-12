@@ -12,275 +12,143 @@ use Illuminate\Support\Str;
 
 class ProductApiController extends Controller
 {
-    // public function Product_list_rating(Request $request)
-    // {
-    //     // Fetch all products data with conditions applied
-    //     $data = \DB::table('products')
-    //         ->join('product_rating', 'products.id', '=', 'product_rating.product_id')
-    //         ->join('categories', 'products.category_id', '=', 'categories.id') // Join with category table
-    //         ->select(
-    //             'products.*', 
-    //             'product_rating.rating', 
-    //             'categories.id as category_id', 
-    //             'categories.name as title', 
-    //             'products.short_description' // Get short_description from products table
-    //         )
-    //         ->where('products.no_of_ratings', '>=', 10) // Condition for no_of_ratings
-    //         ->where('product_rating.rating', '>=', 3) // Condition for rating
-    //         ->get();
-    
-    //     // Group data by 'type' (from products table)
-    //     $groupedData = $data->groupBy('type');
-    
-    //     // Transform the grouped data into an object structure and fetch category info
-    //     $result = $groupedData->map(function ($items, $type) {
-    //         // Get category details based on category_id from the products table
-    //         $categoryInfo = \DB::table('categories')
-    //             ->where('id', $items[0]->category_id)
-    //             ->first(['id', 'name']); // Fetch id and name for the category
-            
-    //         return [
-    //             'type' => $type,
-    //             'category_id' => $categoryInfo->id,  // Category id
-    //             'category_title' => $categoryInfo->name,  // Category title (name)
-    //             'category_description' => $items[0]->short_description,  // Short description from products table
-    //             'products' => $items->toArray()
-    //         ];
-    //     })->values();
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Filtered data grouped by type and category retrieved successfully',
-    //         'data' => $result,
-    //     ], 200);
-    // }
-
-//     public function Product_list_rating()
-//  { 
-        
-//         $Diwali = DB::table('products')
-//                   ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-//                   ->select('products.*',
-//                   'product_variants.price as price',
-//                   'product_variants.special_price as special_price',
-//                   'product_variants.percentage_off as percentage_off'
-//                   )
-//                   ->where('products.category_id', '=', 1)
-//                   ->limit(4)
-//                   ->get();
-                   
-//         $Clothes = DB::table('products')
-//             ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-//                   ->select('products.*',
-//                   'product_variants.price as price',
-//                   'product_variants.special_price as special_price',
-//                   'product_variants.percentage_off as percentage_off'
-//                   )
-//                 ->where('products.category_id', '=', 2)->limit(4)->get();
-                
-//         $Digital = DB::table('products')
-//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-//                   ->select('products.*',
-//                   'product_variants.price as price',
-//                   'product_variants.special_price as special_price',
-//                   'product_variants.percentage_off as percentage_off'
-//                   )
-//         ->where('products.category_id', '=', 3)->limit(4)->get();
-        
-//         $Furniture = DB::table('products')
-//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-//                   ->select('products.*',
-//                   'product_variants.price as price',
-//                   'product_variants.special_price as special_price',
-//                   'product_variants.percentage_off as percentage_off'
-//                   )
-//         ->where('products.category_id', '=', 4)->limit(4)->get();
-        
-        
-//         $Electronics= DB::table('products')
-//         ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-//                   ->select('products.*',
-//                   'product_variants.price as price',
-//                   'product_variants.special_price as special_price',
-//                   'product_variants.percentage_off as percentage_off'
-//                   )
-//         ->where('products.category_id', '=', 5)->limit(4)->get();
-        
-//         return response()->json([
-//             (object)[
-//             'category_id'=>1,
-//             'category_id_name'=>'Diwali',
-//             'category_title'=>'Top deals on diwali',
-//             'products'=>$Diwali
-//             ],
-//             (object)[
-//             'category_id'=>2,
-//             'category_id_name'=>'Clothes',
-//             'category_title'=>'Top deals on clothes',
-//             'products'=>$Clothes
-//             ],
-//             (object)[
-//             'category_id'=>3,
-//             'category_id_name'=>'Digital',
-//             'category_title'=>'Top deals on Digital',
-//             'products'=>$Digital
-//             ],
-//             (object)[
-//             'category_id'=>4,
-//             'category_id_name'=>'Furniture',
-//             'category_title'=>'Top deals on Furniture',
-//             'products'=>$Furniture
-//             ],
-//             (object)[
-//             'category_id'=>5,
-//             'category_id_name'=>'Electronics',
-//             'category_title'=>'Top deals on Electronics',
-//             'products'=>$Electronics
-//             ],
-//             ]);
-//                       return response()->json([
-//             'data' => $data,
-//             'success' => true,
-//             'message' => 'Filtered data grouped by type and category retrieved successfully',
-    
-// ], 200);
-        
-//     }
     
     public function Product_list_rating(){
-        
-    $Furnitures = DB::table('products')
-                ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-                ->select('products.*',
-                'product_variants.price as price',
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off'
-                )
-                ->where('products.category_id', '=', 1)
-                ->limit(4)
-                ->get();
-                
-    $Fashion = DB::table('products')
-        ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-                ->select('products.*',
-                'product_variants.price as price',
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off'
-                )
-            ->where('products.category_id', '=', 2)->limit(4)->get();
-            
-    $Electronics = DB::table('products')
-    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-                ->select('products.*',
-                'product_variants.price as price',
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off'
-                )
-    ->where('products.category_id', '=', 3)->limit(4)->get();
-    
-    $Vegitable = DB::table('products')
-    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-                ->select('products.*',
-                'product_variants.price as price',
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off'
-                )
-    ->where('products.category_id', '=', 4)->limit(4)->get();
-    
-    
-    $Baby_Care= DB::table('products')
-    ->leftJoin('product_variants','products.id','=','product_variants.product_id')
-                ->select('products.*',
-                'product_variants.price as price',
-                'product_variants.special_price as special_price',
-                'product_variants.percentage_off as percentage_off'
-                )
-    ->where('products.category_id', '=', 5)->limit(4)->get();
-    
-    return response()->json([
-        'data' => [
-            (object)[
-                'category_id'=>1,
-                'category_id_name'=>'Furnitures',
-                'category_title'=>'Top deals on Furnitures',
-                'products'=>$Furnitures
-            ],
-            (object)[
-                'category_id'=>2,
-                'category_id_name'=>'Fashion',
-                'category_title'=>'Top deals on Fashion',
-                'products'=>$Fashion
-            ],
-            (object)[
-                'category_id'=>3,
-                'category_id_name'=>'Electronics',
-                'category_title'=>'Top deals on Electronics',
-                'products'=>$Electronics
-            ],
-            (object)[
-                'category_id'=>4,
-                'category_id_name'=>'Vegitable',
-                'category_title'=>'Top deals on Vegitable',
-                'products'=>$Vegitable
-            ],
-            (object)[
-                'category_id'=>5,
-                'category_id_name'=>'Baby_Care',
-                'category_title'=>'Top deals on Baby_Care',
-                'products'=>$Baby_Care
-            ]
-        ],
-        'success' => true,
-        'message' => 'Filtered data grouped by type and category retrieved successfully',
-    ], 200);
-}
-
-    public function Product_list_rating_old(Request $request)
-    {
-    // Fetch all products data with conditions applied
-    $data = \DB::table('products')
-        ->join('product_rating', 'products.id', '=', 'product_rating.product_id')
-        ->join('categories', 'products.category_id', '=', 'categories.id') // Join with category table
-        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id') // Left join with product_variants table to fetch pricing info
+    $data = DB::table('categories')
         ->select(
-            'products.*',  // Select product id
-             // Rating from product_rating table
-            'categories.id as category_id', // Category id from categories table
-            'categories.name as title', // Category title from categories table
-            'product_variants.price', // Price from product_variants table
-            'product_variants.special_price', // Special price from product_variants table
-            'product_variants.percentage_off' // Percentage off from product_variants table
+            'categories.id as category_id',
+            'categories.name as category_id_name',
+            'categories.title as category_title',
+            'products.id',
+            'products.product_identity',
+            'products.category_id',
+            'products.seller_id',
+            'products.tax',
+            'products.row_order',
+            'products.type',
+            'products.stock_type',
+            'products.name as product_name',
+            'products.short_description',
+            'products.slug',
+            'products.indicator',
+            'products.cod_allowed',
+            'products.download_allowed',
+            'products.download_type',
+            'products.download_link',
+            'products.minimum_order_quantity',
+            'products.quantity_step_size',
+            'products.total_allowed_quantity',
+            'products.is_prices_inclusive_tax',
+            'products.is_returnable',
+            'products.is_cancelable',
+            'products.cancelable_till',
+            'products.image',
+            'products.video_type',
+            'products.video',
+            'products.tags',
+            'products.warranty_period',
+            'products.guarantee_period',
+            'products.made_in',
+            'products.hsn_code',
+            'products.brand',
+            'products.product_highlight',
+            'products.sku',
+            'products.stock',
+            'products.in_day_to_sell',
+            'products.item_to_sell',
+            'products.availability',
+            'products.rating',
+            'products.no_of_ratings',
+            'products.description',
+            'products.extra_description',
+            'products.deliverable_type',
+            'products.deliverable_zipcodes',
+            'products.pickup_location',
+            'products.status',
+            'products.date_added',
+            'product_variants.price',
+            'product_variants.special_price', 
+            'product_variants.percentage_off' 
         )
-        ->where('products.no_of_ratings', '>=', 10) // Condition for no_of_ratings
-        ->where('product_rating.rating', '>=', 3) // Condition for rating
-        ->get();
+        ->leftJoin('products', 'categories.id', '=', 'products.category_id')
+        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+        ->whereNotNull('products.id') // Exclude categories without products
+        ->get()
+        ->groupBy('category_id')
+        ->map(function ($items, $category_id) {
+            $category = $items->first();
+            return [
+                'category_id' => $category->category_id,
+                'category_id_name' => $category->category_id_name,
+                'category_title' => $category->category_title,
+                'products' => $items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_identity' => $item->product_identity,
+                        'category_id' => $item->category_id,
+                        'seller_id' => $item->seller_id,
+                        'tax' => $item->tax,
+                        'row_order' => $item->row_order,
+                        'type' => $item->type,
+                        'stock_type' => $item->stock_type,
+                        'name' => $item->product_name,
+                        'short_description' => $item->short_description,
+                        'slug' => $item->slug,
+                        'indicator' => $item->indicator,
+                        'cod_allowed' => $item->cod_allowed,
+                        'download_allowed' => $item->download_allowed,
+                        'download_type' => $item->download_type,
+                        'download_link' => $item->download_link,
+                        'minimum_order_quantity' => $item->minimum_order_quantity,
+                        'quantity_step_size' => $item->quantity_step_size,
+                        'total_allowed_quantity' => $item->total_allowed_quantity,
+                        'is_prices_inclusive_tax' => $item->is_prices_inclusive_tax,
+                        'is_returnable' => $item->is_returnable,
+                        'is_cancelable' => $item->is_cancelable,
+                        'cancelable_till' => $item->cancelable_till,
+                        'image' => $item->image,
+                        'video_type' => $item->video_type,
+                        'video' => $item->video,
+                        'tags' => $item->tags,
+                        'warranty_period' => $item->warranty_period,
+                        'guarantee_period' => $item->guarantee_period,
+                        'made_in' => $item->made_in,
+                        'hsn_code' => $item->hsn_code,
+                        'brand' => $item->brand,
+                        'product_highlight' => $item->product_highlight,
+                        'sku' => $item->sku,
+                        'stock' => $item->stock,
+                        'in_day_to_sell' => $item->in_day_to_sell,
+                        'item_to_sell' => $item->item_to_sell,
+                        'availability' => $item->availability,
+                        'rating' => $item->rating,
+                        'no_of_ratings' => $item->no_of_ratings,
+                        'description' => $item->description,
+                        'extra_description' => $item->extra_description,
+                        'deliverable_type' => $item->deliverable_type,
+                        'deliverable_zipcodes' => $item->deliverable_zipcodes,
+                        'pickup_location' => $item->pickup_location,
+                        'status' => $item->status,
+                        'date_added' => $item->date_added,
+                        'price' => $item->price,
+                        'special_price' => $item->special_price,
+                        'percentage_off' => $item->percentage_off,
+                    ]; 
+                }),
+            ];
+        })
+        ->values(); // Re-index the array
     
-    // Group data by 'type' (from products table)
-    $groupedData = $data->groupBy('type');
-    
-    // Transform the grouped data into an object structure and fetch category info
-    $result = $groupedData->map(function ($items, $type) {
-        // Get category details based on category_id from the products table
-        $categoryInfo = \DB::table('categories')
-            ->where('id', $items[0]->category_id)
-            ->first(['id', 'name']); // Fetch id and name for the category
-        
-        return [
-            'type' => $type,
-            'category_id' => $categoryInfo->id,  // Category id
-            'category_title' => $categoryInfo->name,  // Category title (name)
-            'category_description' => $items[0]->short_description,  // Short description from products table
-            'products' => $items
-        ];
-    })->values();
+    // return response()->json($data);
     
     return response()->json([
-        'success' => true,
-        'message' => 'Filtered data grouped by type and category retrieved successfully',
-        'data' => $result,
-    ], 200);
-}
+            'success' => true,
+            'message' => 'Filtered data grouped by type and category retrieved successfully',
+            'data' => $data,
+        ], 200);
+    }
 
+ 
     public function productRating(Request $request)
     {
         // Validate the incoming request
@@ -334,91 +202,62 @@ class ProductApiController extends Controller
         ], 200);
     }
     
-    // public function product_explore(Request $request) 
-    // {
-    //     $search = $request->input('search'); // Search term from JSON payload
-    
-    //     $products = DB::table('products')
-    //         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
-    //         ->select(
-    //             'products.*',
-    //             'product_variants.price',
-    //             'product_variants.special_price', 
-    //             'product_variants.percentage_off'
-    //         )
-    //         ->when($search, function ($query, $search) {
-    //             return $query->where('products.name', 'like', '%' . $search . '%');
-    //         })
-    //         ->get();
-    
-    //     // Add a custom message based on the result
-    //     $message = $products->isEmpty() 
-    //         ? 'No products found matching your search.' 
-    //         : 'Products retrieved successfully.';
-    
-    //     return response()->json([
-    //         'message' => $message,
-    //         "success" => true,
-    //         'data' => $products
-    //     ]);
-    // }
-    
     public function product_explore(Request $request) 
-{
-    $search = $request->input('search'); // Search term from JSON payload
-    $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
-
-    // Fetch products with optional search filter
-    $products = DB::table('products')
-        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
-        ->select(
-             'products.*',
-            'product_variants.price',
-            'product_variants.special_price', 
-            'product_variants.percentage_off'
-        )
-        ->when($search, function ($query, $search) {
-            return $query->where('products.name', 'like', '%' . $search . '%');
-        })
-        ->get();
-
-    // Initialize cart and favorites arrays
-    $cartItems = [];
-    $favoriteItems = [];
-
-    if ($userId) {
-        // Fetch product IDs in the user's cart
-        $cartItems = DB::table('cart')
-            ->where('user_id', $userId)
-            ->pluck('product_id') // Fetch only product IDs
-            ->toArray();
-
-        // Fetch product IDs in the user's favorites
-        $favoriteItems = DB::table('favorites')
-            ->where('user_id', $userId)
-            ->pluck('product_id') // Fetch only product IDs
-            ->toArray();
+    {
+        $search = $request->input('search'); // Search term from JSON payload
+        $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
+    
+        // Fetch products with optional search filter
+        $products = DB::table('products')
+            ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->select(
+                 'products.*',
+                'product_variants.price',
+                'product_variants.special_price', 
+                'product_variants.percentage_off'
+            )
+            ->when($search, function ($query, $search) {
+                return $query->where('products.name', 'like', '%' . $search . '%');
+            })
+            ->get();
+    
+        // Initialize cart and favorites arrays
+        $cartItems = [];
+        $favoriteItems = [];
+    
+        if ($userId) {
+            // Fetch product IDs in the user's cart
+            $cartItems = DB::table('cart')
+                ->where('user_id', $userId)
+                ->pluck('product_id') // Fetch only product IDs
+                ->toArray();
+    
+            // Fetch product IDs in the user's favorites
+            $favoriteItems = DB::table('favorites')
+                ->where('user_id', $userId)
+                ->pluck('product_id') // Fetch only product IDs
+                ->toArray();
+        }
+    
+        // Add `is_added_to_cart` and `is_added_to_fav` flags to each product
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+            $product->is_added_to_cart = in_array($product->id, $cartItems) ? 1 : 0; // Check if product is in cart
+            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; // Check if product is in favorites
+            return $product;
+        });
+    
+        // Add a custom message based on the result
+        $message = $products->isEmpty() 
+            ? 'No products found matching your search.' 
+            : 'Products retrieved successfully.';
+    
+        return response()->json([
+            'message' => $message,
+            "success" => true,
+            'data' => $products
+        ]);
     }
-
-    // Add `is_added_to_cart` and `is_added_to_fav` flags to each product
-    $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
-        $product->is_added_to_cart = in_array($product->id, $cartItems) ? 1 : 0; // Check if product is in cart
-        $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; // Check if product is in favorites
-        return $product;
-    });
-
-    // Add a custom message based on the result
-    $message = $products->isEmpty() 
-        ? 'No products found matching your search.' 
-        : 'Products retrieved successfully.';
-
-    return response()->json([
-        'message' => $message,
-        "success" => true,
-        'data' => $products
-    ]);
-}
-
+    
 
 
     

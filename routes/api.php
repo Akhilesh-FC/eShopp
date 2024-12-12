@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API;
 use App\Http\Controller\Api\AuthController;
-use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController};
+use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController,PayinController};
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -36,6 +36,11 @@ Route::controller(ProductApiController::class)->group(function () {
     Route::post('/product/rating', 'productRating');
     Route::post('/product_explore', 'product_explore');    
 });
+
+Route::post('/payin',[PayinController::class,'payin']); 
+Route::get('/checkPayment',[PayinController::class,'checkPayment']); 
+
+
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');
     Route::post('/updatecart', 'updateFromCart');
@@ -46,6 +51,7 @@ Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtofav', 'addToFavorite'); 
     Route::post('/view_fav', 'viewFavorites');   
     Route::post('/removeFromFavorite', 'removeFromFavorite'); 
+    Route::post('/deletefromfav', 'deletefromfav'); 
     Route::post('/checkout', 'checkout');  
 
 });

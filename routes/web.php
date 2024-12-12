@@ -39,12 +39,18 @@ Route::get('/create_blog', function() {return view('blog.createblog');})->name('
 
 Route::get('/attributes', function() {return view('products.attributes');})->name('attributes');
 Route::get('/tax', function() {return view('products.tax');})->name('tax');
-Route::get('/add_products', function() { return view('products.addproducts');})->name('add_products');
+//Route::get('/add_products', function() { return view('products.addproducts');})->name('add_products');
 Route::get('/bulk_upload', function() { return view('products.bulkupload');})->name('bulk_upload');
 Route::get('/manage_products', function() { return view('products.manageproducts');})->name('manage_products');
 Route::get('/products_faqs', function() { return view('products.productsfaqs');})->name('products_faqs');
 Route::get('/product_order', function() { return view('products.productorder');})->name('product_order');
 
+Route::controller(ProductController::class)->group(function() {  
+    
+    Route::get('/add-product',  'showAddProductForm')->name('add_products');
+    Route::post('/add-product', 'storeProduct')->name('store_product');
+
+});
 Route::get('/media', function() {return view('media');})->name('media');
 Route::get('/sliders', function() {return view('sliders');})->name('sliders');
 Route::get('/offers', function() {return view('offers');})->name('offers');
