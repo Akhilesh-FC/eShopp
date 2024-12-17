@@ -31,10 +31,7 @@
                                     <tbody>
                                         @forelse($viewCategories as $category)
                                             <tr>
-                                                <!-- Category Name -->
                                                 <td>{{ $category->name }}</td> 
-
-                                                <!-- Category Image -->
                                                 <td>
                                                     @if($category->image) 
                                                         <img src="{{ $category->image }}" alt="Category Image" class="img-thumbnail" style="max-width: 100px; height: auto;">    

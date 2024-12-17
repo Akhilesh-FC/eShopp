@@ -56,7 +56,7 @@ Route::controller(CartApiController::class)->group(function () {
     
     Route::post('/payin','payin'); 
     Route::get('/checkPayment','checkPayment');     
-    Route::post('/order_place_list','order_place_list');        
+    Route::post('/viewcheckout','viewcheckout');        
 
 
 });

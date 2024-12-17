@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
@@ -12,69 +13,123 @@ class ProductsController extends Controller
         return view('products.addproducts', compact('categories'));   
     } 
 
-    public function storeProduct(Request $request)  
-    {
-        // Validate the incoming data
-        $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'short_description' => 'required|string|max:500',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'tags' => 'nullable|string|max:255',
-            'made_in' => 'nullable|string|max:255',
-            'product_highlight' => 'nullable|string',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'special_price' => 'nullable|numeric|min:0',
-            'percentage_off' => 'nullable|numeric|min:0|max:100',
-        ]);
-    
-        // Handle image uploads
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePaths[] = $image->store('product_images', 'public'); 
-            }
-        }
-    
-        // Step 1: Insert into the 'products' table and get the product ID
-        $productId = DB::table('products')->insertGetId([
-            'name' => $request->product_name,
-            'category_id' => $request->category_id,
-            'short_description' => $request->short_description,
-            'image' => json_encode($imagePaths), // Store images as a JSON array
-            'tags' => $request->tags,
-            'made_in' => $request->made_in,
-            'product_highlight' => $request->product_highlight,
-            'description' => $request->description,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        
-        // Step 2: Insert into the 'product_variants' table using the product ID
-        DB::table('product_variants')->insert([
-            'product_id' => $productId, // Foreign key to 'products' table
-            'price' => $request->price,
-            'special_price' => $request->special_price,
-            'percentage_off' => $request->percentage_off,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    
-        // Step 3: Return success response
-        return redirect()->back()->with('success', 'Product added successfully!');
-    }
-    
-    // public function manageProducts(Request $request)
+    // public function storeProduct(Request $request)  
     // {
-    //     $products = DB::table('products')
-    //         ->join('categories', 'products.category_id', '=', 'categories.id') 
-    //         ->select('products.*', 'categories.name as category_name') 
-    //         ->get();
-
-    //     // Return the view with the fetched products
-    //     return view('products.manageproducts', compact('products'));
+    //     // Validate the incoming data
+    //     $validated = $request->validate([
+    //         'product_name' => 'required|string|max:255',
+    //         'category_id' => 'required|exists:categories,id',
+    //         'short_description' => 'required|string|max:500',
+    //         'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'tags' => 'nullable|string|max:255',
+    //         'made_in' => 'nullable|string|max:255',
+    //         'product_highlight' => 'nullable|string',
+    //         'description' => 'nullable|string',
+    //         'price' => 'required|numeric|min:0',
+    //         'special_price' => 'nullable|numeric|min:0',
+    //         'percentage_off' => 'nullable|numeric|min:0|max:100',
+    //     ]);
+    
+    //     // Handle image uploads
+    //     $imagePaths = [];
+    //     if ($request->hasFile('images')) {
+    //         foreach ($request->file('images') as $image) {
+    //             $imagePaths[] = $image->store('product_images', 'public'); 
+    //         }
+    //     }
+    
+    //     // Step 1: Insert into the 'products' table and get the product ID
+    //     $productId = DB::table('products')->insertGetId([
+    //         'name' => $request->product_name,
+    //         'category_id' => $request->category_id,
+    //         'short_description' => $request->short_description,
+    //         'image' => json_encode($imagePaths), // Store images as a JSON array
+    //         'tags' => $request->tags,
+    //         'made_in' => $request->made_in,
+    //         'product_highlight' => $request->product_highlight,
+    //         'description' => $request->description,
+    //         'created_at' => now(),
+    //         'updated_at' => now(),
+    //     ]);
+        
+    //     // Step 2: Insert into the 'product_variants' table using the product ID
+    //     DB::table('product_variants')->insert([
+    //         'product_id' => $productId, // Foreign key to 'products' table
+    //         'price' => $request->price,
+    //         'special_price' => $request->special_price,
+    //         'percentage_off' => $request->percentage_off,
+    //         'created_at' => now(),
+    //         'updated_at' => now(),
+    //     ]);
+    
+    //     // Step 3: Return success response
+    //     return redirect()->back()->with('success', 'Product added successfully!');
     // }
+
+public function storeProduct(Request $request)  
+{
+    // Validate the incoming data
+    $validated = $request->validate([
+        'product_name' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'short_description' => 'required|string|max:500',
+        'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        'tags' => 'nullable|string|max:255',
+        'made_in' => 'nullable|string|max:255',
+        'product_highlight' => 'nullable|string',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'special_price' => 'nullable|numeric|min:0',
+        'percentage_off' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    // Generate the folder path based on product name (you may want to sanitize the product name)
+    $folderName = strtolower(str_replace(' ', '_', $request->product_name));  // Replace spaces with underscores, and convert to lowercase
+    $folderPath = 'product_images/' . $folderName;
+
+    // Handle image uploads
+    $imageUrls = [];
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            // Store image in the 'product_images/{product_name}' folder
+            $path = $image->store($folderPath, 'public');  // Store the image in the specific folder under 'public'
+
+            // Generate the public URL for the image
+            $imageUrl = Storage::url($path); // This will give you the relative URL
+            
+            // Store the full URL (if you want to prepend the base URL)
+            $imageUrls[] = url($imageUrl); // Prepend base URL
+        }
+    }
+
+    // Step 1: Insert into the 'products' table and get the product ID
+    $productId = DB::table('products')->insertGetId([
+        'name' => $request->product_name,
+        'category_id' => $request->category_id,
+        'short_description' => $request->short_description,
+        'image' => json_encode($imageUrls), // Store the URLs as a JSON array
+        'tags' => $request->tags,
+        'made_in' => $request->made_in,
+        'product_highlight' => $request->product_highlight,
+        'description' => $request->description,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    
+    // Step 2: Insert into the 'product_variants' table using the product ID
+    DB::table('product_variants')->insert([
+        'product_id' => $productId, // Foreign key to 'products' table
+        'price' => $request->price,
+        'special_price' => $request->special_price,
+        'percentage_off' => $request->percentage_off,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Step 3: Return success response
+    return redirect()->back()->with('success', 'Product added successfully!');
+}
+
     
     public function manageProducts(Request $request)
     {
