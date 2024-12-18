@@ -4,10 +4,20 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\CustomerController;   
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
+use App\Http\Controllers\AuthController;         
 
- Route::get('/', function (){return view('welcome');});
- 
-Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
+Route::get('/', function (){return view('welcome');});
+
+Route::get('dashboard', function () {return view('admin.index'); })->name('dashboard')->middleware('auth'); 
+Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/dashboard', function () {
+    return view('admin.index');
+})->name('dashboard')->middleware('checkSession');
+
+//Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
 //==============================Orders Routes================================//          
 Route::get('/orders', function () {return view('orders.orders');})->name('orders');
 Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');

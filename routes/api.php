@@ -55,9 +55,11 @@ Route::controller(CartApiController::class)->group(function () {
     Route::post('/checkout', 'checkout'); 
     
     Route::post('/payin','payin'); 
-    Route::get('/checkPayment','checkPayment');     
-    Route::post('/viewcheckout','viewcheckout');        
-
+    Route::post('/checkPayment','checkPayment');     
+    Route::post('/viewcheckout','viewcheckout'); 
+    Route::post('/viewcheckout_history','viewcheckout_history'); 
+    //Route::get('/payin','payin');  
+    
 
 });
 Route::controller(AddressApiController::class)->group(function() {

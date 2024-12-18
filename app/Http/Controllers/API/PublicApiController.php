@@ -366,33 +366,6 @@ class PublicApiController extends Controller
             ], 400);
         }
     }
-    
-    // public function getProfile($id)
-    // {
-    //     \Log::info("Received ID: $id");
-    
-    //     $user = DB::table('users')
-    //         ->select('id', 'mobile', 'username', 'email', 'image')
-    //         ->where('id', $id)
-    //         ->first();
-    
-    //     \Log::info("Fetched User: " . json_encode($user));
-    
-    //     if ($user) {
-    //         // Set image to null
-    //         $user->image = null;
-    
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $user,
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'User not found',
-    //         ], 200);
-    //     }
-    // }
 
     public function updateProfile(Request $request)
     {
@@ -616,64 +589,6 @@ class PublicApiController extends Controller
         }
     }
     
-    // public function getProductsBySubcategory(Request $request)
-    // {
-    //     // Fetch subcategory_id from the request (query parameters or request body)
-    //     $subcategoryId = $request->input('subcategory_id'); 
-    
-    //     // Validate if subcategory_id is provided
-    //     if (!$subcategoryId) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Subcategory ID is required.',
-    //         ], 200);
-    //     }
-    
-    //     // Fetch user_id from the request, but it's not required
-    //     $userId = $request->input('user_id'); 
-    
-    //     // Fetch products that match the subcategory_id along with price and special_price from product_variants
-    //     $products = DB::table('products')
-    //          ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id') 
-    //          ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // Join with product_variants table
-    //          ->where('products.category_id', $subcategoryId) // Filter by subcategory_id
-    //          ->orWhere('sub_categories2.id', $subcategoryId)
-    //          ->get([
-    //              'products.*',
-    //              'product_variants.price', // Fetch price from product_variants
-    //              'product_variants.special_price' // Fetch special price from product_variants
-    //          ]); // Select relevant fields
-    
-    //     // If a user_id is provided, fetch cart details
-    //     $cartItems = [];
-    //     if ($userId) {
-    //         $cartItems = DB::table('cart')
-    //             ->where('user_id', $userId)
-    //             ->pluck('product_id') // Fetch product IDs added to the cart
-    //             ->toArray(); // Convert collection to array
-    //     }
-    
-    //     // Add is_added parameter based on cart
-    //     $products = $products->map(function ($product) use ($cartItems) {
-    //         $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; // Check directly in the array
-    //         return $product;
-    //     });
-    
-    //     // Check if products are found
-    //     if ($products->isEmpty()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'No products found for this subcategory.',
-    //         ], 200);
-    //     }
-    
-    //     // Return the products data as a list
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $products,
-    //     ], 200);
-    // }
-    
     public function getProductsBySubcategory(Request $request)
     {
         $subcategoryId = $request->input('subcategory_id'); 
@@ -731,6 +646,68 @@ class PublicApiController extends Controller
             'data' => $products,
         ], 200);
     }
+
+//     public function getProductsBySubcategory(Request $request)
+// {
+//     $subcategoryId = $request->input('subcategory_id'); 
+
+//     if (!$subcategoryId) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Subcategory ID is required.',
+//         ], 200);
+//     }
+
+//     $userId = $request->input('user_id'); 
+
+//     $products = DB::table('products')
+//         ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
+//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
+//         ->where('products.category_id', $subcategoryId) 
+//         ->orWhere('sub_categories2.id', $subcategoryId)
+//         ->get([
+//             'products.*',
+//             'product_variants.price', 
+//             'product_variants.special_price'
+//         ]); 
+
+//     $cartItems = [];
+//     $favoriteItems = [];
+//     if ($userId) {
+//         // Get cart items along with their quantities
+//         $cartItems = DB::table('cart')
+//             ->where('user_id', $userId)
+//             ->get(['product_id', 'quantity']) // Fetch both product_id and quantity
+//             ->keyBy('product_id') // Key by product_id for easy access
+//             ->toArray(); 
+
+//         // Get favorite items
+//         $favoriteItems = DB::table('favorites')
+//             ->where('user_id', $userId)
+//             ->pluck('product_id')
+//             ->toArray(); 
+//     }
+
+//     // Map products to include cart status and quantity
+//     $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+//         $product->is_added = isset($cartItems[$product->id]) ? 1 : 0;
+//         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+//         $product->quantity_in_cart = isset($cartItems[$product->id]) ? $cartItems[$product->id]->quantity : 0; // Add quantity from cart
+//         return $product;
+//     });
+
+//     if ($products->isEmpty()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'No products found for this subcategory.',
+//         ], 200);
+//     }
+
+//     return response()->json([
+//         'success' => true,
+//         'data' => $products,
+//     ], 200);
+// }
 
 
 

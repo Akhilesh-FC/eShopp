@@ -36,7 +36,7 @@
                         <span class="logo-text">
                              <!-- dark Logo text -->
                              <!--<img src="assets/images/logo-text.png" alt="homepage" class="light-logo" />-->
-                             <h2 style="margin-top:13px;"> FC-Shop</h2>
+                             <h2 style="margin-top:13px;"> Free2kart</h2>
                             
                         </span>
                         <!-- Logo icon -->
