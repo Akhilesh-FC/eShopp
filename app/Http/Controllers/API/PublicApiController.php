@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+
 
 
 class PublicApiController extends Controller
@@ -29,11 +31,12 @@ class PublicApiController extends Controller
         }
     
         // Check if the product exists
-        $productExists = DB::table('products')
+        $product = DB::table('products')
             ->where('id', $request->product_id)
-            ->exists();
+            ->select('products.*')
+            ->first();
     
-        if (!$productExists) {
+        if (empty($product)) {
             return response()->json([
                 'success' => 'error',
                 'message' => 'No product found for this product ID'
@@ -41,11 +44,10 @@ class PublicApiController extends Controller
         }
     
         // Fetch product details
-        $product = DB::table('products')
-            ->where('id', $request->product_id)
-            ->select('products.*')
-            ->first();
-    
+        
+            //first: get only one data, get: get multiple data
+            
+        
         // Fetch product variants
         $variants = DB::table('product_variants')
             ->where('product_id', $request->product_id)
@@ -113,8 +115,8 @@ class PublicApiController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'mobile' => $mobile,
-            //'image' => 'https://eshop.foundercode.org/public/profileimage/1.png',
-           'image' => "profileimage/1.png",
+            'image' => 'https://free2kart.tirangawin.club/public/profileimage/default.png',
+        //   'image' => "profileimage/1.png",
             //'image' => null,
 
             
@@ -135,7 +137,138 @@ class PublicApiController extends Controller
             ], 200);
         }
     }
-
+    
+    public function getProfile($id)
+    {
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|integer|exists:users,id',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid user ID.',
+            ], 400);
+        }
+    
+        Log::info("Received ID: $id");
+        
+        $user = DB::table('users')
+            ->select('id', 'mobile', 'username', 'email', 'image')
+            ->where('id', $id)
+            ->first();
+    
+        Log::info("Fetched User: " . json_encode($user));
+    
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'data' => $user,
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 400);
+        }
+    }
+    
+    public function updateProfile(Request $request)
+    {
+        $userId = $request->input('id');
+    
+        $user = DB::table('users')
+            ->where('id', $userId)
+            ->select('id', 'username', 'email', 'image') // Ensure 'image' column is included
+            ->first();
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 200);
+        }
+    
+        // Validate the input fields
+        $validator = Validator::make($request->all(), [
+            'username' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255|unique:users,email,' . $userId,
+            'profileimage' => 'nullable|image|max:2048', // For uploaded image
+            'image_base64' => 'nullable|string',         // For base64-encoded image
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => $validator->errors()->first()
+            ], 200);
+        }
+    
+        $baseUrl = env('APP_URL', 'https://free2kart.tirangawin.club') . '/public/';
+     // Base URL for constructing image path
+        $input = collect($request->only(['username', 'email']))
+            ->filter(function ($value) {
+                return $value !== null;
+            })->toArray();
+    
+        // Handle uploaded file (if provided)
+        if ($request->hasFile('profileimage')) {
+            // Delete old image if exists
+            if (!empty($user->image) && file_exists(public_path($user->image))) {
+                unlink(public_path($user->image));
+            }
+    
+            $file = $request->file('profileimage');
+            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('profileimage'), $fileName);
+    
+            $input['image'] = 'profileimage/' . $fileName; // Relative path
+        }
+    
+        // Handle base64 image (if provided)
+        if ($request->input('image_base64')) {
+            // Decode and store the image
+            $imageData = base64_decode($request->input('image_base64'));
+            $imageName = 'profileimage/' . uniqid() . '.png'; // Unique name
+    
+            file_put_contents(public_path($imageName), $imageData);
+    
+            // Delete old image if exists
+            if (!empty($user->image) && file_exists(public_path($user->image))) {
+                unlink(public_path($user->image));
+            }
+    
+            $input['image'] = $baseUrl.$imageName; // Relative path
+        }
+    
+        // Check if there is any data to update
+        if (empty($input)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No data provided to update.'
+            ], 400);
+        }
+    
+        // Update the user's profile with the provided data
+        DB::table('users')
+            ->where('id', $userId)
+            ->update($input);
+    
+        // Fetch the updated user data
+        $updatedUser = DB::table('users')
+            ->where('id', $userId)
+            ->select('id', 'username', 'email', 'image') // Specify fields to return
+            ->first();
+    
+        // Append the base URL to the image path, if an image exists
+        if (!empty($updatedUser->image)) {
+            $updatedUser->image = $baseUrl . '/' . $updatedUser->image;
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            // 'user' => $updatedUser
+        ], 200);
+    }
+    
     public function login(Request $request)
     {
         // Validate the request
@@ -340,146 +473,6 @@ class PublicApiController extends Controller
             ], 200);
         }
     }
-
-    public function getProfile($id)
-    {
-        // Debugging: Log the incoming ID
-        \Log::info("Received ID: $id");
-    
-        $user = DB::table('users')
-            ->select('id', 'mobile', 'username', 'email', 'image')
-            ->where('id', $id)
-            ->first();
-    
-        // Debugging: Log the fetched user
-        \Log::info("Fetched User: " . json_encode($user));
-    
-        if ($user) {
-            return response()->json([
-                'success' => true,
-                'data' => $user,
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 400);
-        }
-    }
-
-    public function updateProfile(Request $request)
-    {
-        $userId = $request->input('id');
-    
-        // Check if the user exists
-        $user = DB::table('users')
-            ->where('id', $userId)
-            ->select('id', 'username', 'email', 'image') // Ensure 'image' column is included
-            ->first();
-    
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 200);
-        }
-    
-        // Validate the input fields
-        $validator = Validator::make($request->all(), [
-            'username' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $userId,
-            'profileimage' => 'nullable|image|max:2048', // For uploaded image
-            'image_base64' => 'nullable|string',         // For base64-encoded image
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'error' => $validator->errors()->first()
-            ], 200);
-        }
-    
-        $baseUrl = env('APP_URL', 'https://eshop.foundercode.org') . '/public';
-     // Base URL for constructing image path
-        $input = collect($request->only(['username', 'email']))
-            ->filter(function ($value) {
-                return $value !== null;
-            })->toArray();
-    
-        // Handle uploaded file (if provided)
-        if ($request->hasFile('profileimage')) {
-            // Delete old image if exists
-            if (!empty($user->image) && file_exists(public_path($user->image))) {
-                unlink(public_path($user->image));
-            }
-    
-            $file = $request->file('profileimage');
-            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('profileimage'), $fileName);
-    
-            $input['image'] = 'profileimage/' . $fileName; // Relative path
-        }
-    
-        // Handle base64 image (if provided)
-        if ($request->input('image_base64')) {
-            // Decode and store the image
-            $imageData = base64_decode($request->input('image_base64'));
-            $imageName = 'profileimage/' . uniqid() . '.png'; // Unique name
-    
-            file_put_contents(public_path($imageName), $imageData);
-    
-            // Delete old image if exists
-            if (!empty($user->image) && file_exists(public_path($user->image))) {
-                unlink(public_path($user->image));
-            }
-    
-            $input['image'] = $imageName; // Relative path
-        }
-    
-        // Check if there is any data to update
-        if (empty($input)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No data provided to update.'
-            ], 400);
-        }
-    
-        // Update the user's profile with the provided data
-        DB::table('users')
-            ->where('id', $userId)
-            ->update($input);
-    
-        // Fetch the updated user data
-        $updatedUser = DB::table('users')
-            ->where('id', $userId)
-            ->select('id', 'username', 'email', 'image') // Specify fields to return
-            ->first();
-    
-        // Append the base URL to the image path, if an image exists
-        if (!empty($updatedUser->image)) {
-            $updatedUser->image = $baseUrl . '/' . $updatedUser->image;
-        }
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully',
-            // 'user' => $updatedUser
-        ], 200);
-    }
-
-    public function about_us(Request $request)
-    {
-        $about_us = $request->about;
-        $about_us = DB::select("SELECT `variable`, `value` FROM `settings` WHERE `variable` = 'about_us'");
-        if ($about_us) {
-            $response = [
-                'message' => 'Successfully',
-                'status' => 200,
-                'data' => $about_us
-            ];
-            return response()->json($response);
-        } else {
-            return response()->json(['message' => 'No record found', 'status' => 400,
-                'data' => []], 400);
-        }
-    }
     
     public function FAQs()
     {
@@ -497,6 +490,23 @@ class PublicApiController extends Controller
                 'status' => 200,
                 'data' => []
             ], 400);
+        }
+    }
+
+    public function about_us(Request $request)
+    {
+        $about_us = $request->about;
+        $about_us = DB::select("SELECT `variable`, `value` FROM `settings` WHERE `variable` = 'about_us'");
+        if ($about_us) {
+            $response = [
+                'message' => 'Successfully',
+                'status' => 200,
+                'data' => $about_us
+            ];
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'No record found', 'status' => 400,
+                'data' => []], 400);
         }
     }
     
@@ -588,11 +598,11 @@ class PublicApiController extends Controller
             'data' => []], 400);
         }
     }
-    
+
     public function getProductsBySubcategory(Request $request)
     {
         $subcategoryId = $request->input('subcategory_id'); 
-    
+        
         if (!$subcategoryId) {
             return response()->json([
                 'success' => false,
@@ -616,28 +626,55 @@ class PublicApiController extends Controller
         $cartItems = [];
         $favoriteItems = [];
         if ($userId) {
-          
             $cartItems = DB::table('cart')
                 ->where('user_id', $userId)
-                ->pluck('product_id') 
-                ->toArray(); 
+                ->get(['product_id', 'quantity', 'status']) 
+                ->keyBy('product_id')
+                ->map(function($item) {
+                    return [
+                        'quantity' => $item->quantity,
+                        'status' => $item->status 
+                    ]; 
+                });
     
             $favoriteItems = DB::table('favorites')
                 ->where('user_id', $userId)
-                ->pluck('product_id') 
+                ->pluck('product_id')
                 ->toArray(); 
         }
     
-        $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
-            $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; 
-            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; 
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
+            $product->is_added_to_cart = 0;
+            $product->quantity_in_cart = 0;
+            $product->is_added_to_fav = 0;
+    
+            if ($userId) {
+                // If there is a user ID, check the cart and favorites
+                $cartItem = $cartItems->get($product->id);
+                
+                if ($cartItem) {
+                    // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+                    if ($cartItem['status'] == 1) {
+                        $product->is_added_to_cart = 0;
+                        $product->quantity_in_cart = 0;
+                    } else {
+                        // If the cart item status is 0, return the quantity and set 'added to cart' status
+                        $product->is_added_to_cart = 1;
+                        $product->quantity_in_cart = $cartItem['quantity'];
+                    }
+                }
+    
+                // Check if the product is in the favorites
+                $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+            }
+    
             return $product;
         });
     
         if ($products->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'No products found for this subcategory.',
+                'message' => 'No products found for this subcategory.', 
             ], 200);
         }
     
@@ -646,11 +683,71 @@ class PublicApiController extends Controller
             'data' => $products,
         ], 200);
     }
-
+    
+    
+     // public function getProductsBySubcategory(Request $request)
+    // {
+    //     $subcategoryId = $request->input('subcategory_id'); 
+    
+    //     if (!$subcategoryId) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Subcategory ID is required.',
+    //         ], 200);
+    //     }
+    
+    //     $userId = $request->input('user_id'); 
+    
+    //     $products = DB::table('products')
+    //         ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
+    //         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
+    //         ->where('products.category_id', $subcategoryId) 
+    //         ->orWhere('sub_categories2.id', $subcategoryId)
+    //         ->get([
+    //             'products.*',
+    //             'product_variants.price', 
+    //             'product_variants.special_price'
+    //         ]); 
+    
+    //     $cartItems = [];
+    //     $favoriteItems = [];
+    //     if ($userId) {
+          
+    //         $cartItems = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id') 
+    //             ->toArray(); 
+    
+    //         $favoriteItems = DB::table('favorites')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id') 
+    //             ->toArray(); 
+    //     }
+    
+    //     $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+    //         $product->is_added = in_array($product->id, $cartItems) ? 1 : 0; 
+    //         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; 
+    //         return $product;
+    //     });
+    
+    //     if ($products->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No products found for this subcategory.',
+    //         ], 200);
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $products,
+    //     ], 200);
+    // }
+    
+   
 //     public function getProductsBySubcategory(Request $request)
 // {
 //     $subcategoryId = $request->input('subcategory_id'); 
-
+    
 //     if (!$subcategoryId) {
 //         return response()->json([
 //             'success' => false,
@@ -674,25 +771,46 @@ class PublicApiController extends Controller
 //     $cartItems = [];
 //     $favoriteItems = [];
 //     if ($userId) {
-//         // Get cart items along with their quantities
 //         $cartItems = DB::table('cart')
 //             ->where('user_id', $userId)
-//             ->get(['product_id', 'quantity']) // Fetch both product_id and quantity
-//             ->keyBy('product_id') // Key by product_id for easy access
-//             ->toArray(); 
+//             ->get(['product_id', 'quantity', 'status']) 
+//             ->keyBy('product_id')
+//             ->map(function($item) {
+//                 return [
+//                     'quantity' => $item->quantity,
+//                     'status' => $item->status 
+//                 ]; 
+//             });
 
-//         // Get favorite items
 //         $favoriteItems = DB::table('favorites')
 //             ->where('user_id', $userId)
 //             ->pluck('product_id')
 //             ->toArray(); 
 //     }
 
-//     // Map products to include cart status and quantity
 //     $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
-//         $product->is_added = isset($cartItems[$product->id]) ? 1 : 0;
-//         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
-//         $product->quantity_in_cart = isset($cartItems[$product->id]) ? $cartItems[$product->id]->quantity : 0; // Add quantity from cart
+//         // Get cart item for the current product
+//         $cartItem = $cartItems->get($product->id);
+        
+//         if ($cartItem) {
+//             // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+//             if ($cartItem['status'] == 1) {
+//                 $product->is_added_to_cart = 0;
+//                 $product->quantity_in_cart = 0;
+//             } else {
+//                 // If the cart item status is 0, return the quantity and set 'added to cart' status
+//                 $product->is_added_to_cart = 1;
+//                 $product->quantity_in_cart = $cartItem['quantity'];
+//             }
+//         } else {
+//             // If product is not in the cart, set 'added to cart' status to 0 and quantity to 0
+//             $product->is_added_to_cart = 0;
+//             $product->quantity_in_cart = 0;
+//         }
+
+//         // Check if the product is in the favorites
+//         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; 
+
 //         return $product;
 //     });
 
@@ -711,5 +829,11 @@ class PublicApiController extends Controller
 
 
 
+
+    
+    
+    
+    
+    
 
 }

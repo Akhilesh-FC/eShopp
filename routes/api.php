@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API;
 use App\Http\Controller\Api\AuthController;
-use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController,PayinController};
+use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController};
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,9 +37,6 @@ Route::controller(ProductApiController::class)->group(function () {
     Route::post('/product_explore', 'product_explore');    
 });
 
-// Route::post('/payin',[PayinController::class,'payin']); 
-// Route::get('/checkPayment',[PayinController::class,'checkPayment']); 
-
 
 Route::controller(CartApiController::class)->group(function () {
     Route::post('/addtocart', 'addToCart');
@@ -58,7 +55,6 @@ Route::controller(CartApiController::class)->group(function () {
     Route::post('/checkPayment','checkPayment');     
     Route::post('/viewcheckout','viewcheckout'); 
     Route::post('/viewcheckout_history','viewcheckout_history'); 
-    //Route::get('/payin','payin');  
     
 
 });

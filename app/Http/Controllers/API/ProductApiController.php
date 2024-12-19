@@ -202,16 +202,72 @@ class ProductApiController extends Controller
         ], 200);
     }
     
+    // public function product_explore(Request $request) 
+    // {
+    //     $search = $request->input('search'); // Search term from JSON payload
+    //     $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
+    
+    //     // Fetch products with optional search filter
+    //     $products = DB::table('products')
+    //         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+    //         ->select(
+    //              'products.*',
+    //             'product_variants.price',
+    //             'product_variants.special_price', 
+    //             'product_variants.percentage_off'
+    //         )
+    //         ->when($search, function ($query, $search) {
+    //             return $query->where('products.name', 'like', '%' . $search . '%');
+    //         })
+    //         ->get();
+    
+    //     // Initialize cart and favorites arrays
+    //     $cartItems = [];
+    //     $favoriteItems = [];
+    
+    //     if ($userId) {
+    //         // Fetch product IDs in the user's cart
+    //         $cartItems = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id') // Fetch only product IDs
+    //             ->toArray();
+    
+    //         // Fetch product IDs in the user's favorites
+    //         $favoriteItems = DB::table('favorites')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id') // Fetch only product IDs
+    //             ->toArray();
+    //     }
+    
+    //     // Add `is_added_to_cart` and `is_added_to_fav` flags to each product
+    //     $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+    //         $product->is_added_to_cart = in_array($product->id, $cartItems) ? 1 : 0; // Check if product is in cart
+    //         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; // Check if product is in favorites
+    //         return $product;
+    //     });
+    
+    //     // Add a custom message based on the result
+    //     $message = $products->isEmpty() 
+    //         ? 'No products found matching your search.' 
+    //         : 'Products retrieved successfully.';
+    
+    //     return response()->json([
+    //         'message' => $message,
+    //         "success" => true,
+    //         'data' => $products
+    //     ]);
+    // }
+    
     public function product_explore(Request $request) 
     {
         $search = $request->input('search'); // Search term from JSON payload
         $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
-    
+        
         // Fetch products with optional search filter
         $products = DB::table('products')
             ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
             ->select(
-                 'products.*',
+                'products.*',
                 'product_variants.price',
                 'product_variants.special_price', 
                 'product_variants.percentage_off'
@@ -220,18 +276,22 @@ class ProductApiController extends Controller
                 return $query->where('products.name', 'like', '%' . $search . '%');
             })
             ->get();
-    
+        
         // Initialize cart and favorites arrays
         $cartItems = [];
         $favoriteItems = [];
-    
+        
+        // Only fetch cart and favorite items if userId is provided
         if ($userId) {
-            // Fetch product IDs in the user's cart
+            // Fetch the cart items for the given user
             $cartItems = DB::table('cart')
                 ->where('user_id', $userId)
-                ->pluck('product_id') // Fetch only product IDs
-                ->toArray();
-    
+                ->get(['product_id', 'quantity']) 
+                ->keyBy('product_id') // Key by product_id
+                ->map(function ($item) {
+                    return $item->quantity; // Return the quantity for each product in the cart
+                });
+            
             // Fetch product IDs in the user's favorites
             $favoriteItems = DB::table('favorites')
                 ->where('user_id', $userId)
@@ -239,10 +299,17 @@ class ProductApiController extends Controller
                 ->toArray();
         }
     
-        // Add `is_added_to_cart` and `is_added_to_fav` flags to each product
+        // Add `is_added_to_cart`, `is_added_to_fav`, and `quantity_in_cart` flags to each product
         $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
-            $product->is_added_to_cart = in_array($product->id, $cartItems) ? 1 : 0; // Check if product is in cart
-            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0; // Check if product is in favorites
+            // Check if product is in the cart
+            $product->is_added_to_cart = $cartItems->has($product->id) ? 1 : 0; // `has` checks for the existence of the product in the cart
+    
+            // Check if product is in the favorites
+            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+    
+            // Get the quantity of the product in the cart, or 0 if not present
+            $product->quantity_in_cart = $cartItems->get($product->id, 0);
+    
             return $product;
         });
     
@@ -250,7 +317,8 @@ class ProductApiController extends Controller
         $message = $products->isEmpty() 
             ? 'No products found matching your search.' 
             : 'Products retrieved successfully.';
-    
+        
+        // Return the response with success status and data
         return response()->json([
             'message' => $message,
             "success" => true,
@@ -258,7 +326,6 @@ class ProductApiController extends Controller
         ]);
     }
     
-
 
     
 }
