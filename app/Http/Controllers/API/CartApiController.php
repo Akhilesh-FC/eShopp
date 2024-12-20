@@ -46,6 +46,7 @@ class CartApiController extends Controller
         $existingCartItem = DB::table('cart')
             ->where('user_id', $request->user_id)
             ->where('product_id', $request->product_id)
+            ->where('status', '0')
             ->first();
     
         if ($existingCartItem) {

@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
 use App\Http\Controllers\AuthController;         
+use App\Http\Controllers\{OrdersController,SlidersController};         
 
 Route::get('/', function (){return view('welcome');});
 
@@ -18,18 +19,23 @@ Route::get('/dashboard', function () {
 })->name('dashboard')->middleware('checkSession');
 
 //Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
-//==============================Orders Routes================================//          
-Route::get('/orders', function () {return view('orders.orders');})->name('orders');
-Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');
-Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
-//=============================Categories Routes=================================//
 
+
+//=============================Orders Routes=================================//
+Route::controller(OrdersController::class)->group(function()
+{
+    Route::get('/orders','manageOrders')->name('orders');
+    Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');
+    Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
+});
+
+//=============================Categories Routes=================================//
 Route::controller(CategoriesController::class)->group(function() { 
     Route::get('/category', 'ViewCategory')->name('category'); 
     Route::get('/category_order', function () {return view('category.categorieorder'); })->name('categories_order');
     
     Route::get('/categories.create','create' )->name('category.create');
-    Route::post('/categories.store', 'store')->name('category.store'); 
+    Route::get('/categories.store', 'store')->name('category.store'); 
     
     Route::post('/categories/update/{id}', 'update')->name('category.update');
     Route::post('/categories/delete/{id}', 'destroy')->name('category.delete');
@@ -57,24 +63,34 @@ Route::get('/bulk_upload', function() { return view('products.bulkupload');})->n
 Route::get('/products_faqs', function() { return view('products.productsfaqs');})->name('products_faqs');
 Route::get('/product_order', function() { return view('products.productorder');})->name('product_order');
 
+//=============================ProductsController Routes=================================//
 Route::controller(ProductsController::class)->group(function() {  
     
     Route::get('/add_products',  'showAddProductForm')->name('add_products');   
     Route::post('/add_products', 'storeProduct')->name('store_product');  
     
     Route::get('/manage_products', 'manageProducts')->name('manage_products');
-    Route::get('/admin/product/{id}', 'viewProduct')->name('view_product'); //// Route to view a product
-    Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); // Route to edit a product
-    Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); // Route to update product rating
-    Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  // Route to delete a product
+    Route::get('/admin/product/{id}', 'viewProduct')->name('view_product'); 
+    Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); 
+    Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); 
+    Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  
   
 });
 
-
-//Route::get('/admin/products', [ProductController::class, 'manageProducts'])->name('manage_products');
-
 Route::get('/media', function() {return view('media');})->name('media');
-Route::get('/sliders', function() {return view('sliders');})->name('sliders');
+
+Route::controller(SlidersController::class)->group(function() {
+    Route::get('/slider', 'viewsliders')->name('sliders');
+    Route::post('/slider/store', 'store')->name('sliders.store');
+    Route::get('/slider/edit/{id}', 'edit')->name('sliders.edit');
+    Route::post('/slider/update/{id}', 'update')->name('sliders.update');
+    // web.php
+Route::delete('/sliders/{id}', 'destroy')->name('sliders.destroy');
+
+});
+
+
+
 Route::get('/offers', function() {return view('offers');})->name('offers');
 Route::get('/manage_stock', function() {return view('managestock');})->name('manage_stock');
 

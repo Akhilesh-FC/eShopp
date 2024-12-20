@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
 @section('admin')
 
+<form action="{{ route('sliders') }}" method="get"></form>
+
 <div class="container-fluid">
     <!-- Page Header -->
     <section class="content-header">
@@ -11,7 +13,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://avrluxe.com/admin/home">Home</a></li>
+                        <li class="breadcrumb-item"><a href="https://free2kart.tirangawin.club/dashboard">Home</a></li>
                         <li class="breadcrumb-item active">Slider</li>
                     </ol>
                 </div>
@@ -63,28 +65,37 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Example Row (Fetch rows dynamically from server) -->
+                                    <!-- Dynamically populate rows -->
+                                    @foreach($viewsliders as $slider)
                                     <tr>
-                                        <td>1</td>
-                                        <td>Offer</td>
-                                        <td>123</td>
-                                        <td><img src="path/to/image.jpg" alt="Slider Image" width="50"></td>
-                                        <td><a href="https://example.com">Visit Link</a></td>
+                                        <td>{{ $slider->id }}</td>
+                                        <td>{{ ucfirst($slider->type) }}</td>
+                                        <td>{{ $slider->type_id }}</td>
+                                        <td><img src="{{ asset('path/to/images/' . $slider->image) }}" alt="Slider Image" width="50"></td>
+                                        <td><a href="{{ $slider->link }}" target="_blank">Visit Link</a></td>
                                         <td>
                                             <!-- Action Buttons -->
-                                            <button class="btn btn-success btn-sm" title="Edit" onclick="editSlider(1)">
+                                            <button class="btn btn-success btn-sm" title="Edit" onclick="editSlider({{ $slider->id }})">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn btn-danger btn-sm" title="Delete" onclick="deleteSlider(1)">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                            <button class="btn btn-info btn-sm" title="Copy Link" onclick="copyLink('https://example.com')">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
+                                            
+                                            <!-- Delete Button -->
+                                            <form action="{{ route('sliders.destroy', $slider->id) }}" method="POST" style="display:inline;" id="delete-form-{{ $slider->id }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger btn-sm" title="Delete" onclick="confirmDelete({{ $slider->id }})">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
+                            <!-- Pagination -->
+                            <div class="pagination">
+                                {{ $viewsliders->links() }}
+                            </div>
                         </div> <!-- .card-innr -->
                     </div> <!-- .card -->
                 </div> <!-- .main-content -->
@@ -104,7 +115,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{ url('admin/slider/store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('sliders.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
                         <label for="type">Select Type</label>
@@ -119,6 +130,11 @@
                     <div class="form-group">
                         <label for="slider_image">Slider Image</label>
                         <input type="file" class="form-control-file" id="slider_image" name="slider_image" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="link">Link (Optional)</label>
+                        <input type="url" class="form-control" id="link" name="link" placeholder="http://example.com">
                     </div>
 
                     <div class="form-group d-flex justify-content-between">
@@ -138,15 +154,11 @@ function editSlider(id) {
     alert("Edit slider with ID: " + id);
 }
 
-function deleteSlider(id) {
+function confirmDelete(id) {
     if (confirm("Are you sure you want to delete this slider?")) {
-        alert("Deleted slider with ID: " + id);
+        // Submit the form for deletion
+        document.getElementById('delete-form-' + id).submit();
     }
 }
-
-function copyLink(link) {
-    navigator.clipboard.writeText(link).then(() => {
-        alert("Link copied to clipboard: " + link);
-    });
-}
 </script>
+

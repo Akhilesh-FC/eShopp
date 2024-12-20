@@ -16,6 +16,91 @@ use Illuminate\Support\Facades\Log;
 class PublicApiController extends Controller
 {
     
+     public function getProductsBySubcategory(Request $request)
+    {
+        $subcategoryId = $request->input('subcategory_id'); 
+        
+        if (!$subcategoryId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subcategory ID is required.',
+            ], 200);
+        }
+    
+        $userId = $request->input('user_id'); 
+    
+        $products = DB::table('products')
+            ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
+            ->where('products.category_id', $subcategoryId) 
+            ->orWhere('sub_categories2.id', $subcategoryId)
+            ->get([
+                'products.*',
+                'product_variants.price', 
+                'product_variants.special_price'
+            ]); 
+    
+        $cartItems = [];
+        $favoriteItems = [];
+        if ($userId) {
+            $cartItems = DB::table('cart')
+                ->where('user_id', $userId)
+                ->get(['product_id', 'quantity', 'status']) 
+                ->keyBy('product_id')
+                ->map(function($item) {
+                    return [
+                        'quantity' => $item->quantity,
+                        'status' => $item->status 
+                    ]; 
+                });
+    
+            $favoriteItems = DB::table('favorites')
+                ->where('user_id', $userId)
+                ->pluck('product_id')
+                ->toArray(); 
+        }
+    
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
+            $product->is_added_to_cart = 0;
+            $product->quantity_in_cart = 0;
+            $product->is_added_to_fav = 0;
+    
+            if ($userId) {
+                // If there is a user ID, check the cart and favorites
+                $cartItem = $cartItems->get($product->id);
+                
+                if ($cartItem) {
+                    // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+                    if ($cartItem['status'] == 1) {
+                        $product->is_added_to_cart = 0;
+                        $product->quantity_in_cart = 0;
+                    } else {
+                        // If the cart item status is 0, return the quantity and set 'added to cart' status
+                        $product->is_added_to_cart = 1;
+                        $product->quantity_in_cart = $cartItem['quantity'];
+                    }
+                }
+    
+                // Check if the product is in the favorites
+                $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+            }
+    
+            return $product;
+        });
+    
+        if ($products->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No products found for this subcategory.', 
+            ], 200);
+        }
+    
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ], 200);
+    }
+    
     public function ProductDetails(Request $request)  
     {
         $validator = Validator::make($request->all(), [  
@@ -68,6 +153,7 @@ class PublicApiController extends Controller
             // Check if the product is added to the cart
             $cartItems = DB::table('cart')
                 ->where('user_id', $userId)
+                ->where('status', '0')
                 ->pluck('product_id')
                 ->toArray();
     
@@ -148,7 +234,7 @@ class PublicApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid user ID.',
-            ], 400);
+            ], 200);
         }
     
         Log::info("Received ID: $id");
@@ -169,7 +255,7 @@ class PublicApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',
-            ], 400);
+            ], 200);
         }
     }
     
@@ -243,7 +329,7 @@ class PublicApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No data provided to update.'
-            ], 400);
+            ], 200);
         }
     
         // Update the user's profile with the provided data
@@ -281,7 +367,7 @@ class PublicApiController extends Controller
                 'success' => false,
                 'status' => 2,
                 'message' => $validator->errors()->first(),
-            ], 400);
+            ], 200);
         }
     
         // Check if the user exists
@@ -340,7 +426,7 @@ class PublicApiController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'Category ID is required.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch categories based on category_id
@@ -462,7 +548,7 @@ class PublicApiController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Product added to the cart successfully.',
-                ], 201);
+                ], 200);
             }
         } catch (\Exception $e) {
             // Catch and handle unexpected errors
@@ -489,7 +575,7 @@ class PublicApiController extends Controller
                 'message' => 'No record found',
                 'status' => 200,
                 'data' => []
-            ], 400);
+            ], 200);
         }
     }
 
@@ -599,90 +685,90 @@ class PublicApiController extends Controller
         }
     }
 
-    public function getProductsBySubcategory(Request $request)
-    {
-        $subcategoryId = $request->input('subcategory_id'); 
+    // public function getProductsBySubcategory(Request $request)
+    // {
+    //     $subcategoryId = $request->input('subcategory_id'); 
         
-        if (!$subcategoryId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Subcategory ID is required.',
-            ], 200);
-        }
+    //     if (!$subcategoryId) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Subcategory ID is required.',
+    //         ], 200);
+    //     }
     
-        $userId = $request->input('user_id'); 
+    //     $userId = $request->input('user_id'); 
     
-        $products = DB::table('products')
-            ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
-            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
-            ->where('products.category_id', $subcategoryId) 
-            ->orWhere('sub_categories2.id', $subcategoryId)
-            ->get([
-                'products.*',
-                'product_variants.price', 
-                'product_variants.special_price'
-            ]); 
+    //     $products = DB::table('products')
+    //         ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
+    //         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
+    //         ->where('products.category_id', $subcategoryId) 
+    //         ->orWhere('sub_categories2.id', $subcategoryId)
+    //         ->get([
+    //             'products.*',
+    //             'product_variants.price', 
+    //             'product_variants.special_price'
+    //         ]); 
     
-        $cartItems = [];
-        $favoriteItems = [];
-        if ($userId) {
-            $cartItems = DB::table('cart')
-                ->where('user_id', $userId)
-                ->get(['product_id', 'quantity', 'status']) 
-                ->keyBy('product_id')
-                ->map(function($item) {
-                    return [
-                        'quantity' => $item->quantity,
-                        'status' => $item->status 
-                    ]; 
-                });
+    //     $cartItems = [];
+    //     $favoriteItems = [];
+    //     if ($userId) {
+    //         $cartItems = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->get(['product_id', 'quantity', 'status']) 
+    //             ->keyBy('product_id')
+    //             ->map(function($item) {
+    //                 return [
+    //                     'quantity' => $item->quantity,
+    //                     'status' => $item->status 
+    //                 ]; 
+    //             });
     
-            $favoriteItems = DB::table('favorites')
-                ->where('user_id', $userId)
-                ->pluck('product_id')
-                ->toArray(); 
-        }
+    //         $favoriteItems = DB::table('favorites')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id')
+    //             ->toArray(); 
+    //     }
     
-        $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
-            $product->is_added_to_cart = 0;
-            $product->quantity_in_cart = 0;
-            $product->is_added_to_fav = 0;
+    //     $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
+    //         $product->is_added_to_cart = 0;
+    //         $product->quantity_in_cart = 0;
+    //         $product->is_added_to_fav = 0;
     
-            if ($userId) {
-                // If there is a user ID, check the cart and favorites
-                $cartItem = $cartItems->get($product->id);
+    //         if ($userId) {
+    //             // If there is a user ID, check the cart and favorites
+    //             $cartItem = $cartItems->get($product->id);
                 
-                if ($cartItem) {
-                    // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
-                    if ($cartItem['status'] == 1) {
-                        $product->is_added_to_cart = 0;
-                        $product->quantity_in_cart = 0;
-                    } else {
-                        // If the cart item status is 0, return the quantity and set 'added to cart' status
-                        $product->is_added_to_cart = 1;
-                        $product->quantity_in_cart = $cartItem['quantity'];
-                    }
-                }
+    //             if ($cartItem) {
+    //                 // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+    //                 if ($cartItem['status'] == 1) {
+    //                     $product->is_added_to_cart = 0;
+    //                     $product->quantity_in_cart = 0;
+    //                 } else {
+    //                     // If the cart item status is 0, return the quantity and set 'added to cart' status
+    //                     $product->is_added_to_cart = 1;
+    //                     $product->quantity_in_cart = $cartItem['quantity'];
+    //                 }
+    //             }
     
-                // Check if the product is in the favorites
-                $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
-            }
+    //             // Check if the product is in the favorites
+    //             $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+    //         }
     
-            return $product;
-        });
+    //         return $product;
+    //     });
     
-        if ($products->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No products found for this subcategory.', 
-            ], 200);
-        }
+    //     if ($products->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No products found for this subcategory.', 
+    //         ], 200);
+    //     }
     
-        return response()->json([
-            'success' => true,
-            'data' => $products,
-        ], 200);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $products,
+    //     ], 200);
+    // }
     
     
      // public function getProductsBySubcategory(Request $request)
