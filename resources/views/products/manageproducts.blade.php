@@ -33,7 +33,17 @@
             @foreach ($products as $product)
                 <tr>
                     <td>
-                        <img src="{{ $product->image }}" alt="{{ $product->name }}" class="img-fluid" style="width: 50px; height: auto;">
+                        @php
+                            // Assuming $product->image is a JSON array
+                            $images = json_decode($product->image);
+                            $firstImage = $images[0] ?? null;  // Get the first image URL or null if no image
+                        @endphp
+                        
+                        @if ($firstImage)
+                            <img src="{{ $firstImage }}" alt="{{ $product->name }}" class="img-fluid" style="width: 50px; height: auto;">
+                        @else
+                            <span>No image available</span>
+                        @endif
                     </td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->brand }}</td>

@@ -1,6 +1,6 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
+@section('admin')
 <form action="{{ route('sliders') }}" method="get"></form>
 
 <div class="container-fluid">
@@ -37,23 +37,7 @@
                         </div>
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class="table table-striped" id="slider-table"
-                                   data-toggle="table"
-                                   data-url="https://avrluxe.com/admin/slider/view_slider"
-                                   data-click-to-select="true"
-                                   data-side-pagination="server"
-                                   data-pagination="true"
-                                   data-page-list="[5, 10, 20, 50, 100, 200]"
-                                   data-search="true"
-                                   data-show-columns="true"
-                                   data-show-refresh="true"
-                                   data-trim-on-search="false"
-                                   data-sort-name="id"
-                                   data-sort-order="asc"
-                                   data-mobile-responsive="true"
-                                   data-show-export="true"
-                                   data-maintain-selected="true"
-                                   data-query-params="queryParams">
+                            <table class="table table-striped" id="slider-table">
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable="true" data-align="center">ID</th>
@@ -65,7 +49,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Dynamically populate rows -->
                                     @foreach($viewsliders as $slider)
                                     <tr>
                                         <td>{{ $slider->id }}</td>
@@ -75,7 +58,8 @@
                                         <td><a href="{{ $slider->link }}" target="_blank">Visit Link</a></td>
                                         <td>
                                             <!-- Action Buttons -->
-                                            <button class="btn btn-success btn-sm" title="Edit" onclick="editSlider({{ $slider->id }})">
+                                            <!--<button class="btn btn-success btn-sm" title="Edit" onclick="editSlider({{ $slider->id }})">-->
+                                            <button class="btn btn-success btn-sm" title="Edit" onclick="editSlider">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             
@@ -92,9 +76,10 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                            <!-- Pagination -->
-                            <div class="pagination">
-                                {{ $viewsliders->links() }}
+
+                            <!-- Pagination Links -->
+                            <div class="pagination mt-4 d-flex justify-content-center">
+                                {{ $viewsliders->appends(['per_page' => $perPage])->links('pagination::bootstrap-4') }}
                             </div>
                         </div> <!-- .card-innr -->
                     </div> <!-- .card -->
@@ -162,3 +147,28 @@ function confirmDelete(id) {
 }
 </script>
 
+<!-- Optional Custom Styles for Pagination -->
+<style>
+/* Add to your main CSS file or within <style> tags */
+.pagination {
+    margin-top: 20px; /* Adjust margin for spacing */
+}
+
+.pagination li a {
+    border-radius: 5px; /* Round corners */
+    padding: 8px 16px;  /* Adjust padding to make links bigger */
+    color: #007bff;     /* Blue color for the links */
+    font-size: 16px;    /* Adjust font size */
+}
+
+.pagination li a:hover {
+    background-color: #f0f0f0; /* Hover effect */
+    color: #0056b3;             /* Darker blue for hover state */
+}
+
+.pagination li.active a {
+    background-color: #007bff; /* Active page highlight */
+    color: white;              /* White text for active page */
+    border-color: #007bff;    /* Matching border color */
+}
+</style>

@@ -111,7 +111,8 @@
                         <h2>Logo</h2>
                     </div>
                     <h2 class="text-center mb-4">Sign Into Your Account</h2>
-                    <form action="#">
+                    <form action="{{ url('login') }}" method="POST">
+                        @csrf
                         <div class="mb-3">
                             <input type="email" class="form-control" id="email" name="email" placeholder="Enter Your Email" required>
                         </div>
@@ -126,12 +127,9 @@
                             </div>
                         </div>
                         <button type="submit" class="btn login-btn w-100 mb-3">Login</button>
-                        <div class="social-login mb-3">
-                            <h5 class="text-center mb-3">Social Login</h5>
-                            <button class="btn btn-google mb-3"><i class="fa-brands fa-google text-danger"></i> Sign With Google</button>
-                            <button class="btn btn-facebook mb-3"><i class="fa-brands fa-facebook-f text-white"></i> Sign With Facebook</button>
-                        </div>
+                        
                     </form>
+
 
                     <!-- Register Link -->
                     <p class="text-center register-test mt-3">Don't have an account? <a href="register-3.html" class="text-decoration-none">Register here</a></p>

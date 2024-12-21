@@ -2,13 +2,14 @@
 @section('admin')
 <div class="container">
     <h2 class="my-4 text-center">Add New Product</h2>
-    <form action="{{ route('add_products') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('store_product') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="mb-3">
             <label for="product_name" class="form-label">Product Name</label>
             <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required>
         </div>
 
+        
         <div class="mb-3">
             <label for="category_id" class="form-label">Category</label>
             <select class="form-select" id="category_id" name="category_id" required>

@@ -95,81 +95,81 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xl-6 col-6" id="ecommerceChartView">
-                    <div class="card card-shadow chart-height">
-                        <div class="m-3">Product Sales</div>
-                        <div class="card-header card-header-transparent py-20 border-0">
-                            <ul class="nav nav-pills nav-pills-rounded chart-action float-right btn-group sales-tab" role="group">
-                                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#scoreLineToDay">Day</a></li>
-                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToWeek">Week</a></li>
-                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToMonth">Month</a></li>
-                            </ul>
-                        </div>
-                        <div class="widget-content tab-content bg-white p-20">
-                            <div class="ct-chart tab-pane active scoreLineShadow" id="scoreLineToDay"></div>
-                            <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToWeek"></div>
-                            <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToMonth"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
+            <!--<div class="row">-->
+            <!--    <div class="col-xl-6 col-6" id="ecommerceChartView">-->
+            <!--        <div class="card card-shadow chart-height">-->
+            <!--            <div class="m-3">Product Sales</div>-->
+            <!--            <div class="card-header card-header-transparent py-20 border-0">-->
+            <!--                <ul class="nav nav-pills nav-pills-rounded chart-action float-right btn-group sales-tab" role="group">-->
+            <!--                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#scoreLineToDay">Day</a></li>-->
+            <!--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToWeek">Week</a></li>-->
+            <!--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToMonth">Month</a></li>-->
+            <!--                </ul>-->
+            <!--            </div>-->
+            <!--            <div class="widget-content tab-content bg-white p-20">-->
+            <!--                <div class="ct-chart tab-pane active scoreLineShadow" id="scoreLineToDay"></div>-->
+            <!--                <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToWeek"></div>-->
+            <!--                <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToMonth"></div>-->
+            <!--            </div>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--    <div class="col-md-6">-->
                     <!-- Category Wise Product's Sales -->
-                    <div class="card ">
-                        <h3 class="card-title m-3">Category Wise Product's Count</h3>
-                        <div class="card-body">
-                            <div id="piechart_3d" class='piechat_height'></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="info-box total-info-box bg-primary">
-                        <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text text-white">Total Earnings (₹)</span>
-                            <span class="info-box-number text-white">0.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="info-box details-box bg-success">
-                        <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text text-white">Admin Earnings (₹)</span>
-                            <span class="info-box-number text-white">0.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="info-box bg-secondary">
-                        <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text text-white">Seller Earnings (₹)</span>
-                            <span class="info-box-number text-white">0.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 col-xs-12">
-                    <div class="alert sold-products ">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                        <h6><i class="icon fa fa-info"></i> 0 Product(s) sold out!</h6>
-                        <a href="https://avrluxe.com/admin/product/?flag=sold" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
+            <!--        <div class="card ">-->
+            <!--            <h3 class="card-title m-3">Category Wise Product's Count</h3>-->
+            <!--            <div class="card-body">-->
+            <!--                <div id="piechart_3d" class='piechat_height'></div>-->
+            <!--            </div>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--</div>-->
+            <!--<div class="row">-->
+            <!--    <div class="col-md-4 col-sm-6 col-12">-->
+            <!--        <div class="info-box total-info-box bg-primary">-->
+            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
+            <!--            <div class="info-box-content">-->
+            <!--                <span class="info-box-text text-white">Total Earnings (₹)</span>-->
+            <!--                <span class="info-box-number text-white">0.00</span>-->
+            <!--            </div>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--    <div class="col-md-4 col-sm-6 col-12">-->
+            <!--        <div class="info-box details-box bg-success">-->
+            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
+            <!--            <div class="info-box-content">-->
+            <!--                <span class="info-box-text text-white">Admin Earnings (₹)</span>-->
+            <!--                <span class="info-box-number text-white">0.00</span>-->
+            <!--            </div>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--    <div class="col-md-4 col-sm-6 col-12">-->
+            <!--        <div class="info-box bg-secondary">-->
+            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
+            <!--            <div class="info-box-content">-->
+            <!--                <span class="info-box-text text-white">Seller Earnings (₹)</span>-->
+            <!--                <span class="info-box-number text-white">0.00</span>-->
+            <!--            </div>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--</div>-->
+            <!--<div class="row">-->
+            <!--    <div class="col-md-6 col-xs-12">-->
+            <!--        <div class="alert sold-products ">-->
+            <!--            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+            <!--            <h6><i class="icon fa fa-info"></i> 0 Product(s) sold out!</h6>-->
+            <!--            <a href="https://avrluxe.com/admin/product/?flag=sold" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+            <!--        </div>-->
+            <!--    </div>-->
 
-                <div class="col-md-6 col-xs-12">
-                    <div class="alert alert-primary alert-dismissible">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                        <h6><i class="icon fa fa-info"></i> 2 Product(s) low in stock!<small> (Low stock limit 15)</small></h6>
-                        <a href="https://avrluxe.com/admin/product/?flag=low" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            </div>
+            <!--    <div class="col-md-6 col-xs-12">-->
+            <!--        <div class="alert alert-primary alert-dismissible">-->
+            <!--            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+            <!--            <h6><i class="icon fa fa-info"></i> 2 Product(s) low in stock!<small> (Low stock limit 15)</small></h6>-->
+            <!--            <a href="https://avrluxe.com/admin/product/?flag=low" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--</div>-->
+            <!--</div>-->
 
             <h5 class="col">Sellers Details</h5>
                 <div class="row col-12 d-flex">
@@ -210,8 +210,7 @@
                         </div>
                     </div>
                 </div>
-            
-
+                <br>
                 <div class="container-fluid">
                 <div class="row">
                     <!-- Top Sellers Table -->
@@ -288,91 +287,92 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div><br>
 
                 <h5 class="col">Order Outlines</h5>
-                <div class="row col-12 d-flex">
-                    <div class="col-3">
-                        <div class="small-box awaiting-box bg-primary">
-                            <div class="inner">
-                                <h3 class="text-white">0</h3>
-                                <p class="text-white">Awaiting</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-history"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="small-box received-box bg-success">
-                            <div class="inner">
-                                <h3 class="text-white">0</h3>
-                                <p class="text-white">Received</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-level-down-alt"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="small-box processed-box bg-warning">
-                            <div class="inner">
-                                <h3 class="text-white">0</h3>
-                                <p class="text-white">Processed</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-people-carry"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="small-box shipped-box bg-info">
-                            <div class="inner">
-                                <h3 class="text-white">1</h3>
-                                <p class="text-white">Shipped</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-shipping-fast"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                </row>
-                <div class="row col-12 d-flex">
-                    <div class="col-3">
-                        <div class="small-box delivered-box bg-secondary">
-                            <div class="inner">
-                                <h3 class="text-white">0</h3>
-                                <p class="text-white">Delivered</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-user-check"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="small-box bg-danger">
-                            <div class="inner">
-                                <h3>0</h3>
-                                <p>Cancelled</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-times-circle"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="small-box bg-dark">
-                            <div class="inner">
-                                <h3>0</h3>
-                                <p>Returned</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-level-up-alt"></i> <!-- Updated icon class -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="row col-12 d-flex">
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box awaiting-box bg-primary">
+            <div class="inner">
+                <h3 class="text-white">0</h3>
+                <p class="text-white">Awaiting</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-history"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box received-box bg-success">
+            <div class="inner">
+                <h3 class="text-white">0</h3>
+                <p class="text-white">Received</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-level-down-alt"></i> 
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box processed-box bg-warning">
+            <div class="inner">
+                <h3 class="text-white">0</h3>
+                <p class="text-white">Processed</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-people-carry"></i> 
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box shipped-box bg-info">
+            <div class="inner">
+                <h3 class="text-white">1</h3>
+                <p class="text-white">Shipped</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-shipping-fast"></i> <!-- Updated icon class -->
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="row col-12 d-flex">
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box delivered-box bg-secondary">
+            <div class="inner">
+                <h3 class="text-white">0</h3>
+                <p class="text-white">Delivered</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-check"></i> <!-- Updated icon class -->
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>0</h3>
+                <p>Cancelled</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-times-circle"></i> <!-- Updated icon class -->
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mb-3"> <!-- Added margin-bottom -->
+        <div class="small-box bg-dark">
+            <div class="inner">
+                <h3>0</h3>
+                <p>Returned</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-level-up-alt"></i> <!-- Updated icon class -->
+            </div>
+        </div>
+    </div>
+</div>
+
     
 
             <div class="row">

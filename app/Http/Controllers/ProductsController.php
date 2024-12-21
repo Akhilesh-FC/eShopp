@@ -10,9 +10,12 @@ class ProductsController extends Controller
 
     public function showAddProductForm(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $categories = DB::table('categories')->select('id', 'name')->get();  
-        return view('products.addproducts', compact('categories', 'perPage'));
+        $perPage = $request->input('per_page', 5);
+        $products = DB::table('products')->select('id', 'name')->paginate($perPage);  
+        
+        $categories = DB::table('categories')->select('id', 'name')->get();
+    
+        return view('products.addproducts', compact('products', 'perPage', 'categories'));
     }
 
     public function storeProduct(Request $request)
@@ -31,28 +34,34 @@ class ProductsController extends Controller
             'percentage_off' => 'nullable|numeric|min:0|max:100',
         ]);
     
+        // Define the folder path for storing images
         $folderPath = public_path('products/');  
     
+        // Create the products folder if it doesn't exist
         if (!file_exists($folderPath)) {
-            mkdir($folderPath, 0777, true);  // Create folder with appropriate permissions
+            mkdir($folderPath, 0777, true);  
         }
     
-        // Handle image uploads
+        // Initialize an array to store image URLs
         $imageUrls = [];
-       
-            foreach ($request->file('images') as $image) {
-               
-                $imageName = $image->getClientOriginalName();
     
-                $image->move($folderPath, $imageName);  
-     
-                $imageUrl = url('products/'); // Generate URL with folder path
+        // Iterate over each uploaded image and save them
+        foreach ($request->file('images') as $image) {
     
-                // Store the image URL
-                $imageUrls[] = $imageUrl;
-            }
-        
+            // Generate a unique name for each image
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
     
+            // Move the image to the products folder
+            $image->move($folderPath, $imageName);  
+    
+            // Generate the image URL
+            $imageUrl = url('products/' . $imageName);
+    
+            // Add the URL to the array
+            $imageUrls[] = $imageUrl;
+        }
+    
+        // Insert the product details into the products table
         $productId = DB::table('products')->insertGetId([
             'name' => $request->product_name,
             'category_id' => $request->category_id,
@@ -66,7 +75,7 @@ class ProductsController extends Controller
             'updated_at' => now(),
         ]);
         
-        
+        // Insert the product variant details into the product_variants table
         DB::table('product_variants')->insert([
             'product_id' => $productId, 
             'price' => $request->price,
@@ -76,13 +85,13 @@ class ProductsController extends Controller
             'updated_at' => now(),
         ]);
     
+        // Return a success message after adding the product
         return redirect()->back()->with('success', 'Product added successfully!');
     }
-
-
+    
     public function manageProducts(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 5);
     
         $products = DB::table('products')
             ->join('categories', 'products.category_id', '=', 'categories.id')

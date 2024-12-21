@@ -9,40 +9,54 @@ use App\Models\Slider;
 
 class SlidersController extends Controller
 {
-    public function viewsliders(Request $request)  
-    { 
-        $perPage = $request->input('per_page', 10); 
-        $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage); 
-        return view('sliders', compact('viewsliders', 'perPage')); 
-    }
+    // public function viewsliders(Request $request)  
+    // { 
+    //     $perPage = $request->input('per_page', 5); 
+    //     $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage); 
+    //     return view('sliders', compact('viewsliders', 'perPage')); 
+    // }
+    
+    public function viewsliders(Request $request)
+{
+    // Get the number of rows per page from the request, default to 5 if not set
+    $perPage = $request->input('per_page', 5);
+
+    // Fetch sliders with pagination, ordered by 'id' in descending order
+    $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage);
+
+    // Pass the paginated data and perPage value to the view
+    return view('sliders', compact('viewsliders', 'perPage'));
+}
+
+    
     
 
-public function store(Request $request)
-{
-    $request->validate([
-        'type' => 'nullable|string',
-        'slider_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'link' => 'nullable|url',
-    ]);
-
-    if ($request->hasFile('slider_image')) {
-        $file = $request->file('slider_image');
-        $fileName = time() . '.' . $file->getClientOriginalExtension();
-
-        $filePath = $file->storeAs('public/sliders', $fileName);
-        
-        //$imageUrl = env('APP_URL') . 'public/sliders/' . $fileName; 
-        $imageUrl = asset('public/sliders/' . $fileName);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'type' => 'nullable|string',
+            'slider_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'link' => 'nullable|url',
+        ]);
+    
+        if ($request->hasFile('slider_image')) {
+            $file = $request->file('slider_image');
+            $fileName = time() . '.' . $file->getClientOriginalExtension();
+    
+            $filePath = $file->storeAs('public/sliders', $fileName);
+            
+            //$imageUrl = env('APP_URL') . 'public/sliders/' . $fileName; 
+            $imageUrl = asset('public/sliders/' . $fileName);
+        }
+    
+        DB::table('sliders')->insert([
+            'type' => $request->type,
+            'image' => $imageUrl,  
+            'link' => $request->link,
+        ]);
+    
+        return redirect()->route('sliders')->with('success', 'Slider added successfully!');
     }
-
-    DB::table('sliders')->insert([
-        'type' => $request->type,
-        'image' => $imageUrl,  
-        'link' => $request->link,
-    ]);
-
-    return redirect()->route('sliders')->with('success', 'Slider added successfully!');
-}
 
     // public function edit($id)
     // {
@@ -96,21 +110,41 @@ public function store(Request $request)
         return redirect()->route('sliders')->with('success', 'Slider updated successfully!');
     }
 
-// SliderController.php
-public function destroy($id)
-    {
-        // Find the slider by ID
-        $slider = Slider::find($id);
+    // public function destroy($id)
+    // {
+    //     $slider = Slider::find($id);
         
-        // Check if the slider exists
-        if ($slider) {
-            // Delete the slider from the database
-            $slider->delete();
+    //     if ($slider) {
+    //         // Delete the slider from the database
+    //         $slider->delete();
 
-            // Return a response or redirect to the slider list with success message
-            return redirect()->route('sliders.index')->with('success', 'Slider deleted successfully!');
+    //         // Return a response or redirect to the slider list with success message
+    //         return redirect()->route('sliders.index')->with('success', 'Slider deleted successfully!');
+    //     } else {
+    //         // If slider doesn't exist, show an error message
+    //         return redirect()->route('sliders')->with('error', 'Slider not found!');
+    //     }
+    // }
+    
+   public function destroy($id)
+    {
+        // Find the slider in the database by its ID
+        $slider = DB::table('sliders')->where('id', $id)->first();
+
+        if ($slider) {
+            // Optionally delete the image if it exists
+            if ($slider->image && file_exists(public_path('path/to/images/' . $slider->image))) {
+                // Delete the image file
+                unlink(public_path('path/to/images/' . $slider->image));
+            }
+
+            // Delete the slider from the database
+            DB::table('sliders')->where('id', $id)->delete();
+
+            // Redirect with success message
+            return redirect()->route('sliders')->with('success', 'Slider deleted successfully!');
         } else {
-            // If slider doesn't exist, show an error message
+            // If the slider is not found
             return redirect()->route('sliders')->with('error', 'Slider not found!');
         }
     }

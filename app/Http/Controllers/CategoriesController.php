@@ -12,7 +12,7 @@ class CategoriesController extends Controller
 { 
     public function ViewCategory(Request $request)  
     { 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 5);
         $viewCategories = DB::table('categories')->orderBy('id', 'desc')->paginate($perPage); 
         return view('category.category', compact('viewCategories', 'perPage')); 
     }
@@ -21,7 +21,6 @@ class CategoriesController extends Controller
     {
         return view('category.createcategory');  
     }
-
 
     public function store(Request $request)
     {
@@ -51,28 +50,22 @@ class CategoriesController extends Controller
             'image' => $imagePath
         ]);
     
-        // Redirect with success message
-        return redirect()->route('category.store')->with('success', 'Category added successfully!');
+        return redirect()->route('category')->with('success', 'Category added successfully!');
     }
     
         
     public function edit($id)
     {
-        // Fetch the category from the database using DB query
         $category = DB::table('categories')->where('id', $id)->first();
     
-        // Check if the category exists
         if (!$category) {
             return redirect()->route('category.create')->with('error', 'Category not found');
         }
-    
-        // Return the edit view with the category data
         return view('category.categoryedit', compact('category'));
     }
     
    public function update(Request $request, $id)
     {
-        // Validate the incoming data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -80,24 +73,20 @@ class CategoriesController extends Controller
             'status' => 'required|in:0,1',
         ]);
     
-        // Find the category
         $category = DB::table('categories')->where('id', $id)->first();
     
-        // Handle file upload for image
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('categories/images', 'public');
         } else {
             $imagePath = $category->image;
         }
     
-        // Handle file upload for banner
         if ($request->hasFile('banner')) {
             $bannerPath = $request->file('banner')->store('categories/banners', 'public');
         } else {
             $bannerPath = $category->banner;
         }
     
-        // Update the category
         DB::table('categories')
             ->where('id', $id)
             ->update([
@@ -107,7 +96,6 @@ class CategoriesController extends Controller
                 'status' => $request->status,
             ]);
     
-        // Redirect back with success message
         return redirect()->route('category.create')->with('success', 'Category updated successfully');   
     }
 
