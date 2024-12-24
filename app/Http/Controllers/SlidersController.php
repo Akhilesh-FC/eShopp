@@ -9,28 +9,16 @@ use App\Models\Slider;
 
 class SlidersController extends Controller
 {
-    // public function viewsliders(Request $request)  
-    // { 
-    //     $perPage = $request->input('per_page', 5); 
-    //     $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage); 
-    //     return view('sliders', compact('viewsliders', 'perPage')); 
-    // }
     
     public function viewsliders(Request $request)
-{
-    // Get the number of rows per page from the request, default to 5 if not set
-    $perPage = $request->input('per_page', 5);
-
-    // Fetch sliders with pagination, ordered by 'id' in descending order
-    $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage);
-
-    // Pass the paginated data and perPage value to the view
-    return view('sliders', compact('viewsliders', 'perPage'));
-}
-
+    {
+        $perPage = $request->input('per_page', 5);
     
+        $viewsliders = DB::table('sliders')->orderBy('id', 'desc')->paginate($perPage);
     
-
+        return view('sliders', compact('viewsliders', 'perPage'));
+    }
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -110,25 +98,9 @@ class SlidersController extends Controller
         return redirect()->route('sliders')->with('success', 'Slider updated successfully!');
     }
 
-    // public function destroy($id)
-    // {
-    //     $slider = Slider::find($id);
-        
-    //     if ($slider) {
-    //         // Delete the slider from the database
-    //         $slider->delete();
-
-    //         // Return a response or redirect to the slider list with success message
-    //         return redirect()->route('sliders.index')->with('success', 'Slider deleted successfully!');
-    //     } else {
-    //         // If slider doesn't exist, show an error message
-    //         return redirect()->route('sliders')->with('error', 'Slider not found!');
-    //     }
-    // }
     
-   public function destroy($id)
+    public function destroy($id)
     {
-        // Find the slider in the database by its ID
         $slider = DB::table('sliders')->where('id', $id)->first();
 
         if ($slider) {

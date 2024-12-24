@@ -59,11 +59,11 @@
                         <a href="{{ route('view_product', $product->id) }}" class="btn btn-info btn-sm">View</a>
                         <a href="{{ route('edit_product', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
 
-                        <form action="{{ route('delete_product', $product->id) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm ml-2">Delete</button>
-                        </form>
+                        <!--<form action="{{ route('delete_product', $product->id) }}" method="POST" style="display:inline-block;">-->
+                        <!--    @csrf-->
+                        <!--    @method('DELETE')-->
+                        <!--    <button type="submit" class="btn btn-danger btn-sm ml-2">Delete</button>-->
+                        <!--</form>-->
                     </td>
                 </tr>
             @endforeach

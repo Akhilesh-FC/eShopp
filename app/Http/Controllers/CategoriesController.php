@@ -13,7 +13,7 @@ class CategoriesController extends Controller
     public function ViewCategory(Request $request)  
     { 
         $perPage = $request->input('per_page', 5);
-        $viewCategories = DB::table('categories')->orderBy('id', 'desc')->paginate($perPage); 
+        $viewCategories = DB::table('categories')->orderBy('id', 'asc')->paginate($perPage); 
         return view('category.category', compact('viewCategories', 'perPage')); 
     }
     

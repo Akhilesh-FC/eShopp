@@ -8,47 +8,49 @@
                 <div class="col-md-12">
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">Customer Address </h3>
+                            <h3 class="card-title">Customer Address</h3>
                         </div>
                         <div class="card-body">
-                            <table class="table table-hover table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>User Name</th>
-                                        <th>Type</th>
-                                        <th>Mobile</th>
-                                        <th>Alternate Mobile</th>
-                                        <th>Landmark</th>
-                                        <th>Area</th>
-                                        <th>City</th>
-                                        <th>State</th>
-                                        <th>Pincode</th>
-                                        <th>Country</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($viewAddress as $address)
+                            <div class="table-responsive"> <!-- Added responsiveness to the table -->
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-dark">
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $address->name }}</td>
-                                            <td>{{ $address->type }}</td>
-                                            <td>{{ $address->mobile }}</td>
-                                            <td>{{ $address->alternate_mobile }}</t>
-                                            <td>{{ $address->landmark }}</td>
-                                            <td>{{ $address->area }}</td>
-                                            <td>{{ $address->city }}</td>
-                                            <td>{{ $address->state }}</td>
-                                            <td>{{ $address->pincode }}</td>
-                                            <td>{{ $address->country }}</td>
+                                            <th>ID</th>
+                                            <th>User Name</th>
+                                            <th>Type</th>
+                                            <th>Mobile</th>
+                                            <th>Alternate Mobile</th>
+                                            <th>Landmark</th>
+                                            <th>Area</th>
+                                            <th>City</th>
+                                            <th>State</th>
+                                            <th>Pincode</th>
+                                            <th>Country</th>
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="11" class="text-center">No addresses found</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($viewAddress as $address)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $address->name }}</td>
+                                                <td>{{ $address->type }}</td>
+                                                <td>{{ $address->mobile }}</td>
+                                                <td>{{ $address->alternate_mobile }}</td> <!-- Fixed typo in tag -->
+                                                <td>{{ $address->landmark }}</td>
+                                                <td>{{ $address->area }}</td>
+                                                <td>{{ $address->city }}</td>
+                                                <td>{{ $address->state }}</td>
+                                                <td>{{ $address->pincode }}</td>
+                                                <td>{{ $address->country }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="11" class="text-center">No addresses found</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
 
                             <!-- Rows per page selector -->
                             <div class="row mb-3">
