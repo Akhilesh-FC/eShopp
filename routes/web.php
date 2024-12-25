@@ -56,10 +56,8 @@ Route::get('/bulk_upload', function() { return view('products.bulkupload');})->n
 Route::get('/products_faqs', function() { return view('products.productsfaqs');})->name('products_faqs');
 Route::get('/product_order', function() { return view('products.productorder');})->name('product_order');
 
-
 Route::controller(ProductsController::class)->group(function() {  
-    
-    Route::get('/add_products',  'showAddProductForm')->name('add_products');   
+    Route::get('/add_products', 'showAddProductForm')->name('add_products');   
     Route::post('/add_products', 'showAddProductForm')->name('store_product');  
     
     Route::get('/manage_products', 'manageProducts')->name('manage_products');
@@ -67,7 +65,12 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); 
     Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); 
     Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  
+    
+    // Fix for the toggle_active_inactive route:
+    Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
 });
+
+
 //=============================Products Routes END=================================//
 
 Route::get('/media', function() {return view('media');})->name('media');

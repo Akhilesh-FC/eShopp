@@ -360,9 +360,8 @@ class CartApiController extends Controller
         }
     }
 
-    
     public function viewFavorites(Request $request)
-{
+    {
     $validator = Validator::make($request->all(), [
         'user_id' => 'required|integer',
     ]);
@@ -431,7 +430,6 @@ class CartApiController extends Controller
     ], 200);
 }
 
-    
     public function removeFromFavorite(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -871,124 +869,6 @@ class CartApiController extends Controller
         }
     }
     
-    
-    
-    
-    public function checkout_old(Request $request) 
-    {  
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer|exists:users,id',
-            'total_price' => 'required|numeric|min:1', 
-            'address_id' => 'required|integer|exists:addresses,id', 
-            'coupon_applied' => 'nullable|string', 
-            'paymode' => 'required|in:0,1'
-        ]);
-    
-        $validator->stopOnFirstFailure();
-    
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 200);
-        }
-    
-        $userId = $request->input('user_id');
-        $totalPrice = $request->input('total_price');
-        $addressId = $request->input('address_id');
-        $paymode = $request->input('paymode');
-        $couponApplied = $request->input('coupon_applied', null);
-    
-        // Check if the address belongs to the user
-        $addressExists = \DB::table('addresses')
-            ->where('id', $addressId)
-            ->where('user_id', $userId)
-            ->exists();
-    
-        if (!$addressExists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'The provided address does not belong to the specified user.',
-            ], 200);
-        }
-    
-        if (!empty($couponApplied)) {
-            $isCouponValid = $this->validateCoupon($couponApplied);
-            if (!$isCouponValid) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid coupon code.',
-                ], 200);
-            }
-    
-            $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
-        }
-    
-        $orderData = [
-            'user_id' => $userId,
-            'address_id' => $addressId,
-            'final_total' => $totalPrice,
-            'payment_method' => $paymode == 1 ? 'Online' : 'COD',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-    
-        $orderId = \DB::table('orders')->insertGetId($orderData);
-        
-        // If payment mode is COD, delete cart items immediately
-        if ($paymode == 0) {
-            \DB::table('cart')->where('user_id', $userId)->delete();
-        }
-    
-        // If payment mode is Online, generate payment link
-        if ($paymode == 1) {
-            $paymentLink = $this->payin($paymode, $userId, $totalPrice);  // Generate payment link
-    
-            if ($paymentLink) {
-                return response()->json([
-                    'success' => true, 
-                    'message' => 'Make Payment to confirm order.',   
-                    'data' => [
-                        'payment_url' => $paymentLink, 
-                        'paymode' => 'Online', 
-                        'final_total' => $totalPrice, 
-                        'coupon_applied' => $couponApplied,  
-                        'order_id' => $orderId,
-                    ],
-                ], 200); 
-            }
-        }
-    
-        // After payment, check the status of the payment
-        if ($paymode == 1) {
-            // Check the payment status from the payins table
-            $paymentStatus = \DB::table('payins')
-                ->where('user_id', $userId)
-                ->where('order_id', $orderId)
-                ->value('status');
-    
-            if ($paymentStatus == 1) { // Payment not completed
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment is not completed yet.',
-                ], 200);
-            } elseif ($paymentStatus == 2) { // Payment successful
-                // Payment successful, delete cart items
-                \DB::table('cart')->where('user_id', $userId)->delete(); 
-            } 
-        }
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Order Placed successfully.',
-            'data' => [
-                'paymode' => $paymode == 1 ? 'Online' : 'COD',
-                'final_total' => $totalPrice,
-                'coupon_applied' => $couponApplied,
-                'order_id' => $orderId,
-            ],
-        ], 200);
-    }
 
   
 }

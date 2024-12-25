@@ -7,16 +7,25 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
-
     public function showAddProductForm(Request $request)
     {
         $perPage = $request->input('per_page', 5);
-        $products = DB::table('products')->select('id', 'name')->paginate($perPage);  
+    
+        // Fetch products with the 'status' column (0 for active, 1 for inactive)
+        $products = DB::table('products')
         
+            ->select('id', 'name', 'status')  // Ensure to select 'status'
+            ->paginate($perPage);
+            //  dd($products);/
+            // die;
+    
+        // Fetch categories
         $categories = DB::table('categories')->select('id', 'name')->get();
     
         return view('products.addproducts', compact('products', 'perPage', 'categories'));
     }
+
+
 
     public function storeProduct(Request $request)
     {
@@ -95,7 +104,7 @@ class ProductsController extends Controller
     
         $products = DB::table('products')
             ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->select('products.id', 'products.name', 'products.image', 'products.brand', 'products.rating', 'categories.name as category_name')
+            ->select('products.id', 'products.name', 'products.image', 'products.brand', 'products.rating', 'products.status','categories.name as category_name')
             ->leftJoin('product_rating', 'products.id', '=', 'product_rating.product_id')
             ->paginate($perPage);  // Use paginate() instead of get()
     
@@ -130,5 +139,29 @@ class ProductsController extends Controller
     
         return redirect()->back()->with('error', 'Product not found.');
     }
+    
+    
+    public function toggleActiveInactive($id)
+    {
+        // Use 'first()' to fetch a single product row, which returns a stdClass object
+        $product = DB::table('products')->where('id', $id)->first();
+   // dd($product);
+        if ($product) {
+            // Access the 'status' field from the retrieved stdClass object
+            $newStatus = $product->status == 0 ? 1 : 0;
+    
+    
+            // Update the status in the database
+            DB::table('products')->where('id', $id)->update(['status' => $newStatus]);
+    
+            return redirect()->back()->with('success', 'Product status updated successfully');
+        }
+    
+        return redirect()->back()->with('error', 'Product not found');
+    }
+
+
+
+
 
 }
