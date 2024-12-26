@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 class PublicApiController extends Controller
 {
     
-     public function getProductsBySubcategory(Request $request)
+    public function getProductsBySubcategory(Request $request)
     {
         $subcategoryId = $request->input('subcategory_id'); 
         

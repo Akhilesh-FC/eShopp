@@ -4,7 +4,7 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\CustomerController;   
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
-use App\Http\Controllers\{OrdersController,SlidersController,LoginsController};          
+use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController};          
 
 //=============================Login/Logout Routes=================================//
 Route::get('/', [LoginsController::class, 'showLoginForm'])->name('login');
@@ -22,6 +22,18 @@ Route::controller(OrdersController::class)->group(function()
     Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
 });
 //=============================Orders Routes END=================================//
+
+
+Route::controller(VendorController::class)->group(function()
+{
+    Route::get('vendors','index')->name('vendor');
+    Route::put('vendor/{id}/status',  'updateStatus')->name('update_vendor_status');
+    Route::get('vendor/{id}/details',  'showDetails')->name('vendor_details');
+    Route::get('vendor/{id}/products',  'showProducts')->name('vendor_products');
+    Route::get('vendor/{id}/profile', 'showDetails')->name('vendor.showDetails');
+
+
+});
 
 //=============================Categories Routes=================================//
 Route::controller(CategoriesController::class)->group(function() { 

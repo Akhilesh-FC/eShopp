@@ -8,142 +8,29 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 
 class VendorApiController extends Controller
 {
-
-    // public function vendor_register(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'name' => 'required|string',
-    //         'email' => 'required|email|unique:vendor,email',
-    //         'mobile' => 'required|string|unique:vendor,mobile',
-    //         'adharcard' => 'required|string|unique:vendor,adharcard',
-    //         'upload_adharcard' => 'required|string',
-    //         'upload_photo' => 'required|string',
-    //     ]);
-    
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $validator->errors()->all()
-    //         ], 200);
-    //     }
-    
-    //     // Set default paths for the files
-    //     $uploadAdharcardPath = 'vendor_adharcard/default.png';
-    //     $uploadPhotoPath = 'vendor_images/default.png';
-    
-    //     // Process upload_adharcard if base64 is provided
-    //     if ($request->has('upload_adharcard') && !empty($request->upload_adharcard)) {
-    //         $uploadAdharcardData = $request->upload_adharcard;
-    
-    //         // Check if the data contains the base64 prefix
-    //         if (strpos($uploadAdharcardData, 'data:image/') === 0) {
-    //             // Remove the prefix (e.g., data:image/png;base64,)
-    //             $uploadAdharcardData = explode(',', $uploadAdharcardData);
-    
-    //             if (count($uploadAdharcardData) == 2) {
-    //                 // Decode base64 data
-    //                 $fileData = base64_decode($uploadAdharcardData[1]);
-    
-    //                 // Check if decoding was successful
-    //                 if ($fileData !== false) {
-    //                     $fileName = uniqid() . '.png'; // You can change the extension based on the file type
-    //                     Storage::disk('public')->put('vendor_adharcard/' . $fileName, $fileData);
-    //                     $uploadAdharcardPath = 'vendor_adharcard/' . $fileName;
-    //                 } else {
-    //                     return response()->json([
-    //                         'success' => false,
-    //                         'message' => 'Failed to decode Adharcard image.'
-    //                     ], 200);
-    //                 }
-    //             } else {
-    //                 return response()->json([
-    //                     'success' => false,
-    //                     'message' => 'Invalid base64 data for Adharcard.'
-    //                 ], 200);
-    //             }
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Invalid Adharcard image format.'
-    //             ], 200);
-    //         }
-    //     }
-    
-    //     // Process upload_photo if base64 is provided
-    //     if ($request->has('upload_photo') && !empty($request->upload_photo)) {
-    //         $uploadPhotoData = $request->upload_photo;
-    
-    //         // Check if the data contains the base64 prefix
-    //         if (strpos($uploadPhotoData, 'data:image/') === 0) {
-    //             // Remove the prefix (e.g., data:image/png;base64,)
-    //             $uploadPhotoData = explode(',', $uploadPhotoData);
-    
-    //             if (count($uploadPhotoData) == 2) {
-    //                 // Decode base64 data
-    //                 $fileData = base64_decode($uploadPhotoData[1]);
-    
-    //                 // Check if decoding was successful
-    //                 if ($fileData !== false) {
-    //                     $fileName = uniqid() . '.png'; // You can change the extension based on the file type
-    //                     Storage::disk('public')->put('vendor_images/' . $fileName, $fileData);
-    //                     $uploadPhotoPath = 'vendor_images/' . $fileName;
-    //                 } else {
-    //                     return response()->json([
-    //                         'success' => false,
-    //                         'message' => 'Failed to decode Photo image.'
-    //                     ], 200);
-    //                 }
-    //             } else {
-    //                 return response()->json([
-    //                     'success' => false,
-    //                     'message' => 'Invalid base64 data for Photo.'
-    //                 ], 200);
-    //             }
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Invalid Photo image format.'
-    //             ], 200);
-    //         }
-    //     }
-    
-    //     $baseUrl = env('APP_URL');  
-    
-    //     $vendor = DB::table('vendor')->insert([
-    //         'name' => $request->name,
-    //         'email' => $request->email,
-    //         'mobile' => $request->mobile,
-    //         'adharcard' => $request->adharcard,
-    //         'upload_adharcard' => $baseUrl . '/storage/' . $uploadAdharcardPath,
-    //         'vendor_image' => $baseUrl . '/storage/' . $uploadPhotoPath,
-    //     ]);
-    
-    //     if ($vendor) {
-    //         $newVendor = DB::table('vendor')->where('mobile', $request->mobile)->first();
-    //         $id = $newVendor->id;
-    
-    //         return response()->json([
-    //             'data' => $id,
-    //             'success' => true,
-    //             'message' => 'Registration successful.',
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Registration failed.',
-    //         ], 200);
-    //     }
-    // }
+    private function handleBase64Image($base64Image)
+    {
+        if ($base64Image) {
+                $imageData = base64_decode($base64Image);
+                $imageName = 'profileimage/' . uniqid() . '.png'; 
+                 $baseUrl = env('APP_URL', 'https://free2kart.tirangawin.club') . '/public/';
+                file_put_contents(public_path($imageName), $imageData);
+               return $input = $baseUrl.$imageName; 
+            }
+    }
     
     public function vendor_register(Request $request)
-    {
+    { 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|email|unique:vendor,email',
             'mobile' => 'required|string|unique:vendor,mobile',
+            'address' => 'required|string',
             'adharcard' => 'required|string|unique:vendor,adharcard',
             'upload_adharcard' => 'required|string',
             'upload_photo' => 'required|string',
@@ -177,6 +64,7 @@ class VendorApiController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile' => $request->mobile,
+                'address' => $request->address,
                 'adharcard' => $request->adharcard,
                 'shoap_name' => $request->shoap_name,
                 'shoap_address' => $request->shoap_address,
@@ -203,11 +91,6 @@ class VendorApiController extends Controller
             ], 200);
         }
     }
-   
-    
-   
-
-
 
     public function vendor_login(Request $request)
     {
@@ -241,84 +124,299 @@ class VendorApiController extends Controller
         }
     }
     
-    // public function viewProfile(Request $request)  
+    public function viewProfile($vendor_id)
+    {
+        // Validate if the vendor exists with the given ID
+        $validator = Validator::make(['vendor_id' => $vendor_id], [
+            'vendor_id' => 'required|exists:vendor,id',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->all()
+            ], 200);
+        }
+    
+        // Fetch the vendor details
+        $vendor = DB::table('vendor')->where('id', $vendor_id)->first();
+    
+        if ($vendor) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vendor profile fetched successfully.',
+                'data' => $vendor
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found.'
+            ], 200);
+        }
+    }
+  
+public function add_product(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'categories' => 'required|string',
+        'subcategories' => 'required|string',
+        'name' => 'required|string|max:255',
+        'tags' => 'required|string|max:255',
+        'short_description' => 'required|string',
+        'total_allowed_quantity' => 'required|integer|min:1',
+        'minimum_order_quantity' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+        'discount' => 'required|numeric|min:0',
+        'special_price' => 'required|numeric|min:0',
+        'main_image' => 'required|string', 
+        'other_images.*' => 'required|string', 
+    ]);
+    
+    $validator->stopOnFirstFailure();
+    
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => $validator->errors()->first(),
+        ], 200);
+    }
+    
+    $productFolderName = Str::slug($request->input('name'));
+    $imagePaths = [];
+    
+    if ($request->input('main_image')) {
+        $mainImageUrl = $this->handleBase64Image($request->input('main_image'), $productFolderName);
+        $imagePaths[] = $mainImageUrl;
+    } elseif ($request->hasFile('main_image')) {
+        $mainImage = $request->file('main_image');
+        $mainImagePath = $mainImage->storeAs('product/' . $productFolderName, $mainImage->getClientOriginalName(), 'public');
+        $mainImageUrl = asset('public/' . $mainImagePath);
+        $imagePaths[] = $mainImageUrl;
+    }
+    
+    if ($request->has('other_images')) {
+        $otherImages = is_array($request->input('other_images')) ? $request->input('other_images') : [$request->input('other_images')];
+        foreach ($otherImages as $base64Image) {
+            if ($base64Image) {
+                $imageUrl = $this->handleBase64Image($base64Image, $productFolderName);
+                $imagePaths[] = $imageUrl;
+            }
+        }
+    }
+    
+ 
+    $encodedImagePaths = json_encode($imagePaths);
+    
+ 
+    $productId = DB::table('products')->insertGetId([
+        'name' => $request->input('name'),
+        'tags' => $request->input('tags'),
+        'short_description' => $request->input('short_description'),
+        'total_allowed_quantity' => $request->input('total_allowed_quantity'),
+        'minimum_order_quantity' => $request->input('minimum_order_quantity'),
+        'category_id' => $request->input('categories'),
+        'image' => $encodedImagePaths,
+    ]);
+    
+    DB::table('product_variants')->insert([
+        'product_id' => $productId,
+        'price' => $request->input('price'),
+        'percentage_off' => $request->input('discount'),
+        'special_price' => $request->input('special_price'),
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Product added successfully',
+        'data' => [
+            'product_id' => $productId,
+            'images' => json_decode($encodedImagePaths),
+        ],
+    ], 200);
+}
+
+//Handle base64 image data (helper function)
+// private function handleBase64Image($base64Image, $folderName)
+// {
+//     $imageData = explode(',', $base64Image)[1];
+//     $imageData = base64_decode($imageData);
+//     $imageName = uniqid() . '.png'; // Generate a unique name for the image
+//     $path = public_path('storage/product/' . $folderName . '/' . $imageName); 
+    
+//     // Ensure the directory exists
+//     if (!file_exists(dirname($path))) {
+//         mkdir(dirname($path), 0777, true);
+//     }
+    
+//     // Save the image to the folder
+//     file_put_contents($path, $imageData);
+    
+//     // Return the URL of the saved image
+//     return asset('storage/product/' . $folderName . '/' . $imageName);
+// }
+
+    
+    
+    
+    
+    // public function add_product(Request $request)
     // {
     //     $validator = Validator::make($request->all(), [
-    //         'vendor_id' => 'required|exists:vendor,id', 
-    //         // OR if you want to use mobile instead of ID
-    //         // 'mobile' => 'required|exists:vendor,mobile', 
+    //         'categories' => 'required|string',
+    //         'subcategories' => 'required|string',
+    //         'name' => 'required|string|max:255',
+    //         'tags' => 'required|string|max:255',
+    //         'short_description' => 'required|string',
+    //         'total_allowed_quantity' => 'required|integer|min:1',
+    //         'minimum_order_quantity' => 'required|integer|min:1',
+    //         'price' => 'required|numeric|min:0',
+    //         'discount' => 'required|numeric|min:0',
+    //         'special_price' => 'required|numeric|min:0',
+    //         'main_image' => 'required|string', 
+    //         'other_images.*' => 'required|string', 
     //     ]);
+    
+    //     $validator->stopOnFirstFailure();
     
     //     if ($validator->fails()) {
     //         return response()->json([
-    //             'success' => false,
-    //             'message' => $validator->errors()->all()
+    //             'status' => false,
+    //             'message' => $validator->errors()->first(),
     //         ], 200);
     //     }
+        
+    //     $imagePaths = [];
     
-    //     $vendor = DB::table('vendor')->where('id', $request->vendor_id)->first();  
-    
-    //     if ($vendor) {
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Vendor profile fetched successfully.',
-    //             'data' => $vendor
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Vendor not found.'
-    //         ], 404);
+       
+    //     if ($request->input('main_image')) {
+            
+    //         $mainImageUrl = $this->handleBase64Image($request->input('main_image'));
+    //         $imagePaths[] = $mainImageUrl;
+    //     } elseif ($request->hasFile('main_image')) {
+           
+    //         $mainImage = $request->file('main_image');
+    //         $mainImagePath = $mainImage->store('product', 'public');
+    //         $mainImageUrl = asset('storage/' . $mainImagePath);  
+    //         $imagePaths[] = $mainImageUrl;  
     //     }
+    
+    //     if ($request->has('other_images')) {
+            
+    //         $otherImages = is_array($request->input('other_images')) ? $request->input('other_images') : [$request->input('other_images')];
+        
+    //         foreach ($otherImages as $base64Image) {
+    //             if ($base64Image) {
+    //                 $imageUrl = $this->handleBase64Image($base64Image,);
+    //                 $imagePaths[] = $imageUrl;
+    //             }
+    //         }
+    //     }
+       
+    
+    //     $encodedImagePaths = json_encode($imagePaths);
+    // //print_r($imagePaths); die();
+       
+    //     $productId = DB::table('products')->insertGetId([
+    //         'name' => $request->input('name'),
+    //         'tags' => $request->input('tags'),
+    //         'short_description' => $request->input('short_description'),
+    //         'total_allowed_quantity' => $request->input('total_allowed_quantity'),
+    //         'minimum_order_quantity' => $request->input('minimum_order_quantity'),
+    //         'category_id' => $request->input('categories'),
+    //         'image' => $encodedImagePaths,
+    //     ]);
+    //     // print_r($mainImageUrl); die();
+    
+    //     DB::table('product_variants')->insert([
+    //         'product_id' => $productId,
+    //         'price' => $request->input('price'),
+    //         'percentage_off' => $request->input('discount'),
+    //         'special_price' => $request->input('special_price'),
+    //     ]);
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product added successfully',
+    //         'data' => [
+    //             'product_id' => $productId,
+    //             'images' => json_decode($encodedImagePaths),
+    //         ],
+    //     ], 200);
     // }
-    public function viewProfile($vendor_id)
-{
-    // Validate if the vendor exists with the given ID
-    $validator = Validator::make(['vendor_id' => $vendor_id], [
-        'vendor_id' => 'required|exists:vendor,id',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->all()
-        ], 200);
-    }
-
-    // Fetch the vendor details
-    $vendor = DB::table('vendor')->where('id', $vendor_id)->first();
-
-    if ($vendor) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Vendor profile fetched successfully.',
-            'data' => $vendor
-        ], 200);
-    } else {
-        return response()->json([
-            'success' => false,
-            'message' => 'Vendor not found.'
-        ], 200);
-    }
-}
-
+ 
+    // public function add_product(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'categories' => 'required|string',
+    //         'subcategories' => 'required|string',
+    //         'name' => 'required|string|max:255',
+    //         'tags' => 'required|string|max:255',
+    //         'short_description' => 'required|string',
+    //         'total_allowed_quantity' => 'required|integer|min:1',
+    //         'minimum_order_quantity' => 'required|integer|min:1',
+    //         'price' => 'required|numeric|min:0',
+    //         'discount' => 'required|numeric|min:0',
+    //         'special_price' => 'required|numeric|min:0',
+    //         'main_image' => 'required|string',
+    //         'other_images.*' => 'required|string',
+    //     ]);
     
-
-private function handleBase64Image($base64Image)
-{
-    if ($base64Image) {
-            $imageData = base64_decode($base64Image);
-            $imageName = 'profileimage/' . uniqid() . '.png'; 
-             $baseUrl = env('APP_URL', 'https://free2kart.tirangawin.club') . '/public/';
-            file_put_contents(public_path($imageName), $imageData);
-           return $input = $baseUrl.$imageName; 
-        }
-}
-
-
-
+    //     $validator->stopOnFirstFailure();
     
-   
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+        
+    //     $imagePaths = [];
     
+    //     $mainImagePath = '';
+    //     if ($request->hasFile('main_image')) {
+    //         $mainImage = $request->file('main_image');
+    //         // Store the main image and get its URL path
+    //         $mainImagePath = $mainImage->store('products', 'public');
+    //         $mainImageUrl = asset('storage/' . $mainImagePath);  
+    //         $imagePaths[] = $mainImageUrl;  
+    //     }
+    
+    //     if ($request->hasFile('other_images')) {
+    //         foreach ($request->file('other_images') as $image) {
+    //             $imagePath = $image->store('products/other_images', 'public');    
+    //             $imageUrl = asset('storage/' . $imagePath);  
+    //             $imagePaths[] = $imageUrl;  
+    //         }
+    //     }
+    
+    //     $encodedImagePaths = json_encode($imagePaths);
+    
+    //     $productId = DB::table('products')->insertGetId([
+    //         'name' => $request->input('name'),
+    //         'tags' => $request->input('tags'),
+    //         'short_description' => $request->input('short_description'),
+    //         'total_allowed_quantity' => $request->input('total_allowed_quantity'),
+    //         'minimum_order_quantity' => $request->input('minimum_order_quantity'),
+    //         'category_id' => $request->input('categories'),
+    //         'image' => $encodedImagePaths,
+    //     ]);
+        
+    //     DB::table('product_variants')->insert([
+    //         'product_id' => $productId,
+    //         'price' => $request->input('price'),
+    //         'percentage_off' => $request->input('discount'),
+    //         'special_price' => $request->input('special_price'),
+    //     ]);
+        
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product added successfully',
+    //         'data' => [
+    //             'product_id' => $productId,
+    //             'images' => json_decode($encodedImagePaths),
+    //         ],
+    //     ], 200);
+        
+    // }
     
 }

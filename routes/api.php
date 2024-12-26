@@ -71,6 +71,7 @@ Route::controller(VendorApiController::class)->group(function(){
     Route::post('/vendor_login', 'vendor_login');  
    // Route::get('/vendor_profile/{id}', 'viewProfile');
     Route::get('/vendor/{vendor_id}', 'viewProfile');
+    Route::post('add_product', 'add_product');
 
   
      
