@@ -59,13 +59,6 @@
                                                 <!-- Action Buttons -->
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <!-- Delete -->
-                                                        <!--<form action="{{ route('category.delete', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?')">-->
-                                                        <!--    @csrf-->
-                                                        <!--    <button type="submit" class="btn btn-sm btn-danger mr-1" title="Delete">-->
-                                                        <!--        <i class="fas fa-trash"></i>-->
-                                                        <!--    </button>-->
-                                                        <!--</form>-->
                                                         <a href="{{ route('category.edit', $category->id) }}" class="btn btn-sm btn-warning mr-1" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </a>

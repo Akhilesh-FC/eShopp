@@ -20,6 +20,7 @@ Route::controller(OrdersController::class)->group(function()
     Route::get('/orders','manageOrders')->name('orders');
     Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');
     Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
+    Route::get('/order/{orderId}', 'viewOrderDetails')->name('view_orderdetails');
 });
 //=============================Orders Routes END=================================//
 
@@ -77,9 +78,10 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); 
     Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); 
     Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  
-    
+    Route::get('/get-subcategories/{categoryId}',  'getSubcategories');
     // Fix for the toggle_active_inactive route:
     Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
+    
 });
 
 
@@ -119,8 +121,11 @@ Route::get('/section_order', function() {return view('featuredSection.sectionord
 
 
 Route::controller(CustomerController::class)->group(function () {   
-    Route::get('/view_customer', 'ViewCustomers')->name('view_customer');      
-    Route::get('/view_address', 'ViewAddress')->name('address');        
+    Route::get('/view_customer', 'ViewCustomers')->name('view_customer'); 
+    Route::get('/view_customer/toggle-status/{id}', 'toggleStatus')->name('view_customer.toggleStatus');
+    Route::get('/view_address', 'ViewAddress')->name('address');
+    
+   
     
 });
 

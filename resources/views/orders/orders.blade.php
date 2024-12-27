@@ -4,6 +4,7 @@
 
 <div class="container-fluid">
     <form action="{{ route('orders') }}" method="get"></form>
+    
 
     <div class="row mt-4">
         <div class="col-12">
@@ -44,8 +45,9 @@
                                             <td>₹{{ $order->final_total }}</td>
                                             <td>{{ $order->payment_method }}</td>
                                             <td>{{ $order->created_at }}</td>
-                                            
-                                            <td><a href=" #" class="btn btn-warning btn-sm">View</a></td>
+                                            <td>
+                                              <a href="{{ route('view_orderdetails', ['orderId' => $order->id]) }}" class="btn btn-warning btn-sm">View</a>
+                                              </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -82,5 +84,21 @@
         </div>
     </div>
 </div>
+<style>
+    .table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table img {
+    max-width: 100%;
+    height: auto;
+}
+
+.btn {
+    margin: 0 5px;
+}
+
+</style>
 
 @endsection

@@ -13,18 +13,23 @@ class ProductsController extends Controller
     
         // Fetch products with the 'status' column (0 for active, 1 for inactive)
         $products = DB::table('products')
-        
-            ->select('id', 'name', 'status')  // Ensure to select 'status'
+            ->select('id', 'name', 'status') 
             ->paginate($perPage);
-            //  dd($products);/
-            // die;
-    
-        // Fetch categories
         $categories = DB::table('categories')->select('id', 'name')->get();
     
         return view('products.addproducts', compact('products', 'perPage', 'categories'));
     }
-
+    
+    public function getSubcategories($categoryId)
+    {
+        // Fetch subcategories for the selected category
+        $subcategories = DB::table('subcategories')
+            ->where('category_id', $categoryId)
+            ->select('id', 'name')
+            ->get();
+    
+        return response()->json(['subcategories' => $subcategories]);
+    }
 
 
     public function storeProduct(Request $request)
@@ -36,11 +41,13 @@ class ProductsController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'tags' => 'nullable|string|max:255',
             'made_in' => 'nullable|string|max:255',
-            'product_highlight' => 'nullable|string',
-            'description' => 'nullable|string',
+            'product_highlight' => 'required|string',
+            'description' => 'required|string',
+            'color' => 'required|string',
+            'size' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'special_price' => 'nullable|numeric|min:0',
-            'percentage_off' => 'nullable|numeric|min:0|max:100',
+            'special_price' => 'required|numeric|min:0',
+            'percentage_off' => 'required|numeric|min:0|max:100',
         ]);
     
         // Define the folder path for storing images
@@ -87,6 +94,8 @@ class ProductsController extends Controller
         // Insert the product variant details into the product_variants table
         DB::table('product_variants')->insert([
             'product_id' => $productId, 
+            'color' => $color,
+            'size' => $size,
             'price' => $request->price,
             'special_price' => $request->special_price,
             'percentage_off' => $request->percentage_off,

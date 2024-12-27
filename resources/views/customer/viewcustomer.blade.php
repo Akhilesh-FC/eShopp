@@ -26,13 +26,9 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Name</th>
+                                        <th>Image</th>
                                         <th>Email</th>
                                         <th>Mobile No</th>
-                                        <th>Balance</th>
-                                        <th>Street</th>
-                                        <th>Area</th>
-                                        <th>City</th>
-                                        <th>Date</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -42,19 +38,25 @@
                                         <tr>
                                             <td>{{ $customer->id }}</td>  
                                             <td>{{ $customer->username }}</td> 
+                                            <td>
+                                                    @if($customer->image) 
+                                                        <img src="{{ $customer->image }}" alt="Customer Image" class="img-thumbnail" style="max-width: 100px; height: auto;">    
+                                                        @else 
+                                                        <span>No Image</span> 
+                                                    @endif
+                                                </td>
                                             <td>{{ $customer->email }}</td> 
                                             <td>{{ $customer->mobile }}</td>
-                                            <td>{{ $customer->balance }}</td>
-                                            <td>{{ $customer->street }}</td>
-                                            <td>{{ $customer->area }}</td>
-                                            <td>{{ $customer->city }}</td>
-                                            <td>{{ $customer->updated_at }}</td>
                                             <td>
-                                                <!-- Example Status (Can be adjusted to reflect active/inactive status) -->
-                                                <span class="badge badge-success">Active</span>
+                                                <form action="{{ route('view_customer.toggleStatus', $customer->id) }}" method="GET" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm {{ $customer->status == 1 ? 'btn-danger' : 'btn-success' }}">
+                                                        {{ $customer->status == 1 ? 'Deactivate' : 'Activate' }}
+                                                    </button>
+                                                </form>
                                             </td>
+
+
                                             <td>
-                                                <!-- Action buttons (e.g., Edit/Delete) -->
                                                 <a href="#" class="btn btn-warning btn-sm">Edit</a>
                                                 <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
                                             </td>
