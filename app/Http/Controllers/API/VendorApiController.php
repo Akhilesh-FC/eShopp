@@ -27,6 +27,7 @@ class VendorApiController extends Controller
     public function add_product(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|string',
             'categories' => 'required|string',
             'subcategories' => 'required|string',
             'name' => 'required|string|max:255',
@@ -81,6 +82,7 @@ class VendorApiController extends Controller
         $encodedImagePaths = json_encode($imagePaths);
         $productId = DB::table('products')->insertGetId([
             'name' => $request->input('name'),
+            'vendor_id' => $request->input('vendor_id'),
             'tags' => $request->input('tags'),
             'short_description' => $request->input('short_description'),
             'total_allowed_quantity' => $request->input('total_allowed_quantity'),
@@ -239,6 +241,58 @@ class VendorApiController extends Controller
         }
     }
     
+    // public function view_products_by_vendor($vendorId)
+    // {
+    //     // Step 1: Validate if the vendor exists
+    //     $vendor = DB::table('vendor')->where('id', $vendorId)->first();
+    
+    //     if (!$vendor) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Vendor not found',
+    //         ], 200);
+    //     }
+    
+    //     // Step 2: Fetch all products added by this vendor
+    //     $products = DB::table('products')
+    //         ->where('vendor_id', $vendorId)
+    //         ->get();
+    
+    //     if ($products->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No products found for this vendor',
+    //         ], 200);
+    //     }
+    
+    //     // Step 3: Prepare the product data including variants and special prices
+    //     $productsData = [];
+    //     foreach ($products as $product) {
+    //         // Get product variants for each product (only fetch special price)
+    //         $productVariants = DB::table('product_variants')
+    //             ->where('product_id', $product->id)
+    //             ->get();
+    
+    //         // Decode images
+    //         $images = json_decode($product->image, true);
+    
+    //         // Prepare the data for each product
+    //         $productsData[] = [
+    //             'product_id' => $product->id,
+    //             'name' => $product->name,
+    //             'image' => $images ? $images[0] : null, // First image as main image
+    //             'total_allowed_quantity' => $product->total_allowed_quantity, // From the products table
+    //             'special_prices' => $productVariants->pluck('special_price'), // Get special prices from variants
+    //         ];
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Products fetched successfully',
+    //         'data' => $productsData,
+    //     ], 200);
+    // }
+
     public function view_products_by_vendor($vendorId)
     {
         // Step 1: Validate if the vendor exists
@@ -274,13 +328,18 @@ class VendorApiController extends Controller
             // Decode images
             $images = json_decode($product->image, true);
     
-            // Prepare the data for each product
+           
+            $specialPrices = null; // Default to null if no special prices are found
+                if ($productVariants->isNotEmpty()) {
+                    $specialPrices = $productVariants->first()->special_price; // Get the first variant's special price
+                }
+    
             $productsData[] = [
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'image' => $images ? $images[0] : null, // First image as main image
                 'total_allowed_quantity' => $product->total_allowed_quantity, // From the products table
-                'special_prices' => $productVariants->pluck('special_price'), // Get special prices from variants
+                'special_prices' => $specialPrices, // Array of special prices
             ];
         }
     

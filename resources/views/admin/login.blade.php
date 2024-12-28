@@ -50,7 +50,7 @@
         h2.text-center {
             font-size: 1.5rem;
             margin-bottom: 2rem;
-            color: #333;
+            color: #fff;
             text-align: center;
         }
 

@@ -224,6 +224,41 @@ class PublicApiController extends Controller
         }
     }
     
+    // public function getProfile($id)
+    // {
+    //     $validator = Validator::make(['id' => $id], [
+    //         'id' => 'required|integer|exists:users,id',
+    //     ]);
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid user ID.',
+    //         ], 200);
+    //     }
+    
+    //     Log::info("Received ID: $id");
+        
+    //     $user = DB::table('users')
+    //         ->select('id', 'mobile', 'username', 'email', 'image')
+    //         ->where('id', $id)
+    //         ->where('active', 1)
+    //         ->first();
+    
+    //     Log::info("Fetched User: " . json_encode($user));
+    
+    //     if ($user) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => $user,
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'User not found',
+    //         ], 200);
+    //     }
+    // }
     public function getProfile($id)
     {
         $validator = Validator::make(['id' => $id], [
@@ -238,26 +273,39 @@ class PublicApiController extends Controller
         }
     
         Log::info("Received ID: $id");
-        
+    
         $user = DB::table('users')
-            ->select('id', 'mobile', 'username', 'email', 'image')
+            ->select('id', 'mobile', 'username', 'email', 'image', 'active')
             ->where('id', $id)
             ->first();
     
         Log::info("Fetched User: " . json_encode($user));
     
         if ($user) {
-            return response()->json([
-                'success' => true,
-                'data' => $user,
-            ], 200);
+            // Check if the user is active (status = 1)
+            if ($user->active == 1) {
+                return response()->json([
+                    'success' => true,
+                    'status_message' => 'User is active.',
+                    'active'=> 1,
+                    'data' => $user,
+                    
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'active' => 0,
+                    'message' => 'User is inactive.',
+                ], 200);
+            }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found',
+                'message' => 'User not found.',
             ], 200);
         }
     }
+    
     
     public function updateProfile(Request $request)
     {
@@ -355,10 +403,55 @@ class PublicApiController extends Controller
         ], 200);
     }
     
+    // public function login(Request $request)
+    // {
+    //     // Validate the request
+    //         $validator = Validator::make($request->all(), [
+    //         'mobile' => 'required|string',
+    //     ]);
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'status' => 2,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+    
+    //     // Check if the user exists
+    //     $user = DB::table('users')->where('mobile', $request->mobile)->first();
+    // //dd($user);
+    // $login_status=$user->active;
+    // //dd($login_status);
+    //     if ($user) {
+    //         if($login_status == 1)
+    //         {
+    //         return response()->json([
+    //             'success' => true,
+    //             'status' => 0,
+    //             'message' => 'login successfully.',
+    //             'data' => $user->id,
+    //         ], 200);
+    //         }else{
+    //           return response()->json([
+    //             'success' => false,
+    //             'status' => 1,
+    //             'message' => 'you are blocked by admin ..., please contact to admin..!'
+    //         ], 200);  
+    //         }
+    //     } else {
+    //         // User not registered
+    //         return response()->json([
+    //             'success' => false,
+    //             'status' => 1,
+    //             'message' => 'You are not registered. Please register first.',
+    //         ], 200);
+    //     }
+    // }
     public function login(Request $request)
     {
         // Validate the request
-            $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'mobile' => 'required|string',
         ]);
     
@@ -373,20 +466,28 @@ class PublicApiController extends Controller
         // Check if the user exists
         $user = DB::table('users')->where('mobile', $request->mobile)->first();
     
+        // Check if user exists
         if ($user) {
-            // Generate and send OTP
-            $otp = rand(100000, 999999);
-            // Example: Call your OTP service here
-            // Http::post('your-otp-api-endpoint', ['otp' => $otp, 'mobile' => $request->mobile]);
+            $login_status = $user->active;  // Now safe to access $user->active
     
-            return response()->json([
-                'success' => true,
-                'status' => 0,
-                'message' => 'OTP sent successfully.',
-                'data' => $user->id,
-            ], 200);
+            if ($login_status == 1) {
+                return response()->json([
+                    'success' => true,
+                    'status' => 0,
+                    'active'=> 1,
+                    'message' => 'Login successful.',
+                    'data' => $user->id,
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'status' => 1,
+                    'active' => 0,
+                    'message' => 'You are blocked by admin. Please contact the admin.',
+                ], 200);
+            }
         } else {
-            // User not registered
+            // User not found
             return response()->json([
                 'success' => false,
                 'status' => 1,
@@ -394,6 +495,7 @@ class PublicApiController extends Controller
             ], 200);
         }
     }
+
     
     public function showSliders()
     {

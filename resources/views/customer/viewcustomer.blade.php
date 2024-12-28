@@ -49,8 +49,8 @@
                                             <td>{{ $customer->mobile }}</td>
                                             <td>
                                                 <form action="{{ route('view_customer.toggleStatus', $customer->id) }}" method="GET" style="display: inline;">
-                                                    <button type="submit" class="btn btn-sm {{ $customer->status == 1 ? 'btn-danger' : 'btn-success' }}">
-                                                        {{ $customer->status == 1 ? 'Deactivate' : 'Activate' }}
+                                                    <button type="submit" class="btn btn-sm {{ $customer->active == 0 ? 'btn-danger' : 'btn-success' }}">
+                                                        {{ $customer->active == 1 ? 'Deactivate' : 'Activate' }}
                                                     </button>
                                                 </form>
                                             </td>

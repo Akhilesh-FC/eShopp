@@ -43,7 +43,9 @@
                     </td>
                     <td>
                        <a href="{{ route('vendor_details', $vendor->id) }}" class="btn btn-info btn-sm">Vendor Details</a>
-                        <a href="#" class="btn btn-primary btn-sm mt-1">Vendor Product Details</a>
+                        <!-- Blade File -->
+                        <a href="{{ route('vendor_productdetails', $vendor->id) }}" class="btn btn-primary btn-sm mt-1">Vendor Product Details</a>
+
                     </td>
                 </tr>
             @endforeach

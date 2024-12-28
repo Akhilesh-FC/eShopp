@@ -32,8 +32,10 @@ Route::controller(VendorController::class)->group(function()
     Route::get('vendor/{id}/details',  'showDetails')->name('vendor_details');
     Route::get('vendor/{id}/products',  'showProducts')->name('vendor_products');
     Route::get('vendor/{id}/profile', 'showDetails')->name('vendor.showDetails');
+    Route::get('vendor/{id}/productdetails',  'showProductDetails')->name('vendor_productdetails');
 
 
+//<form action="{{ route('vendor_productdetails', $vendor->id) }}" method="POST" enctype="multipart/form-data">
 });
 
 //=============================Categories Routes=================================//

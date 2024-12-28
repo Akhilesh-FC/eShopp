@@ -23,9 +23,9 @@ class CustomerController extends Controller
             return redirect()->route('view_customer')->with('error', 'Customer not found.');
         }
     
-        $newStatus = $customer->status == 1 ? 0 : 1;
+        $newStatus = $customer->active == 1 ? 0 : 1;
 
-        DB::table('users')->where('id', $id)->update(['status' => $newStatus]);
+        DB::table('users')->where('id', $id)->update(['active' => $newStatus]);
     
         $statusMessage = $newStatus == 1 ? 'activated' : 'deactivated';
     
