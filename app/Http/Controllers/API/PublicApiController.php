@@ -32,7 +32,8 @@ class PublicApiController extends Controller
         $products = DB::table('products')
             ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
             ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
-            ->where('products.category_id', $subcategoryId) 
+            ->where('products.category_id', $subcategoryId)
+            ->whereIn('products.is_vendor', 1)  /////written bye me cahnge in 31-12-2024
             ->orWhere('sub_categories2.id', $subcategoryId)
             ->get([
                 'products.*',
@@ -223,42 +224,7 @@ class PublicApiController extends Controller
             ], 200);
         }
     }
-    
-    // public function getProfile($id)
-    // {
-    //     $validator = Validator::make(['id' => $id], [
-    //         'id' => 'required|integer|exists:users,id',
-    //     ]);
-    
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid user ID.',
-    //         ], 200);
-    //     }
-    
-    //     Log::info("Received ID: $id");
-        
-    //     $user = DB::table('users')
-    //         ->select('id', 'mobile', 'username', 'email', 'image')
-    //         ->where('id', $id)
-    //         ->where('active', 1)
-    //         ->first();
-    
-    //     Log::info("Fetched User: " . json_encode($user));
-    
-    //     if ($user) {
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $user,
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'User not found',
-    //         ], 200);
-    //     }
-    // }
+   
     public function getProfile($id)
     {
         $validator = Validator::make(['id' => $id], [
@@ -305,7 +271,6 @@ class PublicApiController extends Controller
             ], 200);
         }
     }
-    
     
     public function updateProfile(Request $request)
     {
@@ -402,52 +367,7 @@ class PublicApiController extends Controller
             // 'user' => $updatedUser
         ], 200);
     }
-    
-    // public function login(Request $request)
-    // {
-    //     // Validate the request
-    //         $validator = Validator::make($request->all(), [
-    //         'mobile' => 'required|string',
-    //     ]);
-    
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'status' => 2,
-    //             'message' => $validator->errors()->first(),
-    //         ], 200);
-    //     }
-    
-    //     // Check if the user exists
-    //     $user = DB::table('users')->where('mobile', $request->mobile)->first();
-    // //dd($user);
-    // $login_status=$user->active;
-    // //dd($login_status);
-    //     if ($user) {
-    //         if($login_status == 1)
-    //         {
-    //         return response()->json([
-    //             'success' => true,
-    //             'status' => 0,
-    //             'message' => 'login successfully.',
-    //             'data' => $user->id,
-    //         ], 200);
-    //         }else{
-    //           return response()->json([
-    //             'success' => false,
-    //             'status' => 1,
-    //             'message' => 'you are blocked by admin ..., please contact to admin..!'
-    //         ], 200);  
-    //         }
-    //     } else {
-    //         // User not registered
-    //         return response()->json([
-    //             'success' => false,
-    //             'status' => 1,
-    //             'message' => 'You are not registered. Please register first.',
-    //         ], 200);
-    //     }
-    // }
+  
     public function login(Request $request)
     {
         // Validate the request
@@ -496,7 +416,6 @@ class PublicApiController extends Controller
         }
     }
 
-    
     public function showSliders()
     {
         $sliders = DB::table('sliders')->select('id', 'image', 'date_added')->get();

@@ -3,7 +3,8 @@
 @section('admin')
 <div class="container">
     <!-- Back Button on Top -->
-    <a href="{{ route('vendor', $vendor->id) }}" class="btn btn-secondary mb-4">Back to Vendor List</a>
+    <!--<a href="{{ route('vendor', $vendor->id) }}" class="btn btn-primary mb-4">Back to Vendor List</a>-->
+    <a href="{{ route('vendor', $vendor->id) }}" class="btn btn-primary mb-4">&larr; Back to Vendor List</a>
     
     <h2 class="my-4 text-center">Vendor Profile</h2>
 

@@ -90,9 +90,60 @@ class CartApiController extends Controller
         ], 200);
     }
 
+    // public function viewCart(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|string',
+    //     ]);
+    
+    //     $validator->stopOnFirstFailure();
+    
+    //     if ($validator->fails()) {
+    //         $response = [
+    //             'status' => false,
+    //             'message' => $validator->errors()->first()
+    //         ];
+    //         return response()->json($response, 200);
+    //     }
+    
+    //     $cartItems = DB::table('cart')
+    //         ->join('products', 'cart.product_id', '=', 'products.id')
+    //         ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id') 
+    //         ->select(
+    //             'cart.id as cart_item_id',
+    //             'cart.product_id',
+    //             'products.*',   
+    //             'product_variants.price as product_price', 
+    //             'product_variants.special_price as special_price', 
+    //             'product_variants.percentage_off as percentage_off',
+    //             'cart.quantity',
+    //             DB::raw('IFNULL(product_variants.special_price, product_variants.price) * cart.quantity as total_price') // Default to regular price if special price is null
+    //         )
+    //         ->where('cart.user_id', $request->user_id)
+    //         ->where('cart.status', 0)  // Ensure the cart is active (status = 0)
+    //         ->get();
+    
+    //     // Check if the cart is empty
+    //     if ($cartItems->isEmpty()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No items in the cart',
+    //             'data' => []
+    //         ], 200);
+    //     }
+    
+    //     // Calculate the final total price of all items in the cart
+    //     $finalTotalPrice = $cartItems->sum('total_price');
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Cart retrieved successfully',
+    //         'data' => $cartItems,
+    //         'final_total_price' => $finalTotalPrice // Return the final total price
+    //     ], 200);
+    // }
     public function viewCart(Request $request)
     {
-        // Validate the user_id input
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|string',
         ]);
@@ -100,49 +151,51 @@ class CartApiController extends Controller
         $validator->stopOnFirstFailure();
     
         if ($validator->fails()) {
-            $response = [
+            return response()->json([
                 'status' => false,
                 'message' => $validator->errors()->first()
-            ];
-            return response()->json($response, 400);
+            ], 200);
         }
     
-        // Fetch cart items for the specified user
         $cartItems = DB::table('cart')
             ->join('products', 'cart.product_id', '=', 'products.id')
-            ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id') // Ensure the correct join on the variant
+            ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id') 
             ->select(
                 'cart.id as cart_item_id',
                 'cart.product_id',
-                //'cart.product_variant_id', // Add the variant ID to ensure the correct variant is selected
-                'products.*',   // Example of selecting the product description, adjust based on your structure
-                'product_variants.price as product_price', // Price from product_variants table
+                'products.*',   
+                'product_variants.price as product_price', 
                 'product_variants.special_price as special_price', 
                 'product_variants.percentage_off as percentage_off',
                 'cart.quantity',
-                DB::raw('IFNULL(product_variants.special_price, product_variants.price) * cart.quantity as total_price') // Default to regular price if special price is null
+                DB::raw('IFNULL(product_variants.special_price, product_variants.price) * cart.quantity as total_price') // Calculate total price
             )
             ->where('cart.user_id', $request->user_id)
-            ->where('cart.status', 0)  // Ensure the cart is active (status = 0)
+            ->where('cart.status', 0)  // Active cart only
             ->get();
     
-        // Check if the cart is empty
+        // Calculate the final total price of all items in the cart
+        $finalTotalPrice = $cartItems->sum('total_price'); // Sum of all total_price values from cartItems
+    
+        // Ensure final_total_price is always returned, even if cart is empty
+        $finalTotalPrice = $finalTotalPrice ?? 0; // Default to 0 if no cart items
+    
+        // Check if the cart is empty and return appropriate response
         if ($cartItems->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No items in the cart',
-                'data' => []
+                'data' => [],
+                'final_total_price' => $finalTotalPrice // Always return the total price
             ], 200);
         }
     
-        // Calculate the final total price of all items in the cart
-        $finalTotalPrice = $cartItems->sum('total_price');
-    
+        // Return the response with cart items and final total price
         return response()->json([
             'success' => true,
             'message' => 'Cart retrieved successfully',
             'data' => $cartItems,
-            'final_total_price' => $finalTotalPrice // Return the final total price
+            'final_total_price' => $finalTotalPrice // Always return the total price
         ], 200);
     }
     

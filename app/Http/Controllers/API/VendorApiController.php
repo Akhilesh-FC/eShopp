@@ -241,61 +241,9 @@ class VendorApiController extends Controller
         }
     }
     
-    // public function view_products_by_vendor($vendorId)
-    // {
-    //     // Step 1: Validate if the vendor exists
-    //     $vendor = DB::table('vendor')->where('id', $vendorId)->first();
-    
-    //     if (!$vendor) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Vendor not found',
-    //         ], 200);
-    //     }
-    
-    //     // Step 2: Fetch all products added by this vendor
-    //     $products = DB::table('products')
-    //         ->where('vendor_id', $vendorId)
-    //         ->get();
-    
-    //     if ($products->isEmpty()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'No products found for this vendor',
-    //         ], 200);
-    //     }
-    
-    //     // Step 3: Prepare the product data including variants and special prices
-    //     $productsData = [];
-    //     foreach ($products as $product) {
-    //         // Get product variants for each product (only fetch special price)
-    //         $productVariants = DB::table('product_variants')
-    //             ->where('product_id', $product->id)
-    //             ->get();
-    
-    //         // Decode images
-    //         $images = json_decode($product->image, true);
-    
-    //         // Prepare the data for each product
-    //         $productsData[] = [
-    //             'product_id' => $product->id,
-    //             'name' => $product->name,
-    //             'image' => $images ? $images[0] : null, // First image as main image
-    //             'total_allowed_quantity' => $product->total_allowed_quantity, // From the products table
-    //             'special_prices' => $productVariants->pluck('special_price'), // Get special prices from variants
-    //         ];
-    //     }
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Products fetched successfully',
-    //         'data' => $productsData,
-    //     ], 200);
-    // }
-
     public function view_products_by_vendor($vendorId)
     {
-        // Step 1: Validate if the vendor exists
+        
         $vendor = DB::table('vendor')->where('id', $vendorId)->first();
     
         if (!$vendor) {
@@ -305,19 +253,24 @@ class VendorApiController extends Controller
             ], 200);
         }
     
-        // Step 2: Fetch all products added by this vendor
+        
         $products = DB::table('products')
             ->where('vendor_id', $vendorId)
+            ->where('is_vendor', '!=', 2)
+           
             ->get();
+            
+        //  $products = DB::select("SELECT * FROM products WHERE is_vendor != 2 AND vendor_id = ?", [$vendorId]);
     
         if ($products->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No products found for this vendor',
+                'data'=>$products
             ], 200);
         }
     
-        // Step 3: Prepare the product data including variants and special prices
+    
         $productsData = [];
         foreach ($products as $product) {
             // Get product variants for each product (only fetch special price)
@@ -340,6 +293,7 @@ class VendorApiController extends Controller
                 'image' => $images ? $images[0] : null, // First image as main image
                 'total_allowed_quantity' => $product->total_allowed_quantity, // From the products table
                 'special_prices' => $specialPrices, // Array of special prices
+                'is_vender' => $product->is_vendor, // Array of special prices
             ];
         }
     
@@ -349,6 +303,140 @@ class VendorApiController extends Controller
             'data' => $productsData,
         ], 200);
     }
+    
+    public function product_remove(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer',
+            'product_id' => 'required|integer',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(), 
+            ], 200);
+        }
+    
+        $vendor_id = $request->input('vendor_id');
+        $product_id = $request->input('product_id');
+    
+        $product = DB::table('products')
+            ->where('id', $product_id)
+            ->where('vendor_id', $vendor_id)  
+            ->first(); 
+    
+        // If the product exists, proceed to check and update
+        if ($product) {
+            // Check if the product's 'is_vendor' status is already 2
+            if ($product->is_vendor == 2) {
+                // If it's already 2, return a message that no action is needed
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product is already removed or marked.'
+                ], 200);
+            }
+    
+            // Otherwise, update the 'is_vendor' status to 2
+            DB::table('products')
+                ->where('id', $product_id)
+                ->where('vendor_id', $vendor_id)
+                ->update(['is_vendor' => 2]); 
+    
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Product removed successfully.'
+            ]);
+        } else {
+            // Return error response if product not found
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found or does not belong to this vendor.'
+            ], 200);
+        }
+    }
+    
+    public function enable_disable_product(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer',
+            'product_id' => 'required|integer',
+            'status' => 'required|in:0,1',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 200);
+        }
+    
+        $vendor_id = $request->input('vendor_id');
+        $product_id = $request->input('product_id');
+        $status = $request->input('status');  // 0 for disable, 1 for enable
+    
+        $product = DB::table('products')
+            ->where('id', $product_id)
+            ->where('vendor_id', $vendor_id)
+            ->first();
+    
+        if ($product) {
+            DB::table('products')
+                ->where('id', $product_id)
+                ->where('vendor_id', $vendor_id)
+                ->update(['is_vendor' => $status]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => $status == 1 ? 'Product enabled successfully.' : 'Product disabled successfully.',
+            ]);
+        } else {
+            // Return error response if product not found
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found or does not belong to this vendor.',
+            ], 200);
+        }
+    }
+    
+    public function vendor_order_history(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer|exists:vendor,id', 
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 200);
+        }
+
+        $orders = DB::table('orders') // Start with the orders table
+            ->join('cart', 'orders.user_id', '=', 'cart.user_id')  // Join orders and carts on user_id
+            ->join('products', 'cart.product_id', '=', 'products.id')  // Join carts and products on product_id
+           ->join('product_variants', 'products.id', '=', 'product_variants.product_id')  // Join products and product_variants on product_id 
+            ->where('products.vendor_id', $request->vendor_id)  // Filter by vendor_id in the products table
+            ->select('orders.created_at', 'products.name', 'products.image', 'product_variants.special_price')  // Select necessary fields
+            ->get();
+
+        if ($orders->isNotEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order history retrieved successfully.',
+                'data' => $orders,
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No orders found for this Vendor.',
+            ], 200);
+        }
+    }
+
+
+        
 
 
 

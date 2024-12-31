@@ -24,19 +24,18 @@ Route::controller(OrdersController::class)->group(function()
 });
 //=============================Orders Routes END=================================//
 
-
-Route::controller(VendorController::class)->group(function()
-{
+Route::controller(VendorController::class)->group(function() {
     Route::get('vendors','index')->name('vendor');
-    Route::put('vendor/{id}/status',  'updateStatus')->name('update_vendor_status');
+    // Route::put('vendor/{v_id}/status', 'enable_vendor')->name('update_vendor_status');
+    Route::put('vendor/{v_id}/status/{status}', 'enable_vendor')->name('update_vendor_status');
+
     Route::get('vendor/{id}/details',  'showDetails')->name('vendor_details');
     Route::get('vendor/{id}/products',  'showProducts')->name('vendor_products');
     Route::get('vendor/{id}/profile', 'showDetails')->name('vendor.showDetails');
     Route::get('vendor/{id}/productdetails',  'showProductDetails')->name('vendor_productdetails');
-
-
-//<form action="{{ route('vendor_productdetails', $vendor->id) }}" method="POST" enctype="multipart/form-data">
+    //Route::get('enable_vendor/{v_id}/{status}',  'enable_vendor')->name('update_vendor_status');
 });
+
 
 //=============================Categories Routes=================================//
 Route::controller(CategoriesController::class)->group(function() { 

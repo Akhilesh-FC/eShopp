@@ -73,6 +73,7 @@ class ProductApiController extends Controller
         ->leftJoin('products', 'categories.id', '=', 'products.category_id')
         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
         ->whereNotNull('products.id') // Exclude categories without products
+         ->where('products.is_vendor', 1)
         ->get()
         ->groupBy('category_id')
         ->map(function ($items, $category_id) {
@@ -217,6 +218,7 @@ class ProductApiController extends Controller
                 'product_variants.special_price', 
                 'product_variants.percentage_off'
             )
+            ->where('products.is_vendor', 1)
             ->when($search, function ($query, $search) {
                 return $query->where('products.name', 'like', '%' . $search . '%');
             })

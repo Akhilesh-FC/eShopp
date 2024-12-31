@@ -27,7 +27,7 @@ Route::controller(PublicApiController::class)->group(function () {
     Route::get('/shipping_policy','Shipping_Policy');
     Route::get('/faqs','FAQs');
     Route::get('/Terms_Condition','Terms_Condition');
-    Route::post('/product_details','ProductDetails');
+    Route::post('/product_details','ProductDetails'); 
     
 });
 
@@ -67,12 +67,15 @@ Route::controller(AddressApiController::class)->group(function() {
 }); 
 
 Route::controller(VendorApiController::class)->group(function(){
-    Route::post('/vendor_register', 'vendor_register');
+    Route::post('/vendor_register', 'vendor_register');  
     Route::post('/vendor_login', 'vendor_login');  
    // Route::get('/vendor_profile/{id}', 'viewProfile');
     Route::get('/vendor/{vendor_id}', 'viewProfile');
     Route::post('/add_product', 'add_product');
     Route::get('/vendor_products/{vendorId}', 'view_products_by_vendor');
+    Route::post('/product_remove', 'product_remove');
+    Route::post('/enable_disable_product', 'enable_disable_product');
+    Route::post('/vendor_order_history', 'vendor_order_history');
 
   
      

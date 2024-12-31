@@ -31,7 +31,6 @@ class ProductsController extends Controller
         return response()->json(['subcategories' => $subcategories]);
     }
 
-
     public function storeProduct(Request $request)
     {
         $validated = $request->validate([
@@ -148,7 +147,6 @@ class ProductsController extends Controller
     
         return redirect()->back()->with('error', 'Product not found.');
     }
-    
     
     public function toggleActiveInactive($id)
     {
