@@ -25,18 +25,9 @@
                                 <li class="sidebar-item"><a href="{{ route('bulk_upload') }}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu">  Bulk Upload  </span></a></li>
                             </ul>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">Vendor </span></a>
-                            <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{ route('vendor') }}" class="sidebar-link"><i class="fab fa-adversal nav-icon"></i><span class="hide-menu"> Vendor </span></a></li>
-                                <li class="sidebar-item"><a href="#" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu">  Vendor Details  </span></a></li>
-                            </ul>   
-                        </li>
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-store text-danger"></i><span class="hide-menu">Sellers </span></a>
-                            <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{ route('sellers') }}" class="sidebar-link"><i class="fa fa-store nav-icon"></i><span class="hide-menu"> Sellers </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('wallet_transaction') }}" class="sidebar-link"><i class="fa fa-wallet nav-icon"></i><span class="hide-menu">   Wallet Transaction  </span></a></li>
-                            </ul>
-                        </li>
+                        
+                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('vendor') }}" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">Vendor</span></a></li>
+                        
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-cubes text-primary"></i><span class="hide-menu">Products </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{{ route('attributes') }}" class="sidebar-link"><i class="fas fa-sliders-h nav-icon"></i><span class="hide-menu"> Attributes </span></a></li>

@@ -32,19 +32,56 @@
         <tbody>
             @foreach ($products as $product)
                 <tr>
+                   
                     <td>
                         @php
-                            // Assuming $product->image is a JSON array
+                            // Assuming $product->image is a JSON array of images
                             $images = json_decode($product->image);
                             $firstImage = $images[0] ?? null;  // Get the first image URL or null if no image
                         @endphp
-                        
+            
                         @if ($firstImage)
+                            <!-- Display the first image -->
                             <img src="{{ $firstImage }}" alt="{{ $product->name }}" class="img-fluid" style="width: 50px; height: auto;">
+                            
+                            <!-- Check if there are more than one image -->
+                            @if (count($images) > 1)
+                                <!-- Button to open modal -->
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imageModal{{ $product->id }}">
+                                    Show Images
+                                </button>
+                            @endif
                         @else
                             <span>No image available</span>
                         @endif
                     </td>
+
+                        <!-- Modal to display all images for this product -->
+                        <div class="modal fade" id="imageModal{{ $product->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="imageModalLabel">Product Images for {{ $product->name }}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Display all images for this product in a responsive grid -->
+                                        <div class="row">
+                                            @foreach($images as $image)
+                                                <div class="col-4 mb-3">
+                                                    <img src="{{ $image }}" alt="Product Image" class="img-fluid" style="width: 100%; height: auto;">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+
+
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->brand }}</td>
                     <td>{{ $product->category_name ?? 'No Category' }}</td>

@@ -194,14 +194,29 @@ class VendorApiController extends Controller
     
         $user = DB::table('vendor')->where('mobile', $request->mobile)->first();   
     
-        if ($user) {
-            return response()->json([
-                'success' => true,
-                'status' => 0,
-                'message' => 'Login successful.',
-                 'data' => $user->id,
-            ], 200);
-        } else {
+         if ($user) {
+            $login_status = $user->active;
+            
+        if ($login_status == 1) {
+                return response()->json([
+                    'success' => true,
+                    'status' => 0,
+                    'active'=> 1,
+                    'message' => 'Login successful.',
+                    'data' => $user->id,
+                ], 200);
+            } 
+            
+            else {
+                return response()->json([
+                    'success' => false,
+                    'status' => 1,
+                    'active' => 0,
+                    'message' => 'You are blocked by admin. Please contact the admin.',
+                ], 200);
+            }
+        } 
+         else {
             return response()->json([
                 'success' => false,
                 'status' => 1,
@@ -209,10 +224,9 @@ class VendorApiController extends Controller
             ], 200);
         }
     }
-    
+   
     public function viewProfile($vendor_id)
     {
-        // Validate if the vendor exists with the given ID
         $validator = Validator::make(['vendor_id' => $vendor_id], [
             'vendor_id' => 'required|exists:vendor,id',
         ]);
@@ -224,23 +238,33 @@ class VendorApiController extends Controller
             ], 200);
         }
     
-        // Fetch the vendor details
         $vendor = DB::table('vendor')->where('id', $vendor_id)->first();
     
         if ($vendor) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Vendor profile fetched successfully.',
-                'data' => $vendor
-            ], 200);
+            // Check if the user is active (status = 1)
+            if ($vendor->active == 1) {
+                return response()->json([
+                    'success' => true,
+                    'status_message' => 'Vendor is active.',
+                    'active'=> 1,
+                    'data' => $vendor,
+                    
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'active' => 0,
+                    'message' => 'Vendor is inactive.',
+                ], 200);
+            }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Vendor not found.'
+                'message' => 'Vendor not found.',
             ], 200);
         }
     }
-    
+   
     public function view_products_by_vendor($vendorId)
     {
         
@@ -418,7 +442,7 @@ class VendorApiController extends Controller
             ->join('products', 'cart.product_id', '=', 'products.id')  // Join carts and products on product_id
            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')  // Join products and product_variants on product_id 
             ->where('products.vendor_id', $request->vendor_id)  // Filter by vendor_id in the products table
-            ->select('orders.created_at', 'products.name', 'products.image', 'product_variants.special_price')  // Select necessary fields
+            ->select('orders.created_at', 'products.name', 'products.image', 'product_variants.special_price', 'cart.quantity')  // Select necessary fields
             ->get();
 
         if ($orders->isNotEmpty()) {
@@ -434,10 +458,96 @@ class VendorApiController extends Controller
             ], 200);
         }
     }
-
-
+    
+    public function vendor_order_status(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer|exists:vendor,id',
+            'product_id' => 'required|integer|exists:products,id',
+            'order_status' => 'required|integer|exists:orders,status',
+        ]);
         
-
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 200);
+        }
+    
+        $product = DB::table('products')
+            ->where('vendor_id', $request->vendor_id)
+            ->where('id', $request->product_id)
+            ->first();
+    
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found for the given vendor.',
+            ], 200);
+        }
+    
+        $cartEntries = DB::table('cart')
+            ->where('product_id', $request->product_id)
+            ->get();
+    
+        if ($cartEntries->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No users have added this product to their cart.',
+            ], 200);
+        }
+    
+        foreach ($cartEntries as $cart) {
+            $order = DB::table('orders')
+                ->where('user_id', $cart->user_id)
+                ->where('product_id', $request->product_id)
+                ->first();
+    
+            if ($order) {
+                $newStatus = $request->order_status;
+    
+                switch ($newStatus) {
+                    case 0:
+                        $statusMessage = 'Order accepted';
+                        break;
+    
+                    case 2:
+                        $statusMessage = 'Order rejected';
+                        break;
+    
+                    case 4:
+                        $statusMessage = 'Order dispatched';
+                        break;
+    
+                    default:
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Invalid order status.',
+                        ], 200);
+                }
+    
+                DB::table('orders')
+                    ->where('id', $order->id)
+                    ->update(['status' => $newStatus]);
+                    
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order status updated successfully: ' . $statusMessage,
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No matching order found for user ' . $cart->user_id . ' and product ' . $request->product_id,
+                ], 200);
+            }
+        }
+    
+        return response()->json([
+            'success' => false,
+            'message' => 'No matching orders found for updating status.',
+        ], 200);
+    }
+    
 
 
    

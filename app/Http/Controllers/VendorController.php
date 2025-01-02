@@ -10,51 +10,33 @@ use Illuminate\Support\Facades\Validator;
 
 class VendorController extends Controller
 { 
-    // public function enable_vendor(?string $v_id,?string $status){
-    //     $a = DB::table('vendor')->where('id',$v_id)->update(['active'=>$status]);
-    //     if($a)
-    //     {
-    //         return redirect()->back()->with('success','Updated successfully');
-    //     }
-    //     else
-    //     {
-    //         return redirect()->back()->with('error','Something went wrong!');
-    //     }
-    // }
-    
-  public function enable_vendor($v_id, $status)
-{
-    // Validate the status value (only 0 or 1 is allowed)
-    if (!in_array($status, [0, 1])) {
-        return redirect()->back()->with('error', 'Invalid status value');
-    }
-
-    // Find the vendor
-    $vendor = DB::table('vendor')->where('id', $v_id)->first();
-
-    if (!$vendor) {
-        return redirect()->back()->with('error', 'Vendor not found');
-    }
-
-    // Update the active status
-    $update = DB::table('vendor')->where('id', $v_id)->update(['active' => $status]);
-
-    if ($update) {
-        // Show success message after status update
-        if ($status == 1) {
-            return redirect()->back()->with('success', 'Vendor is now active.');
-        } else {
-            return redirect()->back()->with('success', 'Vendor is now inactive.');
+    public function enable_vendor($v_id, $status)
+    {
+        if (!in_array($status, [0, 1])) {
+            return redirect()->back()->with('error', 'Invalid status value');
         }
-    } else {
-        return redirect()->back()->with('error', 'Something went wrong!');
+    
+        $vendor = DB::table('vendor')->where('id', $v_id)->first();
+    
+        if (!$vendor) {
+            return redirect()->back()->with('error', 'Vendor not found');
+        }
+    
+        // Update the 'active' field, not 'status'
+        $update = DB::table('vendor')->where('id', $v_id)->update(['active' => $status]);
+    
+        if ($update) {
+            if ($status == 1) {
+                return redirect()->back()->with('success', 'Vendor is now active.');
+            } else {
+                return redirect()->back()->with('success', 'Vendor is now inactive.');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong!');
+        }
     }
-}
 
 
-
-
-   
     public function index(Request $request)
     {
          $perPage = $request->input('per_page', 5);
@@ -62,24 +44,9 @@ class VendorController extends Controller
 
         return view('vendor.vendor', compact('vendors'));
     }
-
-//   public function updateStatus(Request $request, $id)
-//     {
-       
-//         $status = ($request->status == 'Inactive') ? 1 : 0;
-    
-//         DB::table('vendor')
-//             ->where('id', $id)
-//             ->update(['active' => $status]);
-    
-//         return redirect()->route('vendor')->with('success', 'Vendor status updated successfully.');
-//     }
-    
         
     public function showDetails($id)
     {
-        //echo('hiio'); die;
-     
         $vendor = DB::table('vendor')->where('id', $id)->first();
     
         if (!$vendor) {
@@ -104,12 +71,6 @@ class VendorController extends Controller
         
         return view('vendor.vendorproductdetails', compact('vendor', 'products', 'productVariants'));
     }
-    
-  
-
-
-
-
         
 }
 

@@ -4,7 +4,7 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\CustomerController;   
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
-use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController};          
+use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController,DashboardController};          
 
 //=============================Login/Logout Routes=================================//
 Route::get('/', [LoginsController::class, 'showLoginForm'])->name('login');
@@ -13,7 +13,13 @@ Route::post('logout', [LoginsController::class, 'logout'])->name('logout');
 //=============================END Login/Logout Routes=================================//
 
 
-Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
+//Route::get('/dashboard', function () {return view('admin.index');})->name('dashboard');
+
+Route::controller(DashboardController::class)->group(function()
+{
+   Route::get('/dashboard', 'dashboard_index')->name('dashboard');
+
+});
 //=============================Orders Routes=================================//
 Route::controller(OrdersController::class)->group(function()
 {
@@ -26,14 +32,11 @@ Route::controller(OrdersController::class)->group(function()
 
 Route::controller(VendorController::class)->group(function() {
     Route::get('vendors','index')->name('vendor');
-    // Route::put('vendor/{v_id}/status', 'enable_vendor')->name('update_vendor_status');
     Route::put('vendor/{v_id}/status/{status}', 'enable_vendor')->name('update_vendor_status');
-
     Route::get('vendor/{id}/details',  'showDetails')->name('vendor_details');
     Route::get('vendor/{id}/products',  'showProducts')->name('vendor_products');
     Route::get('vendor/{id}/profile', 'showDetails')->name('vendor.showDetails');
     Route::get('vendor/{id}/productdetails',  'showProductDetails')->name('vendor_productdetails');
-    //Route::get('enable_vendor/{v_id}/{status}',  'enable_vendor')->name('update_vendor_status');
 });
 
 

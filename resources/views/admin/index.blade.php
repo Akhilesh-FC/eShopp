@@ -25,6 +25,7 @@
     </style>
 </head>
 <body>
+   
     <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-3 col-12">
                     <div class="card pull-up">
@@ -36,13 +37,16 @@
                                     </div>
                                     <div class="media-body text-right">
                                         <h5 class="text-muted text-bold-500">Orders</h5>
-                                        <h3 class="text-bold-600">1</h3>
+                                        <!-- Dynamic totalOrders display -->
+                                        <h3 class="text-bold-600">{{ $totalorders }}</h3>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-xl-3 col-lg-3 col-md-3 col-12">
                     <div class="card pull-up">
                         <div class="card-content">
@@ -53,7 +57,7 @@
                                     </div>
                                     <div class="media-body text-right">
                                         <h5 class="text-muted text-bold-500">New Signups</h5>
-                                        <h3 class="text-bold-600">10</h3>
+                                        <h3 class="text-bold-600">{{$newsingup}}</h3>
                                     </div>
                                 </div>
                             </div>
@@ -69,8 +73,8 @@
                                         <i class="ion-ios-people-outline display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Delivery Boys</h5>
-                                        <h3 class="text-bold-600">1</h3>
+                                        <h5 class="text-muted text-bold-500">Vendors</h5>
+                                        <h3 class="text-bold-600">{{$vendor}}</h3>
                                     </div>
                                 </div>
                             </div>
@@ -87,7 +91,7 @@
                                     </div>
                                     <div class="media-body text-right">
                                         <h5 class="text-muted text-bold-500">Products</h5>
-                                        <h3 class="text-bold-600">40</h3>
+                                        <h3 class="text-bold-600">{{$products}}</h3>
                                     </div>
                                 </div>
                             </div>

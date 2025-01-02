@@ -4,65 +4,62 @@
 <div class="container">
     <h2 class="my-4 text-center">Vendors List</h2>
     
-    
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Vendor Name</th>
-                <th>Image</th>
-                <th>Mobile</th>
-                <th>Address</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-    @foreach($vendors as $vendor)
-        <tr>
-            <td>{{ $vendor->id }}</td>
-            <td>{{ $vendor->name }}</td>
-            <td>
-                @if(isset($vendor->vendor_image) && $vendor->vendor_image)
-                    <img src="{{ $vendor->vendor_image }}" alt="Vendor Image" class="img-thumbnail" style="max-width: 100px; height: auto;">
-                @else
-                    <span>No Image</span>
-                @endif
-            </td>
-            <td>{{ $vendor->mobile }}</td>
-            <td>{{ $vendor->address }}</td>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Vendor Name</th>
+                    <th>Image</th>
+                    <th>Mobile</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($vendors as $vendor)
+                    <tr>
+                        <td>{{ $vendor->id }}</td>
+                        <td>{{ $vendor->name }}</td>
+                        <td>
+                            @if(isset($vendor->vendor_image) && $vendor->vendor_image)
+                                <img src="{{ $vendor->vendor_image }}" alt="Vendor Image" class="img-thumbnail" style="max-width: 100px; height: auto;">
+                            @else
+                                <span>No Image</span>
+                            @endif
+                        </td>
+                        <td>{{ $vendor->mobile }}</td>
+                        <td>{{ $vendor->address }}</td>
+                        <td>
+                            @if($vendor->active == 1)
+                                <!-- Form to Inactive vendor -->
+                                <form action="{{ route('update_vendor_status', ['v_id' => $vendor->id, 'status' => 0]) }}" method="POST" style="display: inline-block;">
+                                    @method('PUT')
+                                    @csrf
+                                    <button class="btn btn-danger btn-sm" type="submit">Inactive</button>
+                                </form>
+                            @elseif($vendor->active == 0)
+                                <!-- Form to Active vendor -->
+                                <form action="{{ route('update_vendor_status', ['v_id' => $vendor->id, 'status' => 1]) }}" method="POST" style="display: inline-block;">
+                                    @method('PUT')
+                                    @csrf
+                                    <button class="btn btn-success btn-sm" type="submit">Active</button>
+                                </form>
+                            @else
+                                <span>Unknown Status</span>
+                            @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('vendor_details', $vendor->id) }}" class="btn btn-info btn-sm">Vendor Details</a>
+                            <a href="{{ route('vendor_productdetails', $vendor->id) }}" class="btn btn-primary btn-sm mt-1">Vendor Product Details</a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-            <td>
-                @if($vendor->status == 1)
-                    <!-- Form to disable vendor -->
-                    <form action="{{ route('update_vendor_status', ['v_id' => $vendor->id, 'status' => 0]) }}" method="POST" style="display: inline-block;">
-                        @method('PUT')
-                        @csrf
-                        <button class="btn btn-danger btn-sm" type="submit">Disable</button>
-                    </form>
-                @elseif($vendor->status == 0)
-                    <!-- Form to enable vendor -->
-                    <form action="{{ route('update_vendor_status', ['v_id' => $vendor->id, 'status' => 1]) }}" method="POST" style="display: inline-block;">
-                        @method('PUT')
-                        @csrf
-                        <button class="btn btn-success btn-sm" type="submit">Enable</button>
-                    </form>
-                @else
-                    <span>Unknown Status</span>
-                @endif
-            </td>
-
-
-            <td>
-                <a href="{{ route('vendor_details', $vendor->id) }}" class="btn btn-info btn-sm">Vendor Details</a>
-                <a href="{{ route('vendor_productdetails', $vendor->id) }}" class="btn btn-primary btn-sm mt-1">Vendor Product Details</a>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
-
-    </table>
-    
     <div class="row mt-3">
         <div class="col-md-6">
             <p>Showing {{ $vendors->firstItem() }} to {{ $vendors->lastItem() }} of {{ $vendors->total() }} rows</p>
