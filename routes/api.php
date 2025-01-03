@@ -76,6 +76,7 @@ Route::controller(VendorApiController::class)->group(function(){
     Route::post('/enable_disable_product', 'enable_disable_product');
     Route::post('/vendor_order_history', 'vendor_order_history');
     Route::post('/vendor_order_status', 'vendor_order_status');
+    Route::post('/vendor_order_dispatch', 'vendor_order_dispatch');
 
   
      

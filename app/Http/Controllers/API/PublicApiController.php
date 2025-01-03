@@ -33,7 +33,8 @@ class PublicApiController extends Controller
             ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
             ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
             ->where('products.category_id', $subcategoryId)
-            ->whereIn('products.is_vendor', 1)  /////written bye me cahnge in 31-12-2024
+            // ->whereIn('products.is_vendor', 1)  /////written bye me cahnge in 31-12-2024
+            ->whereIn('products.is_vendor', [1])  
             ->orWhere('sub_categories2.id', $subcategoryId)
             ->get([
                 'products.*',

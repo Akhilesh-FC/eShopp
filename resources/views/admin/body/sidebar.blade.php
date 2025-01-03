@@ -15,7 +15,7 @@
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-bullseye text-success"></i><span class="hide-menu">Categories</span></a>
                             <ul aria-expanded="false" class="collapse  first-level">  
                                 <li class="sidebar-item"><a href="{{  route('category')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Category </span></a></li> 
-                                <!--<li class="sidebar-item"><a href="{{  route('categories_order')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Category Order </span></a></li> -->
+                                <li class="sidebar-item"><a href="{{  route('categories_order')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Sub Category </span></a></li> 
                                 
                             </ul>
                         </li> 

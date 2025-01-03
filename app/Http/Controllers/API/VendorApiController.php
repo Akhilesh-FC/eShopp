@@ -440,9 +440,9 @@ class VendorApiController extends Controller
         $orders = DB::table('orders') // Start with the orders table
             ->join('cart', 'orders.user_id', '=', 'cart.user_id')  // Join orders and carts on user_id
             ->join('products', 'cart.product_id', '=', 'products.id')  // Join carts and products on product_id
-           ->join('product_variants', 'products.id', '=', 'product_variants.product_id')  // Join products and product_variants on product_id 
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')  // Join products and product_variants on product_id 
             ->where('products.vendor_id', $request->vendor_id)  // Filter by vendor_id in the products table
-            ->select('orders.created_at', 'products.name', 'products.image', 'product_variants.special_price', 'cart.quantity')  // Select necessary fields
+            ->select('orders.created_at','orders.vendor_order_status','orders.order_id', 'products.name', 'products.image', 'product_variants.special_price', 'cart.quantity', 'products.id as product_id')  
             ->get();
 
         if ($orders->isNotEmpty()) {
@@ -462,9 +462,10 @@ class VendorApiController extends Controller
     public function vendor_order_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|integer|exists:vendor,id',
-            'product_id' => 'required|integer|exists:products,id',
-            'order_status' => 'required|integer|exists:orders,status',
+            'vendor_id' => 'required|string|exists:vendor,id',
+            'product_id' => 'required|string|exists:products,id',
+            'vendor_order_status' => 'required|string|in:0,1,4', 
+            'order_id' => 'required|string|exists:orders,order_id',
         ]);
         
         if ($validator->fails()) {
@@ -473,82 +474,210 @@ class VendorApiController extends Controller
                 'message' => $validator->errors()->first(),
             ], 200);
         }
-    
+        
         $product = DB::table('products')
             ->where('vendor_id', $request->vendor_id)
             ->where('id', $request->product_id)
             ->first();
-    
+        
         if (!$product) {
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found for the given vendor.',
             ], 200);
         }
-    
+        
         $cartEntries = DB::table('cart')
             ->where('product_id', $request->product_id)
             ->get();
-    
+        
         if ($cartEntries->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No users have added this product to their cart.',
             ], 200);
         }
+        $userIds = $cartEntries->pluck('user_id')->toArray();
+ 
+        $orders = DB::table('orders')
+            ->whereIn('user_id', $userIds)
+            ->where('order_id', $request->order_id)
+            ->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No matching orders found for updating status.',
+            ], 200);
+        }
+        
+        $statusMessage = '';
+        $newStatus = $request->vendor_order_status;
     
-        foreach ($cartEntries as $cart) {
-            $order = DB::table('orders')
-                ->where('user_id', $cart->user_id)
-                ->where('product_id', $request->product_id)
-                ->first();
-    
-            if ($order) {
-                $newStatus = $request->order_status;
-    
-                switch ($newStatus) {
-                    case 0:
-                        $statusMessage = 'Order accepted';
-                        break;
-    
-                    case 2:
-                        $statusMessage = 'Order rejected';
-                        break;
-    
-                    case 4:
-                        $statusMessage = 'Order dispatched';
-                        break;
-    
-                    default:
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Invalid order status.',
-                        ], 200);
-                }
-    
+        foreach ($orders as $order) {
+        switch ($newStatus) {
+            case 0:
+                
                 DB::table('orders')
                     ->where('id', $order->id)
-                    ->update(['status' => $newStatus]);
-                    
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Order status updated successfully: ' . $statusMessage,
-                ], 200);
-            } else {
+                    ->update(['vendor_order_status' => 0]);
+                $statusMessage = 'Order rejected';
+                break;
+
+            case 1:
+               
+                DB::table('orders')
+                    ->where('id', $order->id)
+                    ->update(['vendor_order_status' => 1]);
+                $statusMessage = 'Order accepted';
+                break;
+
+            case 4:
+                
+                DB::table('orders')
+                    ->where('id', $order->id)
+                    ->update(['status' => 4]);
+                $statusMessage = 'Order dispatched successfully'; 
+                break;
+
+            default:
                 return response()->json([
                     'success' => false,
-                    'message' => 'No matching order found for user ' . $cart->user_id . ' and product ' . $request->product_id,
+                    'message' => 'Invalid order status.',
                 ], 200);
-            }
         }
-    
-        return response()->json([
-            'success' => false,
-            'message' => 'No matching orders found for updating status.',
-        ], 200);
     }
     
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully: ' . $statusMessage,
+        ], 200);
+    }
 
+    // public function vendor_order_dispatch(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|integer|exists:vendor,id',
+    //         'product_id' => 'required|integer|exists:products,id',
+    //         'order_id' => 'required|integer|exists:orders,order_id',
+    //         'vendor_order_status' => 'required|integer|in:4',
+    //     ]);
+        
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+        
+    //     $product = DB::table('products')
+    //         ->where('vendor_id', $request->vendor_id)
+    //         ->where('id', $request->product_id)
+    //         ->first();
+        
+    //     if (!$product) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Product not found for the given vendor.',
+    //         ], 200);
+    //     }
+    
+    //     $currentStatus = DB::table('orders')
+    //         ->where('order_id', $request->order_id)
+    //         ->where('vendor_id', $request->vendor_id)
+    //         ->value('vendor_order_status'); 
+    
+    //     if ($currentStatus != 1) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Order is not accepted. Cannot dispatch.',
+    //         ], 200);
+    //     }
+    
+    //     $updated = DB::table('orders')
+    //         ->where('order_id', $request->order_id)
+    //         ->update(['status' => 4]); 
+    
+    //     if ($updated) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Order dispatched successfully.',
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to dispatch the order.',
+    //         ], 200);
+    //     }
+    // }
+    
+    // public function vendor_order_dispatch(Request $request)
+    // {
+    //       //dd($request);
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|integer|exists:vendor,id',
+    //         'product_id' => 'required|integer|exists:products,id',
+    //         'order_id' => 'required|string|exists:orders,order_id',
+    //         'vendor_order_status' => 'required|string|in:4', 
+    //     ]);
+       
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+    
+    
+    //     $product = DB::table('products')
+    //         ->where('vendor_id', $request->vendor_id)
+    //         ->where('id', $request->product_id)
+    //         ->first();
+            
+    //     if (!$product) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Product not found for the given vendor.',
+    //         ], 200);
+    //     }
+       
+    //     $currentStatus = DB::table('orders')
+    //         ->join('products', 'orders.product_id', '=', 'products.id')
+    //         ->where('orders.order_id', $request->order_id)
+    //         ->where('products.vendor_id', $request->vendor_id)
+    //         ->value('orders.status');
+    
+    //     if ($currentStatus != 1) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Order is not accepted. Cannot dispatch.',
+    //         ], 200);
+    //     }
+    
+    
+    //     $updated = DB::table('orders')
+    //         ->where('order_id', $request->order_id)
+    //         ->update(['status' => $request->status]);
+    
+       
+    //     if ($updated) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Order dispatched successfully.',
+    //         ], 200);
+    //     } else {
+            
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to dispatch the order.',
+    //         ], 200);
+    //     }
+    // }
+    
+            
+        
+       
 
    
  
