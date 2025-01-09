@@ -20,7 +20,8 @@ class ProductApiController extends Controller
             'categories.name as category_id_name',
             'categories.title as category_title',
             'products.id',
-            'products.product_identity',
+            'products.subcategory',
+            'products.subcategory2',
             'products.category_id',
             'products.vendor_id',
             'products.tax',
@@ -85,7 +86,8 @@ class ProductApiController extends Controller
                 'products' => $items->map(function ($item) {
                     return [
                         'id' => $item->id,
-                        'product_identity' => $item->product_identity,
+                        'subcategory' => $item->subcategory,
+                        'subcategory2' => $item->subcategory2,
                         'category_id' => $item->category_id,
                         'vendor_id' => $item->vendor_id,
                         'tax' => $item->tax,
@@ -273,8 +275,4 @@ class ProductApiController extends Controller
             'data' => $products
         ]);
     }
-    
-        
-
-    
 }

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API;
 use App\Http\Controller\Api\AuthController;
-use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController, VendorApiController};
+use App\Http\Controllers\API\{PublicApiController,ListController, ProductApiController, CartApiController, AddressApiController, VendorApiController,VarientsApiController};
 
 Route::get('/user', function (Request $request) { return $request->user();})->middleware('auth:sanctum');
 Route::post('/tokens', [ListController::class, 'tokens']);
@@ -29,6 +29,14 @@ Route::controller(PublicApiController::class)->group(function () {
     Route::get('/Terms_Condition','Terms_Condition');
     Route::post('/product_details','ProductDetails'); 
     
+    
+});
+
+Route::controller(VarientsApiController::class)->group(function (){
+    Route::get('/get_color', 'get_color');
+    Route::get('/get_size', 'get_size');
+    Route::get('/notification_type','notification_type'); 
+    Route::post('/notifications','notifications'); 
 });
 
 Route::controller(ProductApiController::class)->group(function () {

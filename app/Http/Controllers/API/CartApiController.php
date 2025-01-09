@@ -590,7 +590,7 @@ class CartApiController extends Controller
                 'order_id' => $orderid,
                 'redirect_url' => $redirect_url,
                 'status' => 1, // Assuming initial status is 1
-                'typeimage' => "https://eshop.foundercode.org/uploads/fastpay_image.png",
+                'typeimage' => "https://free2kart.mobileappdemo.net/uploads/fastpay_image.png",
                 'created_at' => $datetime,
                 'updated_at' => $datetime
             ]);

@@ -18,7 +18,7 @@ class VendorApiController extends Controller
         if ($base64Image) {
                 $imageData = base64_decode($base64Image);
                 $imageName = $path.'/' . uniqid() . '.png'; 
-                 $baseUrl = env('APP_URL', 'https://free2kart.tirangawin.club') . '/public/';
+                 $baseUrl = env('APP_URL', 'https://free2kart.mobileappdemo.net/') . '/public/';
                 file_put_contents(public_path($imageName), $imageData);
                return $input = $baseUrl.$imageName; 
             }

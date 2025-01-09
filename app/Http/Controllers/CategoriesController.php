@@ -7,9 +7,56 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
-
 class CategoriesController extends Controller
-{ 
+{
+    public function view_subcategory(){
+        $categories =DB::table('categories')->get();
+        $subcategories =DB::table('subcategories')->get();
+        return view('category.subcategoryview',compact('categories', 'subcategories'));;
+        
+    }
+    
+    public function creat_subcategory()
+    {
+        $categories = DB::table('categories')->get();
+        return view('category.subcategory', compact('categories'));
+    }
+    
+    public function storeSubCategory(Request $request)
+    {
+      
+        $request->validate([
+            'category_id' => 'required|exists:categories,id', 
+            'name' => 'required|string|max:255',  
+            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',  
+        ]);
+    
+        $imagePath = null;
+    
+        if ($request->hasFile('image')) {
+    
+            $image = $request->file('image');
+    
+            $destinationPath = public_path('subcategories'); 
+    
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);  
+            }
+            
+             $imageName = $image->getClientOriginalName(); 
+                $image->move($destinationPath, $imageName);
+                $imagePath = url('subcategories/' . $imageName);  
+        }
+    
+        DB::table('subcategories')->insert([
+            'category_id' => $request->category_id, 
+            'name' => $request->name, 
+            'image' => $imagePath, 
+        ]);
+    
+        return redirect()->route('subcategory')->with('success', 'SubCategory added successfully!');
+    }
+
     public function ViewCategory(Request $request)  
     { 
         $perPage = $request->input('per_page', 5);
@@ -29,6 +76,7 @@ class CategoriesController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
     
+        
         $imagePath = null;
         if ($request->hasFile('image')) {
 

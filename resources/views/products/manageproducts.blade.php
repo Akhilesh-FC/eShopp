@@ -2,6 +2,9 @@
 
 @section('admin')
 <div class="container mt-4">
+    <div class="text-center mb-4">
+        <a href="{{ route('add_products') }}" class="btn btn-secondary">Add products</a>
+    </div>
     <h3 class="mb-4">Manage Products</h3>
 
     <!-- Success or Error Messages -->
@@ -23,9 +26,10 @@
             <tr>
                 <th>Image</th>
                 <th>Name</th>
-                <th>Brand</th>
+                <!--<th>Brand</th>-->
                 <th>Category Name</th>
                 <th>Rating</th>
+                <th>No.of Rating</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -83,12 +87,20 @@
 
 
                     <td>{{ $product->name }}</td>
-                    <td>{{ $product->brand }}</td>
+                    <!--<td>{{ $product->brand }}</td>-->
                     <td>{{ $product->category_name ?? 'No Category' }}</td>
                     <td>
                         <form action="{{ route('update_rating', $product->id) }}" method="POST" class="d-inline-block">
                             @csrf
-                            <input type="number" name="rating" value="{{ $product->rating }}" min="1" max="5" class="form-control form-control-sm" style="width: 80px; display: inline-block;">
+                            <input type="number" name="rating" value="{{ $product->rating }}" min="1" max="5" step="0.1" class="form-control form-control-sm" style="width: 80px; display: inline-block;">
+
+                            <button type="submit" class="btn btn-primary btn-sm ml-2">Update</button>
+                        </form>
+                    </td>
+                     <td>
+                        <form action="{{ route('update_rating', $product->id) }}" method="POST" class="d-inline-block">
+                            @csrf
+                            <input type="number" name="no_of_ratings" value="{{ $product->no_of_ratings }}" min="1" max="50" class="form-control form-control-sm" style="width: 80px; display: inline-block;">
                             <button type="submit" class="btn btn-primary btn-sm ml-2">Update</button>
                         </form>
                     </td>

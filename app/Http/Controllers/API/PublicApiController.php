@@ -11,15 +11,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
-
-
 class PublicApiController extends Controller
 {
-    
     public function getProductsBySubcategory(Request $request)
     {
         $subcategoryId = $request->input('subcategory_id'); 
         
+        // Check if subcategory_id is provided
         if (!$subcategoryId) {
             return response()->json([
                 'success' => false,
@@ -27,81 +25,81 @@ class PublicApiController extends Controller
             ], 200);
         }
     
+        // You may need to get the user_id from the request if needed
         $userId = $request->input('user_id'); 
-    
+        
+        // Retrieve products based on the subcategory_id
         $products = DB::table('products')
-            ->join('sub_categories2', 'products.category_id', '=', 'sub_categories2.sub_categories_id')
-            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') 
-            ->where('products.category_id', $subcategoryId)
-            // ->whereIn('products.is_vendor', 1)  /////written bye me cahnge in 31-12-2024
-            ->whereIn('products.is_vendor', [1])  
-            ->orWhere('sub_categories2.id', $subcategoryId)
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // join with product_variants
+            ->where('products.subcategory', $subcategoryId) // filter by subcategory_id
+            ->whereIn('products.is_vendor', [1])  // vendor-related filter, you can modify as needed
             ->get([
-                'products.*',
-                'product_variants.price', 
-                'product_variants.special_price'
-            ]); 
+                'products.*', // all fields from the products table
+                'product_variants.price',  // price from product_variants table
+                'product_variants.special_price'  // special_price from product_variants table
+            ]);
     
-        $cartItems = [];
-        $favoriteItems = [];
-        if ($userId) {
-            $cartItems = DB::table('cart')
-                ->where('user_id', $userId)
-                ->get(['product_id', 'quantity', 'status']) 
-                ->keyBy('product_id')
-                ->map(function($item) {
-                    return [
-                        'quantity' => $item->quantity,
-                        'status' => $item->status 
-                    ]; 
-                });
-    
-            $favoriteItems = DB::table('favorites')
-                ->where('user_id', $userId)
-                ->pluck('product_id')
-                ->toArray(); 
-        }
-    
-        $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
-            $product->is_added_to_cart = 0;
-            $product->quantity_in_cart = 0;
-            $product->is_added_to_fav = 0;
-    
+            $cartItems = [];
+            $favoriteItems = [];
             if ($userId) {
-                // If there is a user ID, check the cart and favorites
-                $cartItem = $cartItems->get($product->id);
-                
-                if ($cartItem) {
-                    // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
-                    if ($cartItem['status'] == 1) {
-                        $product->is_added_to_cart = 0;
-                        $product->quantity_in_cart = 0;
-                    } else {
-                        // If the cart item status is 0, return the quantity and set 'added to cart' status
-                        $product->is_added_to_cart = 1;
-                        $product->quantity_in_cart = $cartItem['quantity'];
-                    }
-                }
-    
-                // Check if the product is in the favorites
-                $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+                $cartItems = DB::table('cart')
+                    ->where('user_id', $userId)
+                    ->get(['product_id', 'quantity', 'status']) 
+                    ->keyBy('product_id')
+                    ->map(function($item) {
+                        return [
+                            'quantity' => $item->quantity,
+                            'status' => $item->status 
+                        ]; 
+                    });
+        
+                $favoriteItems = DB::table('favorites')
+                    ->where('user_id', $userId)
+                    ->pluck('product_id')
+                    ->toArray(); 
             }
-    
-            return $product;
-        });
-    
-        if ($products->isEmpty()) {
+        
+            $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
+                $product->is_added_to_cart = 0;
+                $product->quantity_in_cart = 0;
+                $product->is_added_to_fav = 0;
+        
+                if ($userId) {
+                    // If there is a user ID, check the cart and favorites
+                    $cartItem = $cartItems->get($product->id);
+                    
+                    if ($cartItem) {
+                        // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+                        if ($cartItem['status'] == 1) {
+                            $product->is_added_to_cart = 0;
+                            $product->quantity_in_cart = 0;
+                        } else {
+                            // If the cart item status is 0, return the quantity and set 'added to cart' status
+                            $product->is_added_to_cart = 1;
+                            $product->quantity_in_cart = $cartItem['quantity'];
+                        }
+                    }
+        
+                    // Check if the product is in the favorites
+                    $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+                }
+        
+                return $product;
+            });
+        
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products found for this subcategory.', 
+                ], 200);
+            }
+        
             return response()->json([
-                'success' => false,
-                'message' => 'No products found for this subcategory.', 
+                'success' => true,
+                'data' => $products,
             ], 200);
         }
     
-        return response()->json([
-            'success' => true,
-            'data' => $products,
-        ], 200);
-    }
     
     public function ProductDetails(Request $request)  
     {
@@ -203,7 +201,7 @@ class PublicApiController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'mobile' => $mobile,
-            'image' => 'https://free2kart.tirangawin.club/public/profileimage/default.png',
+            'image' => 'https://free2kart.mobileappdemo.net/public/profileimage/default.png',
         //   'image' => "profileimage/1.png",
             //'image' => null,
 
@@ -301,7 +299,7 @@ class PublicApiController extends Controller
             ], 200);
         }
     
-        $baseUrl = env('APP_URL', 'https://free2kart.tirangawin.club') . '/public/';
+        $baseUrl = env('APP_URL', 'https://free2kart.mobileappdemo.net/') . '/public/';
      // Base URL for constructing image path
         $input = collect($request->only(['username', 'email']))
             ->filter(function ($value) {

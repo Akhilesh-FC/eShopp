@@ -1,6 +1,9 @@
 @extends('admin.body.adminmaster')
 @section('admin')
 <div class="container">
+    <div class="text-center mb-4">
+        <a href="{{ route('manage_products') }}" class="btn btn-secondary">Show All Products</a>
+    </div>
     <h2 class="my-4 text-center">Add New Product</h2>
     <form action="{{ route('store_product') }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -34,9 +37,33 @@
         </div>
 
         <div class="mb-3">
-            <label for="images" class="form-label">Product Images</label>
-            <input type="file" class="form-control" id="images" name="images[]" multiple>
-        </div>
+    <label for="images" class="form-label">Product Images</label>
+    <span>@error('images') {{$message}} @enderror</span>
+    <input type="file" class="form-control" id="images" name="images[]" multiple onchange="updateImageList()">
+    
+    <div id="image-names" class="mt-2"></div> <!-- This will display selected image names -->
+</div>
+
+<script>
+    function updateImageList() {
+        var imageInput = document.getElementById('images');
+        var imageNamesContainer = document.getElementById('image-names');
+        
+        // Clear the current displayed image names
+        imageNamesContainer.innerHTML = '';
+
+        // Get the selected files
+        var files = imageInput.files;
+
+        // Loop through the files and display their names
+        for (var i = 0; i < files.length; i++) {
+            var imageName = document.createElement('div');
+            imageName.textContent = files[i].name;
+            imageNamesContainer.appendChild(imageName);
+        }
+    }
+</script>
+
 
         <div class="mb-3">
             <label for="tags" class="form-label">Tags</label>
@@ -59,14 +86,28 @@
         </div>
         
         <div class="mb-3">
-            <label for="description" class="form-label">Color</label>
-            <input type="text" class="form-control" id="product_color" name="product_name" placeholder="Enter product color" required>
+            <label for="product_color" class="form-label">Color</label>
+            <select class="form-select" id="product_color" name="product_color" required>
+                <option value="">Select a Color</option>
+                @foreach($colors as $color)
+                    <option value="{{ $color->id }}">{{ $color->color }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="product_size" class="form-label">Size</label>
+            <select class="form-select" id="product_size" name="product_size" required>
+                <option value="">Select a Size</option>
+                @foreach($sizes as $size)
+                    <option value="{{ $size->id }}">{{ $size->size }}</option>
+                @endforeach
+            </select>
         </div>
         
-        <div class="mb-3">
-            <label for="description" class="form-label">Size</label>
-            <input type="text" class="form-control" id="product_size" name="product_name" placeholder="Enter product size" required>
-        </div>
+        <!--<div class="mb-3">-->
+        <!--    <label for="product_size" class="form-label">Size</label>-->
+        <!--    <input type="text" class="form-control" id="product_size" name="product_size" placeholder="Enter product size" required>-->
+        <!--</div>-->
 
         <div class="mb-3">
             <label for="price" class="form-label">Price</label>
@@ -82,29 +123,48 @@
             <label for="special_price" class="form-label">Special Price</label>
             <input type="number" step="0.01" class="form-control" id="special_price" name="special_price" placeholder="Special price will be calculated" readonly>
         </div>
-
-            <script>
-                // Function to calculate the special price based on price and percentage off
-                function calculateSpecialPrice() {
-                    var price = parseFloat(document.getElementById('price').value);
-                    var percentageOff = parseFloat(document.getElementById('percentage_off').value);
-                    
-                    if (!isNaN(price) && !isNaN(percentageOff)) {
-                        var discount = (percentageOff / 100) * price;
-                        var specialPrice = price - discount;
-                        document.getElementById('special_price').value = specialPrice.toFixed(2); // Set the special price
-                    } else {
-                        document.getElementById('special_price').value = ''; // Clear special price if inputs are invalid
-                    }
-                }
-            
-                // Event listeners to trigger the calculation when price or percentage off changes
-                document.getElementById('price').addEventListener('input', calculateSpecialPrice);
-                document.getElementById('percentage_off').addEventListener('input', calculateSpecialPrice);
-            </script>
-
-
         
+        <div class="row mb-3 g-3">
+    <div class="col">
+        <label for="cancelable" class="form-label">Cancelable</label>
+        <input type="checkbox" class="form-check-input" id="cancelable" name="cancelable" value="1">
+        <label class="form-check-label" for="cancelable">This product is cancelable</label>
+    </div>
+
+    <div class="col">
+        <label for="returnable" class="form-label">Returnable</label>
+        <input type="checkbox" class="form-check-input" id="returnable" name="returnable" value="1">
+        <label class="form-check-label" for="returnable">This product is returnable</label>
+    </div>
+
+    <div class="col">
+        <label for="cod" class="form-label">COD</label>
+        <input type="checkbox" class="form-check-input" id="cod" name="cod" value="1">
+        <label class="form-check-label" for="cod">This product is COD</label>
+    </div>
+</div>
+
+
+
+        <script>
+            // Function to calculate the special price based on price and percentage off
+            function calculateSpecialPrice() {
+                var price = parseFloat(document.getElementById('price').value);
+                var percentageOff = parseFloat(document.getElementById('percentage_off').value);
+                
+                if (!isNaN(price) && !isNaN(percentageOff)) {
+                    var discount = (percentageOff / 100) * price;
+                    var specialPrice = price - discount;
+                    document.getElementById('special_price').value = specialPrice.toFixed(2); // Set the special price
+                } else {
+                    document.getElementById('special_price').value = ''; // Clear special price if inputs are invalid
+                }
+            }
+
+            // Event listeners to trigger the calculation when price or percentage off changes
+            document.getElementById('price').addEventListener('input', calculateSpecialPrice);
+            document.getElementById('percentage_off').addEventListener('input', calculateSpecialPrice);
+        </script>
 
         <button type="submit" class="btn btn-primary w-100">Add Product</button>
     </form>
@@ -139,5 +199,36 @@
             document.getElementById('subcategory_div').style.display = 'none';
         }
     });
+    
 </script>
 @endsection
+
+<style>
+    /* Ensuring the checkbox and label align properly */
+.form-check-input {
+    margin-top: 0.3rem; /* Adjust vertical alignment of checkbox */
+}
+
+.form-check-label {
+    display: inline-block; /* Keep label in the same row as the checkbox */
+    margin-left: 0.5rem; /* Add some space between the checkbox and the label text */
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically align the checkbox and label */
+}
+
+.row .col label {
+    margin-bottom: 0.5rem; /* Add some space below the label */
+    font-weight: bold; /* Optional: Make label bold */
+}
+
+.row .col input[type="checkbox"] {
+    margin-bottom: 0.5rem; /* Add some space between the checkbox and label */
+}
+
+</style>
+
+

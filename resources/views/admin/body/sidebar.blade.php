@@ -15,7 +15,7 @@
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-bullseye text-success"></i><span class="hide-menu">Categories</span></a>
                             <ul aria-expanded="false" class="collapse  first-level">  
                                 <li class="sidebar-item"><a href="{{  route('category')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Category </span></a></li> 
-                                <li class="sidebar-item"><a href="{{  route('categories_order')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Sub Category </span></a></li> 
+                                <li class="sidebar-item"><a href="{{  route('subcategory')  }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> Sub Category </span></a></li> 
                                 
                             </ul>
                         </li> 
@@ -27,6 +27,8 @@
                         </li>
                         
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('vendor') }}" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">Vendor</span></a></li>
+<li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('color') }}" aria-expanded="false"><i class="fa-solid fa-palette menu-icon"></i><span class="hide-menu">Color</span></a></li>
+<li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('size') }}" aria-expanded="false"><i class="fa-solid fa-list-ol menu-icon"></i><span class="hide-menu">Size</span></a></li>
                         
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-cubes text-primary"></i><span class="hide-menu">Products </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">

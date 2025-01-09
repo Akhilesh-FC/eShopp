@@ -22,6 +22,11 @@
                                 <!-- Main Image -->
                                 <div class="form-group">
                                     <label for="image">Main Image <span class="text-danger">*</span></label>
+                                    <span>@error('image')
+                                    {{$message}}
+                                            @enderror
+                                            
+                                    </span>
                                     <input type="file" name="image" id="image" class="form-control-file" required>
                                     <small class="form-text text-muted">Recommended size: 131 x 131 pixels</small>
                                 </div>

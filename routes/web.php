@@ -4,7 +4,7 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\CustomerController;   
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
-use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController,DashboardController};          
+use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController,DashboardController,ColorController,SizeController};          
 
 //=============================Login/Logout Routes=================================//
 Route::get('/', [LoginsController::class, 'showLoginForm'])->name('login');
@@ -39,12 +39,43 @@ Route::controller(VendorController::class)->group(function() {
     Route::get('vendor/{id}/productdetails',  'showProductDetails')->name('vendor_productdetails');
 });
 
+Route::controller(ColorController::class)->group(function() {
+    
+    Route::get('/color', 'color')->name('color');
+    Route::post('/color_store', 'color_store')->name('color.store');
+    
+    Route::get('/color/{id}/activate', 'setActiveStatus')->name('colorstatus.activate');
+    Route::get('/color/{id}/deactivate', 'setInactiveStatus')->name('colorstatus.inactive');
+    
+    Route::post('/color/{id}/edit', 'edit')->name('color.edit');
+    Route::post('/color/{id}/update', 'update')->name('color.update');
+
+});
+
+Route::controller(SizeController::class)->group(function() {
+    Route::get('/size', 'size')->name('size');
+    Route::post('/size_store', 'store')->name('size.store');
+    
+    Route::get('/size/{id}/activate', 'setActiveStatus')->name('sizestatus.activate');
+    Route::get('/size/{id}/deactivate', 'setInactiveStatus')->name('sizestatus.inactive');
+    
+    //Route::post('size/{id}',  'update')->name('size.update');
+    Route::post('size/{id}', 'SizeController@update')->name('size.update');
+
+});
+
 
 //=============================Categories Routes=================================//
 Route::controller(CategoriesController::class)->group(function() { 
-    Route::get('/category', 'ViewCategory')->name('category'); 
-    Route::get('/category_order', function () {return view('category.categorieorder'); })->name('categories_order');
     
+    Route::get('view_subcategory', 'view_subcategory')->name('subcategory');
+    Route::get('/sub_category', 'creat_subcategory')->name('subcategory.create');
+    Route::post('/sub_category_store', 'storeSubCategory')->name('subcategory.store');
+   
+    //Route::get('/subcategories_view','ViewSubCategories')->name('subcategories');
+    
+    
+    Route::get('/category', 'ViewCategory')->name('category'); 
     Route::get('/categories.create','create' )->name('category.create'); 
     Route::post('/categories.store', 'store')->name('category.store');  
      
@@ -75,7 +106,7 @@ Route::get('/product_order', function() { return view('products.productorder');}
 
 Route::controller(ProductsController::class)->group(function() {  
     Route::get('/add_products', 'showAddProductForm')->name('add_products');   
-    Route::post('/add_products', 'showAddProductForm')->name('store_product');  
+    Route::post('/add_products_data', 'storeProduct')->name('store_product');  
     
     Route::get('/manage_products', 'manageProducts')->name('manage_products');
     Route::get('/admin/product/{id}', 'viewProduct')->name('view_product'); 
@@ -87,6 +118,9 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
     
 });
+
+//Route::get('/get-colors', [ProductsController::class, 'getColors'])->name('get_colors');
+
 
 
 //=============================Products Routes END=================================//
