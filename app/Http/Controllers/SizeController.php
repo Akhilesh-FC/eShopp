@@ -8,9 +8,16 @@ use Illuminate\Support\Facades\Validator;
 
 class SizeController extends Controller
 {
-    public function size()
+    public function size(Request $request)
     {
-        $sizes = DB::table('size')->get();
+        $search = $request->input('search');
+        
+        $sizes = DB::table('size')
+        ->when($search, function($query) use ($search) {
+                return $query->where('size.size', 'like', '%'.$search.'%');
+                            
+            })
+            ->get();
         return view('size', compact('sizes'));
     }
     

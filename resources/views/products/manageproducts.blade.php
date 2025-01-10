@@ -3,6 +3,13 @@
 @section('admin')
 <div class="container mt-4">
     <div class="text-center mb-4">
+        <div class="col-md-6">
+            <!-- Search Form -->
+            <form action="{{ route('manage_products') }}" method="GET" class="form-inline">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2" placeholder="Search products...">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
         <a href="{{ route('add_products') }}" class="btn btn-secondary">Add products</a>
     </div>
     <h3 class="mb-4">Manage Products</h3>

@@ -11,6 +11,21 @@
                             <h3 class="card-title">Customer Address</h3>
                         </div>
                         <div class="card-body">
+                            <!-- Search Form -->
+                            <form action="{{ route('address') }}" method="get" class="mb-4">
+                                <div class="row">
+                                    <div class="col-md-8 pr-1"> <!-- Reduced padding on the right -->
+                                        <input type="text" name="search" value="{{ request('search') }}" 
+                                            class="form-control shadow-sm" 
+                                            placeholder="Search by User Name, Mobile, City, etc."
+                                            style="font-size: 16px; max-width: 100%;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+
                             <div class="table-responsive"> <!-- Added responsiveness to the table -->
                                 <table class="table table-hover table-bordered">
                                     <thead class="thead-dark">
@@ -35,7 +50,7 @@
                                                 <td>{{ $address->name }}</td>
                                                 <td>{{ $address->type }}</td>
                                                 <td>{{ $address->mobile }}</td>
-                                                <td>{{ $address->alternate_mobile }}</td> <!-- Fixed typo in tag -->
+                                                <td>{{ $address->alternate_mobile }}</td>
                                                 <td>{{ $address->landmark }}</td>
                                                 <td>{{ $address->area }}</td>
                                                 <td>{{ $address->city }}</td>
@@ -74,7 +89,7 @@
 
                             <!-- Pagination links -->
                             <div class="d-flex justify-content-center">
-                                {{ $viewAddress->appends(['per_page' => request('per_page')])->links('pagination::bootstrap-4') }}
+                                {{ $viewAddress->appends(['per_page' => request('per_page'), 'search' => request('search')])->links('pagination::bootstrap-4') }}
                             </div>
 
                         </div>

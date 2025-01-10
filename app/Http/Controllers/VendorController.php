@@ -39,11 +39,21 @@ class VendorController extends Controller
 
     public function index(Request $request)
     {
-         $perPage = $request->input('per_page', 5);
-        $vendors = DB::table('vendor')->orderby('id', 'desc')->paginate($perPage);;
-
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 5);
+    
+        $vendors = DB::table('vendor')
+            ->when($search, function($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                             ->orWhere('mobile', 'like', "%{$search}%")
+                             ->orWhere('address', 'like', "%{$search}%");
+            })
+            ->orderby('id', 'desc')
+            ->paginate($perPage);
+    
         return view('vendor.vendor', compact('vendors'));
     }
+
         
     public function showDetails($id)
     {

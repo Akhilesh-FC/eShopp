@@ -189,27 +189,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Function to request the wake lock
     async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
-                console.log("Wake lock is active");
-            }
-        } catch (err) {
-            console.error(${err.name}, ${err.message});
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log("Wake lock is active");
+        } else {
+            console.error("Wake Lock API is not supported on this browser.");
         }
+    } catch (err) {
+        console.error(`${err.name}: ${err.message}`); // Correct string interpolation
     }
+}
+
 
     // Function to release the wake lock
     function releaseWakeLock() {
-        if (wakeLock !== null) {
-            wakeLock.release()
-                .then(() => {
-                    wakeLock = null;
-                    console.log("Wake lock is released");
-                })
-                .catch(err => console.error(${err.name}, ${err.message}));
-        }
+    if (wakeLock !== null) {
+        wakeLock.release()
+            .then(() => {
+                wakeLock = null;
+                console.log("Wake lock is released");
+            })
+            .catch(err => console.error(`${err.name}: ${err.message}`));  // Fixed string interpolation
     }
+}
 
     // Request the wake lock when the page is visible
     document.addEventListener('visibilitychange', () => {

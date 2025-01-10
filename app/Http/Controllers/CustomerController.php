@@ -11,8 +11,16 @@ class CustomerController extends Controller
     
     public function ViewCustomers(Request $request)
     {
+         $search = $request->input('search');
         $perPage = $request->input('per_page', 5); 
-        $viewCustomers = User::latest()->paginate($perPage);
+        $viewCustomers = User::latest()
+        ->when($search, function($query, $search) {
+            return $query->where('username', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%")
+                         ->orWhere('mobile', 'like', "%{$search}%");
+        })
+        ->orderby('id', 'desc')
+        ->paginate($perPage);
         return view('customer.viewcustomer', compact('viewCustomers', 'perPage'));
     }
  
@@ -33,11 +41,29 @@ class CustomerController extends Controller
     }
     
     public function ViewAddress(Request $request) 
-    { 
-        $perPage = $request->input('per_page', 5); // Default pagination to 10 per page
-        $viewAddress = DB::table('addresses')->latest()->paginate($perPage); // Paginate the addresses table
-        return view('customer.address', compact('viewAddress', 'perPage'));
-    }  
+{ 
+    $perPage = $request->input('per_page', 5); // Rows per page
+    $search = $request->input('search'); // Search query
+
+    // Build query
+    $query = DB::table('addresses')->latest();
+
+    // If search term is provided, apply the search filter
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', '%' . $search . '%')
+              ->orWhere('mobile', 'like', '%' . $search . '%')
+              ->orWhere('city', 'like', '%' . $search . '%')
+              ->orWhere('state', 'like', '%' . $search . '%');
+        });
+    }
+
+    // Paginate the results
+    $viewAddress = $query->paginate($perPage);
+
+    return view('customer.address', compact('viewAddress', 'perPage', 'search'));
+}
+
 
     
      

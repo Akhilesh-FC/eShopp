@@ -90,58 +90,6 @@ class CartApiController extends Controller
         ], 200);
     }
 
-    // public function viewCart(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'user_id' => 'required|string',
-    //     ]);
-    
-    //     $validator->stopOnFirstFailure();
-    
-    //     if ($validator->fails()) {
-    //         $response = [
-    //             'status' => false,
-    //             'message' => $validator->errors()->first()
-    //         ];
-    //         return response()->json($response, 200);
-    //     }
-    
-    //     $cartItems = DB::table('cart')
-    //         ->join('products', 'cart.product_id', '=', 'products.id')
-    //         ->join('product_variants', 'cart.product_id', '=', 'product_variants.product_id') 
-    //         ->select(
-    //             'cart.id as cart_item_id',
-    //             'cart.product_id',
-    //             'products.*',   
-    //             'product_variants.price as product_price', 
-    //             'product_variants.special_price as special_price', 
-    //             'product_variants.percentage_off as percentage_off',
-    //             'cart.quantity',
-    //             DB::raw('IFNULL(product_variants.special_price, product_variants.price) * cart.quantity as total_price') // Default to regular price if special price is null
-    //         )
-    //         ->where('cart.user_id', $request->user_id)
-    //         ->where('cart.status', 0)  // Ensure the cart is active (status = 0)
-    //         ->get();
-    
-    //     // Check if the cart is empty
-    //     if ($cartItems->isEmpty()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'No items in the cart',
-    //             'data' => []
-    //         ], 200);
-    //     }
-    
-    //     // Calculate the final total price of all items in the cart
-    //     $finalTotalPrice = $cartItems->sum('total_price');
-    
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Cart retrieved successfully',
-    //         'data' => $cartItems,
-    //         'final_total_price' => $finalTotalPrice // Return the final total price
-    //     ], 200);
-    // }
     public function viewCart(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -476,12 +424,12 @@ class CartApiController extends Controller
         return $item;
     });
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Favorites retrieved successfully',
-        'data' => $favoriteItems,
-    ], 200);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Favorites retrieved successfully',
+            'data' => $favoriteItems,
+        ], 200);
+    }
 
     public function removeFromFavorite(Request $request)
     {
@@ -837,7 +785,7 @@ class CartApiController extends Controller
     
         // Start building the query to get order details with product details
         $query = DB::table('orders')
-            ->select(
+            ->select( DB::raw('DISTINCT orders.order_id as order_id'),
                 'orders.order_id as order_id',
                 'orders.final_total as total_price',
                 'orders.status as order_status', 

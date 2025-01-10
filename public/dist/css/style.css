@@ -9179,7 +9179,7 @@ Table-Jsgrid table
 Main sidebar
 ******************/
 .left-sidebar {
-  position: absolute;
+   position: relative;
   width: 250px;
   height: 100%;
   top: 0px;
@@ -9192,9 +9192,14 @@ Main sidebar
 /*******************
 sidebar navigation
 ******************/
+/*.scroll-sidebar {*/
+/*  height: calc(100% - 20px);*/
+/*  position: relative; }*/
 .scroll-sidebar {
-  height: calc(100% - 20px);
-  position: relative; }
+    max-height: calc(100vh - 100px); /* Sidebar ke height ko set karo jisme scroll hoga (100px ka space upar or neeche) */
+    overflow-y: auto; /* Vertical scrolling enable karein */
+    padding-right: 15px; /* Sidebar ka scroll bar overlap na kare content ke saath */
+}
 
 .sidebar-nav ul {
   /*******************

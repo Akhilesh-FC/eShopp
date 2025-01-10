@@ -3,21 +3,23 @@
 @section('admin')
 
 <div class="container-fluid">
-    <form action="{{ route('orders') }}" method="get"></form>
-    
+    <form action="{{ route('orders') }}" method="get">
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center">
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                        class="form-control mr-2" 
+                        placeholder="Search by Order ID, Transaction ID, or Payment Method"
+                        style="font-size: 18px; width: 400px;">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+        </div>
+    </div>
+</form>
+
 
     <div class="row mt-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>Manage Orders</h4>
-                <div class="d-flex align-items-center">
-                    <input type="text" class="form-control mr-2" placeholder="Search" />
-                    <button class="btn btn-outline-secondary ml-2"><i class="fa fa-refresh"></i></button>
-                    <button class="btn btn-outline-secondary ml-2"><i class="fa fa-download"></i></button>
-                    <button class="btn btn-outline-secondary ml-2"><i class="fa fa-bars"></i></button>
-                </div>
-            </div>
-
             <div class="card p-4">
                 <div class="tab-content">
                     <div id="orders_table" class="tab-pane active">
@@ -46,8 +48,8 @@
                                             <td>{{ $order->payment_method }}</td>
                                             <td>{{ $order->created_at }}</td>
                                             <td>
-                                              <a href="{{ route('view_orderdetails', ['orderId' => $order->id]) }}" class="btn btn-warning btn-sm">View</a>
-                                              </td>
+                                                <a href="{{ route('view_orderdetails', ['orderId' => $order->id]) }}" class="btn btn-warning btn-sm">View</a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -77,28 +79,28 @@
 
                 <!-- Pagination Links -->
                 <div class="d-flex justify-content-center">
-                    {{ $orders->appends(['per_page' => request('per_page')])->links('pagination::bootstrap-4') }}
+                    {{ $orders->appends(['per_page' => request('per_page'), 'search' => request('search')])->links('pagination::bootstrap-4') }}
                 </div>
 
             </div>
         </div>
     </div>
 </div>
+
 <style>
     .table th, .table td {
-    text-align: center;
-    vertical-align: middle;
-}
+        text-align: center;
+        vertical-align: middle;
+    }
 
-.table img {
-    max-width: 100%;
-    height: auto;
-}
+    .table img {
+        max-width: 100%;
+        height: auto;
+    }
 
-.btn {
-    margin: 0 5px;
-}
-
+    .btn {
+        margin: 0 5px;
+    }
 </style>
 
 @endsection

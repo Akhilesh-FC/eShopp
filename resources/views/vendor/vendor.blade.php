@@ -4,6 +4,15 @@
 <div class="container">
     <h2 class="my-4 text-center">Vendors List</h2>
     
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form action="{{ route('vendor') }}" method="GET" class="form-inline">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2" placeholder="Search by Vendor Name or Mobile">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+    
     <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered">
             <thead class="thead-dark">

@@ -48,7 +48,9 @@ Route::controller(ColorController::class)->group(function() {
     Route::get('/color/{id}/deactivate', 'setInactiveStatus')->name('colorstatus.inactive');
     
     Route::post('/color/{id}/edit', 'edit')->name('color.edit');
-    Route::post('/color/{id}/update', 'update')->name('color.update');
+   //Route::post('/color/{id}/update',  'update')->name('color.update');
+Route::post('/color/update', 'update')->name('color.update');
+
 
 });
 
@@ -60,7 +62,7 @@ Route::controller(SizeController::class)->group(function() {
     Route::get('/size/{id}/deactivate', 'setInactiveStatus')->name('sizestatus.inactive');
     
     //Route::post('size/{id}',  'update')->name('size.update');
-    Route::post('size/{id}', 'SizeController@update')->name('size.update');
+    Route::post('size/{id}', 'update')->name('size.update');
 
 });
 
@@ -116,6 +118,7 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/get-subcategories/{categoryId}',  'getSubcategories');
     // Fix for the toggle_active_inactive route:
     Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
+    //Route::get('/manageProducts', 'manageProducts')->name('manage_products');
     
 });
 

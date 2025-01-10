@@ -110,16 +110,25 @@ class ProductsController extends Controller
     
     public function manageProducts(Request $request)
     {
+        $search = $request->input('search');
+        
         $perPage = $request->input('per_page', 5);
-    
+        
         $products = DB::table('products')
             ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->select('products.id', 'products.name', 'products.image', 'products.brand', 'products.rating','products.no_of_ratings', 'products.status','categories.name as category_name')
-            // ->leftJoin('product_rating', 'products.id', '=', 'product_rating.product_id')
-            ->paginate($perPage);  
-    
+            ->select('products.id', 'products.name', 'products.image', 'products.brand', 'products.rating', 'products.no_of_ratings', 'products.status', 'categories.name as category_name')
+            // Apply search filter if a search term is provided
+            ->when($search, function($query) use ($search) {
+                return $query->where('products.name', 'like', '%'.$search.'%')
+                             ->orWhere('categories.name', 'like', '%'.$search.'%');
+            })
+            // Paginate the results
+            ->paginate($perPage);
+        
+        // Return the view with the products
         return view('products.manageproducts', compact('products'));
     }
+
 
     public function updateRating(Request $request, $id)
     {

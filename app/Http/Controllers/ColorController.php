@@ -9,11 +9,19 @@ use Illuminate\Support\Facades\Validator;
 
 class ColorController extends Controller
 {
-    public function color()
+    public function color(Request $request)
     {
-        $colors = DB::table('color')->get();
+        $search = $request->input('search');
+    
+        $colors = DB::table('color')
+            ->when($search, function($query) use ($search) {
+                return $query->where('color.color', 'like', '%'.$search.'%')
+                             ->orWhere('color.name', 'like', '%'.$search.'%');
+            })
+            ->get();
         return view('color', compact('colors'));
     }
+
     
     public function color_store(Request $request)
     {
@@ -57,33 +65,36 @@ class ColorController extends Controller
     public function edit($id)
     {
         $color = DB::table('color')->where('id', $id)->first();
-        return response()->json($color);
+        return response()->json($color);  // Return the color data as JSON for AJAX
     }
-    
-    public function update(Request $request, $id)
-{
-    // Validate the incoming request
-    $request->validate([
-        'name' => 'required',
-        'color' => 'required',
-    ]);
-
-    // Find the color by ID and update the values
-    $color = DB::table('color')->where('id', $id)->first();
-
-    if ($color) {
-        DB::table('color')
-            ->where('id', $id)
-            ->update([
-                'name' => $request->name,
-                'color' => $request->color,
-            ]);
         
-        return redirect()->route('color')->with('success', 'Color updated successfully');
-    } else {
-        return redirect()->route('color')->with('error', 'Color not found');
+    public function update(Request $request, $id)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'name' => 'required',
+            'color' => 'required',
+        ]);
+    
+        // Retrieve the color by its ID
+        $color = DB::table('color')->where('id', $id)->first();
+    
+        if ($color) {
+            // Update the color record in the database
+            DB::table('color')
+                ->where('id', $id)
+                ->update([
+                    'name' => $request->name,
+                    'color' => $request->color,
+                ]);
+    
+            // Redirect with a success message
+            return redirect()->route('color')->with('success', 'Color updated successfully');
+        } else {
+            // If the color is not found, redirect with an error message
+            return redirect()->route('color')->with('error', 'Color not found');
+        }
     }
-}
 
 
 

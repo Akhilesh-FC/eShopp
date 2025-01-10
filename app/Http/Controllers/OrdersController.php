@@ -10,8 +10,13 @@ class OrdersController extends Controller
 
     public function manageOrders(Request $request)
     {
+         $search = $request->input('search'); 
         $perPage = $request->input('per_page', 5); 
-        $orders = DB::table('orders', 'desc')->paginate($perPage);
+        $orders = DB::table('orders', 'desc')->when($search, function ($query, $search) {
+                    return $query->where('order_id', 'LIKE', "%{$search}%")
+                                 ->orWhere('transaction_id', 'LIKE', "%{$search}%")
+                                 ->orWhere('payment_method', 'LIKE', "%{$search}%");
+                })->paginate($perPage);
     
         return view('orders.orders', compact('orders'));
     }

@@ -2,7 +2,7 @@
 
 }else{
 	
-	header("Location: https://free2kart.tirangawin.club/");
+	header("Location: https://free2kart.mobileappdemo.net/");
             die; 
 
 } 
@@ -194,14 +194,14 @@
                                 <div class="dropdown-divider"></div>
                                 <!--<a class="dropdown-item" href="{{route('logout')}}"><i class="fa fa-power-off m-r-5 m-l-5"></i> Logout</a>-->
                                 <a class="dropdown-item" href="javascript:void(0);" onclick="document.getElementById('logout-form').submit();">
-    <i class="fa fa-power-off m-r-5 m-l-5"></i> Logout
-</a>
-
-<!-- Hidden logout form -->
-<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-    @csrf
-    @method('POST')
-</form>
+                                    <i class="fa fa-power-off m-r-5 m-l-5"></i> Logout
+                                </a>
+                                
+                                <!-- Hidden logout form -->
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                    @csrf
+                                    @method('POST')
+                                </form>
 
                                 <div class="dropdown-divider"></div>
                                 <div class="p-l-30 p-10"><a href="javascript:void(0)" class="btn btn-sm btn-success btn-rounded">View Profile</a></div>

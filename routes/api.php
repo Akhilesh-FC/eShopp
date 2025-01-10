@@ -36,7 +36,7 @@ Route::controller(VarientsApiController::class)->group(function (){
     Route::get('/get_color', 'get_color');
     Route::get('/get_size', 'get_size');
     Route::get('/notification_type','notification_type'); 
-    Route::post('/notifications','notifications'); 
+    Route::post('/send_notifications','send_notifications'); 
 });
 
 Route::controller(ProductApiController::class)->group(function () {

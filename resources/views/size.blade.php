@@ -3,57 +3,67 @@
 @section('admin')
 
 @if(session('success'))
-    <div class="alert alert-success">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 @endif
 
 <div class="container">
-    <!-- Button to Open Add Size Modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSizeModal">Add Size</button>
-    
-    <form action="{{ route('size.store') }}" method="post">
-        @csrf
-        <!-- Table to display data -->
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Size</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($sizes as $size)
-                <tr>
-                    <td>{{ $size->id }}</td>
-                    <td>{{ $size->size }}</td>
-                    <td class="text-center">
-                        @if($size->status == 0)
-                            <a href="{{ route('sizestatus.activate', $size->id) }}">
-                                <i class="fa-solid fa-toggle-on fa-2xl" style="color: green;"></i>
-                            </a>
-                        @elseif($size->status == 1)
-                            <a href="{{ route('sizestatus.inactive', $size->id) }}">
-                                <i class="fa-solid fa-toggle-on fa-2xl" style="color: red;"></i>
-                            </a>
-                        @else
-                            <span>N/A</span>
-                        @endif
-                    </td>
+    <div class="row mb-4">
+        <!-- Search Form -->
+        <div class="col-md-6">
+            <form action="{{ route('size') }}" method="GET" class="form-inline">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2" placeholder="Search size...">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <!-- Add Size Button -->
+        <div class="col-md-6 text-right">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addSizeModal">Add Size</button>
+        </div>
+    </div>
 
-                    <td>
-                        <!-- Edit Button: Modal Trigger -->
-                        <button class="btn btn-warning btn-sm text-white" data-toggle="modal" data-target="#editSizeModal{{$size->id}}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </form>
+    <!-- Table to display data -->
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Size</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($sizes as $size)
+            <tr>
+                <td>{{ $size->id }}</td>
+                <td>{{ $size->size }}</td>
+                <td class="text-center">
+                    @if($size->status == 0)
+                        <a href="{{ route('sizestatus.activate', $size->id) }}" class="text-success" data-toggle="tooltip" data-placement="top" title="Activate">
+                            <i class="fa-solid fa-toggle-off fa-2xl"></i>
+                        </a>
+                    @elseif($size->status == 1)
+                        <a href="{{ route('sizestatus.inactive', $size->id) }}" class="text-danger" data-toggle="tooltip" data-placement="top" title="Deactivate">
+                            <i class="fa-solid fa-toggle-on fa-2xl"></i>
+                        </a>
+                    @else
+                        <span class="text-muted">N/A</span>
+                    @endif
+                </td>
+                <td>
+                    <!-- Edit Button: Modal Trigger -->
+                    <button class="btn btn-warning btn-sm text-white" data-toggle="modal" data-target="#editSizeModal{{$size->id}}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 
     <!-- Add New Size Modal -->
     <div class="modal fade" id="addSizeModal" tabindex="-1" role="dialog" aria-labelledby="addSizeModalLabel" aria-hidden="true">
@@ -76,8 +86,7 @@
                                 <span class="text-danger">{{ $errors->first('size') }}</span>
                             @endif
                         </div>
-
-                        <button type="submit" class="btn btn-primary">Save Size</button>
+                        <button type="submit" class="btn btn-primary btn-block">Save Size</button>
                     </form>
                 </div>
             </div>
@@ -108,7 +117,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="submit" class="btn btn-warning">Update</button>
                     </div>
                 </form>
             </div>
@@ -117,4 +126,13 @@
     @endforeach
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+    $(function () {
+        // Enable tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
 @endsection
