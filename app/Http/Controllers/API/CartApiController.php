@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 
 class CartApiController extends Controller
@@ -16,6 +17,9 @@ class CartApiController extends Controller
     
     public function addToCart(Request $request)
     {
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = now();
+        
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id',
@@ -56,7 +60,7 @@ class CartApiController extends Controller
                 ->update([
                     'quantity' => $existingCartItem->quantity + $request->quantity,
                     'is_added' => true,  // Mark the product as added
-                    'updated_at' => now(),  // Update the timestamp
+                    'updated_at' => $datetime,  // Update the timestamp
                     ///////new add////
                      'price' => $productVariant->price,
                      'special_price' => $productVariant->special_price,
@@ -72,8 +76,8 @@ class CartApiController extends Controller
                 'quantity' => $request->quantity,
                 
                 'is_added' => true,  // Mark the product as added
-                'created_at' => now(),  // Set the created_at timestamp
-                'updated_at' => now(),  // Set the updated_at timestamp
+                'created_at' => $datetime,  // Set the created_at timestamp
+                'updated_at' => $datetime,  // Set the updated_at timestamp
                 ///new add//
                  'price' => $productVariant->price,
                 'special_price' => $productVariant->special_price,
@@ -149,6 +153,9 @@ class CartApiController extends Controller
     
     public function updateFromCart(Request $request)
     {
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = now();
+        
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id', 
@@ -179,7 +186,7 @@ class CartApiController extends Controller
                 ->where('product_id', $request->product_id)
                 ->update([
                     'quantity' => $newQuantity, 
-                    'updated_at' => now(),
+                    'updated_at' => $datetime(),
                 ]);
     
             return response()->json([
@@ -196,6 +203,10 @@ class CartApiController extends Controller
 
     public function removeFromCart(Request $request) 
     {
+        
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = now();
+        
         $validator = Validator::make($request->all(), [ 
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id', 
@@ -226,7 +237,7 @@ class CartApiController extends Controller
                     ->where('product_id', $request->product_id)
                     ->update([
                         'quantity' => $newQuantity,
-                        'updated_at' => now(),
+                        'updated_at' => $datetime,
                     ]);
     
                 return response()->json([
@@ -294,6 +305,9 @@ class CartApiController extends Controller
 
     public function addToFavorite(Request $request)
     {
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = now();
+        
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id',
@@ -323,8 +337,8 @@ class CartApiController extends Controller
                 'user_id' => $request->user_id,
                 'product_id' => $request->product_id, 
                 'status' => 1, // Mark it as favorite
-                'created_at' => now(),
-                'updated_at' => now(), 
+                'created_at' => $datetime,
+                'updated_at' => $datetime, 
             ]);
     
             return response()->json([
@@ -632,133 +646,302 @@ class CartApiController extends Controller
         }
     }
     
-    public function checkout(Request $request) 
-    {  
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer|exists:users,id',
-            'total_price' => 'required|numeric|min:1', 
-            'address_id' => 'required|integer|exists:addresses,id', 
-            'coupon_applied' => 'nullable|string', 
-            'paymode' => 'required|in:0,1'
-        ]);
+    // public function checkout(Request $request) 
+    // {  
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|integer|exists:users,id',
+    //         'total_price' => 'required|numeric|min:1', 
+    //         'address_id' => 'required|integer|exists:addresses,id', 
+    //         'coupon_applied' => 'nullable|string', 
+    //         'paymode' => 'required|in:0,1'
+    //     ]);
     
-        $validator->stopOnFirstFailure();
+    //     $validator->stopOnFirstFailure();
     
-        if ($validator->fails()) {
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+    
+    //     $userId = $request->input('user_id');
+    //     $totalPrice = $request->input('total_price');
+    //     $addressId = $request->input('address_id');
+    //     $paymode = $request->input('paymode');
+    //     $couponApplied = $request->input('coupon_applied', null);
+    
+    //     $addressExists = DB::table('addresses')
+    //         ->where('id', $addressId)
+    //         ->where('user_id', $userId)
+    //         ->exists();
+    
+    //     if (!$addressExists) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'The provided address does not belong to the specified user.',
+    //         ], 200);
+    //     }
+    
+    //     if (!empty($couponApplied)) {
+    //         $isCouponValid = $this->validateCoupon($couponApplied);
+    //         if (!$isCouponValid) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid coupon code.',
+    //             ], 200);
+    //         }
+    
+    //         $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+    //     }
+        
+    //     $orderId = rand(100000, 999999999);
+    
+    //     $orderData = [
+    //         'user_id' => $userId,
+    //         'address_id' => $addressId,
+    //         'final_total' => $totalPrice,
+    //         'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+    //         'order_id' => $orderId, 
+    //         'status' => 0, // Order placed but not confirmed yet (initial status)
+    //     ];
+        
+    //     date_default_timezone_set('Asia/Kolkata');
+    //     $datetime = now();
+        
+    //      DB::table('orders')->insert($orderData);
+    //      DB::table('cart')
+    //     ->where('user_id', $userId)
+    //     ->update(['order_id' => $orderId]);
+        
+        
+        
+    //     if ($paymode == 0) { // COD
+    //     DB::table('orders')
+    //         ->where('order_id', $orderId)
+    //         ->update(['status' => 0]); // 1 indicates order placed and confirmed
+            
+    //         // echo($paymode.$userId);
+    //         // dd($paymode);
+
+    //     DB::table('cart')
+    //         ->where('user_id', $userId)
+    //         ->update(['status' => 1]); // 1 indicates the cart is checked out and confirmed
+    // }
+    //     if ($paymode == 1) {
+    //         $paymentLink = $this->payin($paymode, $userId, $totalPrice,$orderId);  
+      
+    //         if ($paymentLink) {
+    //             return response()->json([
+    //                 'success' => true, 
+    //                 'message' => 'Make Payment to confirm order.',   
+    //                 'data' => [
+    //                     'payment_url' => $paymentLink, 
+    //                     'paymode' => 'Online', 
+    //                     'final_total' => $totalPrice, 
+    //                     'coupon_applied' => $couponApplied,  
+    //                     'order_id' => $orderId,
+    //                 ],
+    //             ], 200); 
+    //         }
+    //     }
+    
+    //     if ($paymode == 1) {
+    //         $paymentStatus = DB::table('payins')
+    //             ->where('user_id', $userId)
+    //             ->where('order_id', $orderId)
+    //             ->value('status');
+    
+    //         if ($paymentStatus == 1) { 
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Payment is not completed yet.',
+    //             ], 200);
+    //         } elseif ($paymentStatus == 2) 
+    //         { 
+    //             return response()->json([
+    //                 'success'=>true,
+    //                 'message'=> 'Payment successful.',
+    //                 ], 200); 
+    //         } 
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Order Placed successfully.',
+    //         'data' => [
+    //             'paymode' => $paymode == 1 ? 'Online' : 'COD',
+    //             'final_total' => $totalPrice,
+    //             'coupon_applied' => $couponApplied,
+    //             'order_id' => $orderId,
+    //         ],
+    //     ], 200);
+    // }
+   public function checkout(Request $request) 
+{  
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer|exists:users,id',
+        'total_price' => 'required|numeric|min:1', 
+        'address_id' => 'required|integer|exists:addresses,id', 
+        'coupon_applied' => 'nullable|string', 
+        'paymode' => 'required|in:0,1'
+    ]);
+
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first(),
+        ], 200);
+    }
+
+    $userId = $request->input('user_id');
+    $totalPrice = $request->input('total_price');
+    $addressId = $request->input('address_id');
+    $paymode = $request->input('paymode');
+    $couponApplied = $request->input('coupon_applied', null);
+
+    $addressExists = DB::table('addresses')
+        ->where('id', $addressId)
+        ->where('user_id', $userId)
+        ->exists();
+
+    if (!$addressExists) {
+        return response()->json([
+            'success' => false,
+            'message' => 'The provided address does not belong to the specified user.',
+        ], 200);
+    }
+
+    if (!empty($couponApplied)) {
+        $isCouponValid = $this->validateCoupon($couponApplied);
+        if (!$isCouponValid) {
             return response()->json([
                 'success' => false,
-                'message' => $validator->errors()->first(),
+                'message' => 'Invalid coupon code.',
             ], 200);
         }
+
+        $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+    }
+
+    $orderId = rand(100000, 999999999);
+
+    $orderData = [
+        'user_id' => $userId,
+        'address_id' => $addressId,
+        'final_total' => $totalPrice,
+        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+        'order_id' => $orderId, 
+        'status' => 0, // Order placed but not confirmed yet (initial status)
+    ];
+
+    date_default_timezone_set('Asia/Kolkata');
+    $datetime = Carbon::now()->format('Y-m-d H:i:s'); // Format the datetime properly
+
+    DB::table('orders')->insert($orderData);
+
+    // Prepare status array based on order status
+    $statusUpdates = [];
+
+    // Fetch the order status from the orders table
+    $orderStatus = DB::table('orders')->where('order_id', $orderId)->value('status');
     
-        $userId = $request->input('user_id');
-        $totalPrice = $request->input('total_price');
-        $addressId = $request->input('address_id');
-        $paymode = $request->input('paymode');
-        $couponApplied = $request->input('coupon_applied', null);
+    // Dynamically add status messages to the array based on order status
+    if ($orderStatus == 0) {  // Order placed (status = 0)
+        $statusUpdates[] = ['status' => 'orderPlaced', 'datetime' => $datetime];
+    }
     
-        $addressExists = DB::table('addresses')
-            ->where('id', $addressId)
-            ->where('user_id', $userId)
-            ->exists();
+    if ($orderStatus == 1) {  // Order shipped (status = 1)
+        $statusUpdates[] = ['status' => 'orderShipped', 'datetime' => $datetime];
+    }
+
+    if ($orderStatus == 2) {  // Order out for delivery (status =2)
+        $statusUpdates[] = ['status' => 'orderOutForDelivery', 'datetime' => $datetime];
+    }
     
-        if (!$addressExists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'The provided address does not belong to the specified user.',
-            ], 200);
-        }
-    
-        if (!empty($couponApplied)) {
-            $isCouponValid = $this->validateCoupon($couponApplied);
-            if (!$isCouponValid) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid coupon code.',
-                ], 200);
-            }
-    
-            $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
-        }
-        
-        $orderId = rand(100000, 999999999);
-    
-        $orderData = [
-            'user_id' => $userId,
-            'address_id' => $addressId,
-            'final_total' => $totalPrice,
-            'payment_method' => $paymode == 1 ? 'Online' : 'COD',
-            'order_id' => $orderId, 
-             'status' => 0, // Order placed but not confirmed yet (initial status)
-        ];
-        
-         DB::table('orders')->insert($orderData);
-         DB::table('cart')
+    if ($orderStatus == 3) {  // Order delivered (status = 3)
+        $statusUpdates[] = ['status' => 'orderDelivered', 'datetime' => $datetime];
+    }
+
+    // Encode the status array to JSON
+    $orderItemStatus = json_encode($statusUpdates);
+
+    // Insert into order_items with the dynamic status in JSON format
+    DB::table('order_items')->insert([
+        'order_id' => $orderId,
+        'user_id' => $userId,
+         'address_id' => $addressId,
+        'final_total' => $totalPrice,
+        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+       'status' => $orderItemStatus, // Store the dynamic status as JSON
+        // Other necessary columns in order_items (like item_id, quantity, etc.)
+    ]);
+
+    DB::table('cart')
         ->where('user_id', $userId)
         ->update(['order_id' => $orderId]);
-        
-        if ($paymode == 0) { // COD
+
+    if ($paymode == 0) { // COD
         DB::table('orders')
             ->where('order_id', $orderId)
-            ->update(['status' => 0]); // 1 indicates order placed and confirmed
-            
-            // echo($paymode.$userId);
-            // dd($paymode);
+            ->update(['status' => 0]); // 0 indicates order placed and confirmed
 
         DB::table('cart')
             ->where('user_id', $userId)
             ->update(['status' => 1]); // 1 indicates the cart is checked out and confirmed
     }
-        if ($paymode == 1) {
-            $paymentLink = $this->payin($paymode, $userId, $totalPrice,$orderId);  
-      
-            if ($paymentLink) {
-                return response()->json([
-                    'success' => true, 
-                    'message' => 'Make Payment to confirm order.',   
-                    'data' => [
-                        'payment_url' => $paymentLink, 
-                        'paymode' => 'Online', 
-                        'final_total' => $totalPrice, 
-                        'coupon_applied' => $couponApplied,  
-                        'order_id' => $orderId,
-                    ],
-                ], 200); 
-            }
+
+    if ($paymode == 1) {
+        $paymentLink = $this->payin($paymode, $userId, $totalPrice, $orderId);  
+
+        if ($paymentLink) {
+            return response()->json([
+                'success' => true, 
+                'message' => 'Make Payment to confirm order.',   
+                'data' => [
+                    'payment_url' => $paymentLink, 
+                    'paymode' => 'Online', 
+                    'final_total' => $totalPrice, 
+                    'coupon_applied' => $couponApplied,  
+                    'order_id' => $orderId,
+                ],
+            ], 200); 
         }
-    
-        if ($paymode == 1) {
-            $paymentStatus = DB::table('payins')
-                ->where('user_id', $userId)
-                ->where('order_id', $orderId)
-                ->value('status');
-    
-            if ($paymentStatus == 1) { 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment is not completed yet.',
-                ], 200);
-            } elseif ($paymentStatus == 2) 
-            { 
-                return response()->json([
-                    'success'=>true,
-                    'message'=> 'Payment successful.',
-                    ], 200); 
-            } 
-        }
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Order Placed successfully.',
-            'data' => [
-                'paymode' => $paymode == 1 ? 'Online' : 'COD',
-                'final_total' => $totalPrice,
-                'coupon_applied' => $couponApplied,
-                'order_id' => $orderId,
-            ],
-        ], 200);
     }
-    
+
+    if ($paymode == 1) {
+        $paymentStatus = DB::table('payins')
+            ->where('user_id', $userId)
+            ->where('order_id', $orderId)
+            ->value('status');
+
+        if ($paymentStatus == 1) { 
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment is not completed yet.',
+            ], 200);
+        } elseif ($paymentStatus == 2) { 
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment successful.',
+            ], 200); 
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Order Placed successfully.',
+        'data' => [
+            'paymode' => $paymode == 1 ? 'Online' : 'COD',
+            'final_total' => $totalPrice,
+            'coupon_applied' => $couponApplied,
+            'order_id' => $orderId,
+        ],
+    ], 200);
+}
+
     public function viewcheckout(Request $request)  
     {
         // Validate the request
@@ -776,6 +959,9 @@ class CartApiController extends Controller
     
         $user_id = $request->user_id;
         $product_name = $request->product_name; // Get the product name if passed
+        
+        // date_default_timezone_set('Asia/Kolkata');
+        // $datetime = now();
     
         // Get product IDs from the cart for the given user
         $product_ids = DB::table('cart')
@@ -836,40 +1022,309 @@ class CartApiController extends Controller
         }
     }
     
-    public function viewcheckout_history(Request $request)  
-    {
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|integer|exists:orders,order_id'
-        ]);
+   
     
-        if ($validator->fails()) { 
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 200); 
-        }
-    
-        $order_id = $request->order_id;
-    
-    
-    
-    
-    
-    
-         if ($history->isNotEmpty()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Order history retrieved successfully.',
-                'data' => $history,
-            ], 200);
+//     public function viewcheckout_history(Request $request)
+// {
+//     $validator = Validator::make($request->all(), [
+//         'user_id' => 'required|integer|exists:users,id',
+//         'order_id' => 'required|integer|exists:orders,order_id'
+//     ]);
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => $validator->errors()->first(),
+//         ], 200);
+//     }
+
+//     $order_id = $request->order_id;
+
+//     $order = DB::table('orders')
+//         ->where('order_id', $order_id)
+//         ->first();
+
+//     if (!$order) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Order not found.',
+//         ], 200);
+//     }
+
+//     $statusMessage = '';
+//     switch ($order->status) {
+//         case 0:
+//             $statusMessage = 'Order placed.';
+//             break;
+//         case 1:
+//             $statusMessage = 'Order shipped.';
+//             break;
+//         case 2:
+//             $statusMessage = 'Order Out For delivery';
+//             break;
+//         case 3:
+//             $statusMessage = 'Order delivered.';
+//             break;
+//         default:
+//             $statusMessage = 'Unknown status.';
+//     }
+
+//     // Update the query to include vendor_id
+//     $cartItems = DB::table('cart')
+//         ->join('products', 'cart.product_id', '=', 'products.id')
+//         ->join('orders', 'orders.order_id', '=', 'cart.order_id')
+//         ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+//         ->join('users', 'users.id', '=', 'cart.user_id')
+//         ->where('cart.order_id', $order_id)
+//         ->select('cart.product_id', 'products.name', 'products.image', 'cart.quantity', 
+//                  'users.id as user_id', 'users.email', 'orders.status as order_status', 
+//                  'order_items.status as item_status', 'products.vendor_id', 
+//                  'orders.created_at', 'orders.updated_at')
+//         ->get();
+
+//     if ($cartItems->isEmpty()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'No products found for this order.',
+//         ], 200);
+//     }
+
+//     $orderDetails = [];
+//     $totalPrice = 0;
+//     $shippingAddress = '';
+
+//     foreach ($cartItems as $item) {
+//         // Fetching product variant details using the product_id from cart
+//         $variant = DB::table('product_variants')
+//             ->where('product_id', $item->product_id)
+//             ->first();
+
+//         if ($variant) {
+//             $price = $variant->price;
+//             $percentageOff = $variant->percentage_off;
+//             $specialPrice = $variant->special_price;
+
+//             // Calculate total price for this item based on quantity
+//             $itemTotalPrice = $specialPrice > 0 ? $specialPrice : $price;
+//             $itemTotalPrice *= $item->quantity;
+
+//             // Check for vendor_id and get the shipping address accordingly
+//             if (is_null($item->vendor_id)) {
+//                 // If vendor_id is NULL, fetch address from users table
+//                 $userAddress = DB::table('users')
+//                     ->where('id', 1) // Assuming id = 1 is the desired user
+//                     ->value('address'); // Replace with the correct column name for address
+//                 $shippingAddress = $userAddress;
+//             } else {
+//                 // If vendor_id exists, fetch address from vendors table
+//                 $vendorAddress = DB::table('vendors')
+//                     ->where('id', $item->vendor_id)
+//                     ->value('shoap_address'); // Assuming 'shop_address' is the column in vendors table
+//                 $shippingAddress = $vendorAddress;
+//             }
+
+//             // Add item details to the orderDetails array
+//             $orderDetails= [
+//                 'product_id' => $item->product_id,
+//                 'name' => $item->name,
+//                 'user_email' => $cartItems->first()->email,
+//                 'image' => $item->image,
+//                 'quantity' => $item->quantity,
+//                 'price' => $price,
+//                 'percentage_off' => $percentageOff,
+//                 'special_price' => $specialPrice,
+//                 'total_price' => $itemTotalPrice,
+//                 'status' => $item->item_status,
+//                 'shipping_address' => $shippingAddress,
+//                 'created_at' => $item->created_at,
+//             ];
+
+//             // Accumulate the total price of the order
+//             //$totalPrice += $itemTotalPrice;
+//         } else {
+//             // If variant doesn't exist, return an error or handle it as needed
+//             $orderDetails = [
+//                 'product_id' => $item->product_id,
+//                 'name' => $item->name,
+//                 'image' => $item->image,
+//                 'quantity' => $item->quantity,
+//                 'message' => 'No variant found for this product.',
+//             ];
+//         }
+//     }
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Order history retrieved successfully.',
+//         'order_id' => $order_id,
+//         'order_status' => $statusMessage,
+//         'order_details' => $orderDetails,
+//       // 'total_price' => $totalPrice,
+//         // Adding the shipping address to the response
+//     ], 200);
+// }
+
+public function viewcheckout_history(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|integer|exists:users,id',
+        'order_id' => 'required|integer|exists:orders,order_id'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first(),
+        ], 200);
+    }
+
+    $order_id = $request->order_id;
+
+    $order = DB::table('orders')
+        ->where('order_id', $order_id)
+        ->first();
+
+    if (!$order) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found.',
+        ], 200);
+    }
+
+    $statusMessage = '';
+    switch ($order->status) {
+        case 0:
+            $statusMessage = 'Order placed.';
+            break;
+        case 1:
+            $statusMessage = 'Order shipped.';
+            break;
+        case 2:
+            $statusMessage = 'Order Out For delivery';
+            
+            // Generate 4-digit OTP when order status is "Out For delivery"
+            $otp = rand(1000, 9999);
+            
+            // Update the OTP in the orders table
+            DB::table('orders')
+                ->where('order_id', $order_id)
+                ->update(['otp' => $otp]);
+            
+            break;
+        case 3:
+            $statusMessage = 'Order delivered.';
+            break;
+        default:
+            $statusMessage = 'Unknown status.';
+    }
+
+    // Update the query to include vendor_id
+    $cartItems = DB::table('cart')
+        ->join('products', 'cart.product_id', '=', 'products.id')
+        ->join('orders', 'orders.order_id', '=', 'cart.order_id')
+        ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+        ->join('users', 'users.id', '=', 'cart.user_id')
+        ->where('cart.order_id', $order_id)
+        ->select('cart.product_id', 'products.name', 'products.image', 'cart.quantity', 
+                 'users.id as user_id', 'users.email', 'orders.status as order_status', 
+                 'order_items.status as item_status', 'products.vendor_id', 
+                 'orders.created_at', 'orders.updated_at')
+        ->get();
+
+    if ($cartItems->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No products found for this order.',
+        ], 200);
+    }
+
+    $orderDetails = [];
+    $totalPrice = 0;
+    $shippingAddress = '';
+
+    foreach ($cartItems as $item) {
+        // Fetching product variant details using the product_id from cart
+        $variant = DB::table('product_variants')
+            ->where('product_id', $item->product_id)
+            ->first();
+
+        if ($variant) {
+            $price = $variant->price;
+            $percentageOff = $variant->percentage_off;
+            $specialPrice = $variant->special_price;
+
+            // Calculate total price for this item based on quantity
+            $itemTotalPrice = $specialPrice > 0 ? $specialPrice : $price;
+            $itemTotalPrice *= $item->quantity;
+
+            // Check for vendor_id and get the shipping address accordingly
+            if (is_null($item->vendor_id)) {
+                // If vendor_id is NULL, fetch address from users table
+                $userAddress = DB::table('users')
+                    ->where('id', 1) // Assuming id = 1 is the desired user
+                    ->value('address'); // Replace with the correct column name for address
+                $shippingAddress = $userAddress;
+            } else {
+                // If vendor_id exists, fetch address from vendors table
+                $vendorAddress = DB::table('vendors')
+                    ->where('id', $item->vendor_id)
+                    ->value('shoap_address'); // Assuming 'shop_address' is the column in vendors table
+                $shippingAddress = $vendorAddress;
+            }
+
+            // Add item details to the orderDetails array
+            $orderDetails = [
+                 'order_id' => $order_id,
+        'order_status' => $statusMessage,
+                'product_id' => $item->product_id,
+                'name' => $item->name,
+                'user_email' => $cartItems->first()->email,
+                'image' => $item->image,
+                'quantity' => $item->quantity,
+                'price' => $price,
+                'percentage_off' => $percentageOff,
+                'special_price' => $specialPrice,
+                'total_price' => $itemTotalPrice,
+                'status' => $item->item_status,
+                'shipping_address' => $shippingAddress,
+                'created_at' => $item->created_at,
+                 'otp' => $order->otp,
+            ];
+
+            // Accumulate the total price of the order
+            $totalPrice += $itemTotalPrice;
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'No orders found for this order.',
-            ], 200);
+            // If variant doesn't exist, return an error or handle it as needed
+            $orderDetails = [
+                'product_id' => $item->product_id,
+                'name' => $item->name,
+                'image' => $item->image,
+                'quantity' => $item->quantity,
+               
+                'message' => 'No variant found for this product.',
+                
+                
+            ];
         }
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Order history retrieved successfully.',
+        // 'order_id' => $order_id,
+        // 'order_status' => $statusMessage,
+        'order_details' => $orderDetails,
+        //'total_price' => $totalPrice,
+          // Include OTP in the response (only if it exists)
+    ], 200);
+}
+
     
+    
+
+
+
+
 
   
 }

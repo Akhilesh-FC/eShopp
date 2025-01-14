@@ -1,9 +1,11 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
+@section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
     <form action="{{ route('store_settings') }}" method="get"></form>
     
-     <div class="content-wrapper">
+     <!--<div class="content-wrapper">-->
     <!-- Content Header (Page header) -->
     <!-- Main content -->
     <section class="content-header">

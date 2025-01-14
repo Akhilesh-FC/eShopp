@@ -1,7 +1,10 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
-<div class="container-fluid">
+@section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
+
+<!--<div class="container-fluid">-->
     <div class="col-md-12 main-content">
         <div class="card content-area p-4">
             <div class="card-innr">

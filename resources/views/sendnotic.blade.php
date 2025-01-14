@@ -1,7 +1,8 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
-    <div class="container mt-5">
+@section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
         <h2 class="mb-4">Send Notification</h2>
 
         <!-- Notification Form -->

@@ -13,172 +13,383 @@ use Illuminate\Support\Facades\Log;
 
 class PublicApiController extends Controller
 {
-    public function getProductsBySubcategory(Request $request)
+    public function search(?string $name)
     {
-        $subcategoryId = $request->input('subcategory_id'); 
+        // Split the input name into individual words
+        $searchWords = explode(' ', $name);
         
-        // Check if subcategory_id is provided
-        if (!$subcategoryId) {
+        if (empty($searchWords[0])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Subcategory ID is required.',
+                'message' => 'Invalid search query',
+                'data' => []
+            ]);
+        }
+    
+        // Get the first letter of the first word
+        $firstLetter = substr($searchWords[0], 0, 1);
+    
+        // Fetch rows that start with the same first letter
+        $allRows = DB::table('products')->where('name', 'LIKE', $firstLetter . '%')->get();
+        $similarities = [];
+    
+        foreach ($allRows as $item) {
+            // Split $item->name into individual words by spaces
+            $itemWords = explode(' ', $item->name);
+    
+            // Initialize distances array
+            $distances = [];
+    
+            // 1. Calculate Levenshtein distance for each word in the search query
+            foreach ($searchWords as $searchIndex => $searchWord) {
+                $minNormalizedDistance = PHP_INT_MAX; // Start with a large value
+    
+                // Compare with each word in the item name
+                foreach ($itemWords as $itemWord) {
+                    $levDistance = levenshtein($searchWord, $itemWord);
+                    $normalizedDistance = $levDistance / max(strlen($searchWord), strlen($itemWord));
+                    $minNormalizedDistance = min($minNormalizedDistance, $normalizedDistance);
+                }
+    
+                // Store the minimum normalized distance for this search word
+                $distances[$searchIndex][] = $minNormalizedDistance;
+            }
+    
+            // After calculating distances, store them in a flattened format
+            $item->distances = array_map(function($distanceArray) {
+                sort($distanceArray); // Sort each word's distances
+                return $distanceArray;
+            }, $distances);
+            $similarities[] = $item;
+        }
+    
+        // 3. Sort the results based on the distances
+        usort($similarities, function ($a, $b) {
+            // Compare each set of sorted distances
+            foreach ($a->distances as $index => $distanceArrayA) {
+                $distanceArrayB = $b->distances[$index];
+    
+                // Compare sorted distances for each word
+                foreach ($distanceArrayA as $key => $distanceA) {
+                    if ($distanceA != $distanceArrayB[$key]) {
+                        return $distanceA <=> $distanceArrayB[$key];
+                    }
+                }
+            }
+            return 0; // All distances are equal
+        });
+    
+        // Get the top 30 most similar results
+        $topSimilarities = array_slice($similarities, 0, 30);
+    
+        // Build the result collection from the top similar entries
+        $resultRows = collect($topSimilarities);
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Results for search',
+            'data' => $resultRows
+        ]);
+    }
+
+
+
+    
+    
+    public function getProductsBySubcategory(Request $request)
+    {
+        $subcategoryId = $request->input('subcategory_id');
+        $categoryId = $request->input('category_id'); // Category ID
+    
+        // Check if subcategory_id or category_id is provided
+        if (!$subcategoryId && !$categoryId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subcategory ID or Category ID is required.',
             ], 200);
         }
     
         // You may need to get the user_id from the request if needed
         $userId = $request->input('user_id'); 
-        
-        // Retrieve products based on the subcategory_id
-        $products = DB::table('products')
+    
+        $query = DB::table('products')
             ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // join with product_variants
-            ->where('products.subcategory', $subcategoryId) // filter by subcategory_id
-            ->whereIn('products.is_vendor', [1])  // vendor-related filter, you can modify as needed
-            ->get([
-                'products.*', // all fields from the products table
-                'product_variants.price',  // price from product_variants table
-                'product_variants.special_price'  // special_price from product_variants table
-            ]);
+            ->whereIn('products.is_vendor', [1]); // vendor-related filter, you can modify as needed
     
-            $cartItems = [];
-            $favoriteItems = [];
-            if ($userId) {
-                $cartItems = DB::table('cart')
-                    ->where('user_id', $userId)
-                    ->get(['product_id', 'quantity', 'status']) 
-                    ->keyBy('product_id')
-                    ->map(function($item) {
-                        return [
-                            'quantity' => $item->quantity,
-                            'status' => $item->status 
-                        ]; 
-                    });
-        
-                $favoriteItems = DB::table('favorites')
-                    ->where('user_id', $userId)
-                    ->pluck('product_id')
-                    ->toArray(); 
-            }
-        
-            $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
-                $product->is_added_to_cart = 0;
-                $product->quantity_in_cart = 0;
-                $product->is_added_to_fav = 0;
-        
-                if ($userId) {
-                    // If there is a user ID, check the cart and favorites
-                    $cartItem = $cartItems->get($product->id);
-                    
-                    if ($cartItem) {
-                        // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
-                        if ($cartItem['status'] == 1) {
-                            $product->is_added_to_cart = 0;
-                            $product->quantity_in_cart = 0;
-                        } else {
-                            // If the cart item status is 0, return the quantity and set 'added to cart' status
-                            $product->is_added_to_cart = 1;
-                            $product->quantity_in_cart = $cartItem['quantity'];
-                        }
-                    }
-        
-                    // Check if the product is in the favorites
-                    $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
-                }
-        
-                return $product;
+        if ($subcategoryId) {
+            // If subcategory_id is provided, filter by subcategory
+            $query->where('products.subcategory', $subcategoryId);
+        } 
+    
+        if ($categoryId) {
+            // If category_id is provided, get products of all subcategories under this category
+            $query->whereIn('products.subcategory', function ($subQuery) use ($categoryId) {
+                $subQuery->select('id')
+                    ->from('subcategories')
+                    ->where('category_id', $categoryId);
             });
-        
-            if ($products->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No products found for this subcategory.', 
-                ], 200);
-            }
-        
-            return response()->json([
-                'success' => true,
-                'data' => $products,
-            ], 200);
         }
     
-    
-    public function ProductDetails(Request $request)  
-    {
-        $validator = Validator::make($request->all(), [  
-            'product_id' => 'required'
+        // Retrieve the products
+        $products = $query->get([
+            'products.*', // all fields from the products table
+            'product_variants.price',  // price from product_variants table
+            'product_variants.special_price'  // special_price from product_variants table
         ]);
-        $validator->stopOnFirstFailure(); 
     
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
-            ], 200);
-        }
-    
-        // Check if the product exists
-        $product = DB::table('products')
-            ->where('id', $request->product_id)
-            ->select('products.*')
-            ->first();
-    
-        if (empty($product)) {
-            return response()->json([
-                'success' => 'error',
-                'message' => 'No product found for this product ID'
-            ], 200);
-        }
-    
-        // Fetch product details
-        
-            //first: get only one data, get: get multiple data
-            
-        
-        // Fetch product variants
-        $variants = DB::table('product_variants')
-            ->where('product_id', $request->product_id)
-            ->select(
-                'special_price',
-                'price',
-                'percentage_off',
-                'size',
-                'color'
-            )
-            ->get();
-    
-        $userId = $request->input('user_id'); // Optional user ID
         $cartItems = [];
         $favoriteItems = [];
-        
         if ($userId) {
-            // Check if the product is added to the cart
             $cartItems = DB::table('cart')
                 ->where('user_id', $userId)
-                ->where('status', '0')
-                ->pluck('product_id')
-                ->toArray();
+                ->get(['product_id', 'quantity', 'status']) 
+                ->keyBy('product_id')
+                ->map(function($item) {
+                    return [
+                        'quantity' => $item->quantity,
+                        'status' => $item->status 
+                    ]; 
+                });
     
-            // Check if the product is added to favorites
             $favoriteItems = DB::table('favorites')
                 ->where('user_id', $userId)
                 ->pluck('product_id')
-                ->toArray();
+                ->toArray(); 
         }
     
-        $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
-        $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
+        // Modify products based on cart and favorite data
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
+            $product->is_added_to_cart = 0;
+            $product->quantity_in_cart = 0;
+            $product->is_added_to_fav = 0;
     
-        $variant = $variants->first();
+            if ($userId) {
+                // Check if the product is in the cart
+                $cartItem = $cartItems->get($product->id);
+                
+                if ($cartItem) {
+                    // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
+                    if ($cartItem['status'] == 1) {
+                        $product->is_added_to_cart = 0;
+                        $product->quantity_in_cart = 0;
+                    } else {
+                        // If the cart item status is 0, return the quantity and set 'added to cart' status
+                        $product->is_added_to_cart = 1;
+                        $product->quantity_in_cart = $cartItem['quantity'];
+                    }
+                }
     
-        // Merge product and variant data
-        $productData = (object) array_merge((array) $product, (array) $variant);
+                // Check if the product is in the favorites
+                $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+            }
+    
+            return $product;
+        });
+    
+        if ($products->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No products found for this subcategory or category.', 
+            ], 200);
+        }
     
         return response()->json([
-            "success" => true,
-            "is_added" => $isAddedToCart,  
-            "is_added_to_fav" => $isAddedToFavorites,
-            "data" => $productData 
+            'success' => true,
+            'data' => $products,
         ], 200);
     }
+
+    
+    // public function ProductDetails(Request $request)  
+    // {
+    //     $validator = Validator::make($request->all(), [  
+    //         'product_id' => 'required'
+    //     ]);
+    //     $validator->stopOnFirstFailure(); 
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first()
+    //         ], 200);
+    //     }
+    
+    //     // Check if the product exists
+    //     $product = DB::table('products')
+    //         ->where('id', $request->product_id)
+    //         ->select('products.*')
+    //         ->first();
+    
+    //     if (empty($product)) {
+    //         return response()->json([
+    //             'success' => 'error',
+    //             'message' => 'No product found for this product ID'
+    //         ], 200);
+    //     }
+    
+    //     // Fetch product details
+        
+    //         //first: get only one data, get: get multiple data
+            
+        
+    //     // Fetch product variants
+    //     $variants = DB::table('product_variants')
+    //         ->where('product_id', $request->product_id)
+    //         ->select(
+    //             'special_price',
+    //             'price',
+    //             'percentage_off',
+    //             'size',
+    //             'color'
+    //         )
+    //         ->get();
+    
+    //     $userId = $request->input('user_id'); // Optional user ID
+    //     $cartItems = [];
+    //     $favoriteItems = [];
+        
+    //     if ($userId) {
+    //         // Check if the product is added to the cart
+    //         $cartItems = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->where('status', '0')
+    //             ->pluck('product_id')
+    //             ->toArray();
+    
+    //         // Check if the product is added to favorites
+    //         $favoriteItems = DB::table('favorites')
+    //             ->where('user_id', $userId)
+    //             ->pluck('product_id')
+    //             ->toArray();
+    //     }
+    
+    //     $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
+    //     $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
+    
+    //     $variant = $variants->first();
+    
+    //     // Merge product and variant data
+    //     $productData = (object) array_merge((array) $product, (array) $variant);
+    
+    //     return response()->json([
+    //         "success" => true,
+    //         "is_added" => $isAddedToCart,  
+    //         "is_added_to_fav" => $isAddedToFavorites,
+    //         "data" => $productData 
+    //     ], 200);
+    // }
+    
+   public function ProductDetails(Request $request)  
+{
+    $validator = Validator::make($request->all(), [  
+        'product_id' => 'required'
+    ]);
+    $validator->stopOnFirstFailure(); 
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first()
+        ], 200);
+    }
+
+    // Check if the product exists
+    $product = DB::table('products')
+        ->where('id', $request->product_id)
+        ->select('products.*')
+        ->first();
+
+    if (empty($product)) {
+        return response()->json([
+            'success' => 'error',
+            'message' => 'No product found for this product ID'
+        ], 200);
+    }
+
+    // Fetch product variants
+    $variants = DB::table('product_variants')
+        ->where('product_id', $request->product_id)
+        ->select(
+             'id',
+            'special_price',
+            'price',
+            'percentage_off',
+            'size',
+            'color',
+            'stock'
+        )
+        ->get();
+
+    // Group variants by size
+    $groupedVariants = $variants->groupBy('size');
+
+    $userId = $request->input('user_id'); // Optional user ID
+    $cartItems = [];
+    $favoriteItems = [];
+
+    if ($userId) {
+        // Check if the product is added to the cart
+        $cartItems = DB::table('cart')
+            ->where('user_id', $userId)
+            ->where('status', '0')
+            ->pluck('product_id')
+            ->toArray();
+
+        // Check if the product is added to favorites
+        $favoriteItems = DB::table('favorites')
+            ->where('user_id', $userId)
+            ->pluck('product_id')
+            ->toArray();
+    }
+
+    $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
+    $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
+
+    // Prepare the response structure for variants with sizes and colors
+    $formattedVariants = $groupedVariants->map(function ($variantsBySize) {
+        $size = $variantsBySize->first()->size;
+        $price = $variantsBySize->first()->price;
+        $specialPrice = $variantsBySize->first()->special_price;
+        $discount = $variantsBySize->first()->percentage_off;
+
+        // Group colors for this size
+        $colors = $variantsBySize->map(function ($variant) {
+            return [
+                'colorIndex' => $variant->color, // Assuming colorIndex is mapped to color field
+                'colorName' => $variant->color, // Assuming colorName is the same as the color field
+                'stock' => $variant->stock
+            ];
+        });
+
+        return [
+             'id' => $variantsBySize->first()->id,  // Size ID, assuming size is unique
+            'Size' => $size,
+            'price' => $price,
+            'discount' => $discount,
+            'specialPrice' => $specialPrice,
+            'colors' => $colors
+        ];
+    });
+
+    // Flatten the collection to an array
+    $formattedVariants = $formattedVariants->values()->all();
+
+    $variant = $variants->first();
+
+    // Merge product and variant data
+    $productData = (object) array_merge((array) $product, (array) $variant);
+
+    return response()->json([
+        "success" => true,
+        "is_added" => $isAddedToCart,  
+        "is_added_to_fav" => $isAddedToFavorites,
+        "data" => $productData,
+        "variants" => $formattedVariants // Returning the grouped variants
+    ], 200);
+}
+
+
+    
     
     public function register(Request $request)
     {
@@ -495,91 +706,93 @@ class PublicApiController extends Controller
         ], 200);
     }
 
-    public function addToCart(Request $request)
-    {
-        // Validate the input data
-        $validator = Validator::make($request->all(), [
-            'product_id' => [
-                'required',
-                'exists:products,id', // Ensures the product exists in the products table
-            ],
-            'quantity' => [
-                'required',
-                'integer',
-                'min:1|max:5', // Quantity must be at least 1
-            ],
-        ], [
-            'product_id.required' => 'Product ID is required.',
-            'product_id.exists' => 'The selected product does not exist.',
-            'quantity.required' => 'Quantity is required.',
-            'quantity.integer' => 'Quantity must be an integer.',
-            'quantity.min' => 'Quantity must be at least 1.',
-        ]);
+    // public function addToCart(Request $request)
+    // {
+    //     date_default_timezone_set('Asia/Kolkata');
+    //     $datetime = now();
+    //     // Validate the input data
+    //     $validator = Validator::make($request->all(), [
+    //         'product_id' => [
+    //             'required',
+    //             'exists:products,id', // Ensures the product exists in the products table
+    //         ],
+    //         'quantity' => [
+    //             'required',
+    //             'integer',
+    //             'min:1|max:5', // Quantity must be at least 1
+    //         ],
+    //     ], [
+    //         'product_id.required' => 'Product ID is required.',
+    //         'product_id.exists' => 'The selected product does not exist.',
+    //         'quantity.required' => 'Quantity is required.',
+    //         'quantity.integer' => 'Quantity must be an integer.',
+    //         'quantity.min' => 'Quantity must be at least 1.',
+    //     ]);
     
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 200);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
     
-        // Get authenticated user ID
-        $user = $request->user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthenticated. Please log in.',
-            ], 200);
-        }
+    //     // Get authenticated user ID
+    //     $user = $request->user();
+    //     if (!$user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Unauthenticated. Please log in.',
+    //         ], 200);
+    //     }
     
-        $userId = $user->id;
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity');
+    //     $userId = $user->id;
+    //     $productId = $request->input('product_id');
+    //     $quantity = $request->input('quantity');
     
-        try {
-            // Check if the product is already in the cart
-            $cartItem = DB::table('cart')
-                ->where('user_id', $userId)
-                ->where('product_id', $productId)
-                ->first();
+    //     try {
+    //         // Check if the product is already in the cart
+    //         $cartItem = DB::table('cart')
+    //             ->where('user_id', $userId)
+    //             ->where('product_id', $productId)
+    //             ->first();
     
-            if ($cartItem) {
-                // Update quantity if product exists in the cart
-                DB::table('cart')
-                    ->where('id', $cartItem->id)
-                    ->update([
-                        'quantity' => $cartItem->quantity + $quantity,
-                        'updated_at' => now(),
-                    ]);
+    //         if ($cartItem) {
+    //             // Update quantity if product exists in the cart
+    //             DB::table('cart')
+    //                 ->where('id', $cartItem->id)
+    //                 ->update([
+    //                     'quantity' => $cartItem->quantity + $quantity,
+    //                     'updated_at' => $datetime,
+    //                 ]);
     
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Product quantity updated in the cart.',
-                ], 200);
-            } else {
-                // Insert new product into the cart
-                DB::table('cart')->insert([
-                    'user_id' => $userId,
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'message' => 'Product quantity updated in the cart.',
+    //             ], 200);
+    //         } else {
+    //             // Insert new product into the cart
+    //             DB::table('cart')->insert([
+    //                 'user_id' => $userId,
+    //                 'product_id' => $productId,
+    //                 'quantity' => $quantity,
+    //                 'created_at' => $datetime,
+    //                 'updated_at' => $datetime,
+    //             ]);
     
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Product added to the cart successfully.',
-                ], 200);
-            }
-        } catch (\Exception $e) {
-            // Catch and handle unexpected errors
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while adding the product to the cart. Please try again.',
-                'error' => $e->getMessage(),
-            ], 200);
-        }
-    }
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'message' => 'Product added to the cart successfully.',
+    //             ], 200);
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Catch and handle unexpected errors
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An error occurred while adding the product to the cart. Please try again.',
+    //             'error' => $e->getMessage(),
+    //         ], 200);
+    //     }
+    // }
     
     public function FAQs()
     {

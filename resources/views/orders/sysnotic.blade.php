@@ -1,7 +1,9 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
-  
-<div class="container-fluid">
+<div class="page-wrapper">
+     <div class="container-fluid">
+ 
 
 <form action="{{route('system_notification')}}" method="get"></form>
 <div class="content-wrapper">

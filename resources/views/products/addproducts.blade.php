@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
-<div class="container">
+<div class="page-wrapper">
+     <div class="container-fluid">
     <div class="text-center mb-4">
         <a href="{{ route('manage_products') }}" class="btn btn-secondary">Show All Products</a>
     </div>

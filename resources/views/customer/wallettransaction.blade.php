@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
+@section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
     <form action="{{ route('wallet_transactions') }}" method="get"></form>
 
 

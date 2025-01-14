@@ -1,6 +1,11 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
+
+
+<!---->
 
 <div class="container-fluid">
     <form action="{{ route('orders') }}" method="get">
@@ -102,5 +107,6 @@
         margin: 0 5px;
     }
 </style>
+
 
 @endsection

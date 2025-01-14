@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
-<div class="container-fluid">
+<div class="page-wrapper">
+     <div class="container-fluid">
 
     <form action="{{ route('blog_categories') }}" method="get"></form>
 

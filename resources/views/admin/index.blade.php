@@ -1,32 +1,14 @@
 @extends('admin.body.adminmaster')
 @section('admin')
-<form action="{{route('dashboard')}}" method="get"></form>
 
-    <style>
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .icon {
-            font-size: 24px;
-        }
-        .btn-custom {
-            border: none;
-            border-radius: 5px;
-            background-color: #004085;
-            color: #fff;
-            padding: 5px 15px;
-            margin-right: 5px;
-        }
-        .chart-container {
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-   
-    <div class="row">
+
+<div class="page-wrapper">
+     <div class="container-fluid">
+    
+    <!---->
+    
+    
+       <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-3 col-12">
                     <div class="card pull-up">
                         <div class="card-content">
@@ -99,83 +81,8 @@
                     </div>
                 </div>
             </div>
-            <!--<div class="row">-->
-            <!--    <div class="col-xl-6 col-6" id="ecommerceChartView">-->
-            <!--        <div class="card card-shadow chart-height">-->
-            <!--            <div class="m-3">Product Sales</div>-->
-            <!--            <div class="card-header card-header-transparent py-20 border-0">-->
-            <!--                <ul class="nav nav-pills nav-pills-rounded chart-action float-right btn-group sales-tab" role="group">-->
-            <!--                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#scoreLineToDay">Day</a></li>-->
-            <!--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToWeek">Week</a></li>-->
-            <!--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#scoreLineToMonth">Month</a></li>-->
-            <!--                </ul>-->
-            <!--            </div>-->
-            <!--            <div class="widget-content tab-content bg-white p-20">-->
-            <!--                <div class="ct-chart tab-pane active scoreLineShadow" id="scoreLineToDay"></div>-->
-            <!--                <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToWeek"></div>-->
-            <!--                <div class="ct-chart tab-pane scoreLineShadow" id="scoreLineToMonth"></div>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--    <div class="col-md-6">-->
-                    <!-- Category Wise Product's Sales -->
-            <!--        <div class="card ">-->
-            <!--            <h3 class="card-title m-3">Category Wise Product's Count</h3>-->
-            <!--            <div class="card-body">-->
-            <!--                <div id="piechart_3d" class='piechat_height'></div>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--</div>-->
-            <!--<div class="row">-->
-            <!--    <div class="col-md-4 col-sm-6 col-12">-->
-            <!--        <div class="info-box total-info-box bg-primary">-->
-            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
-            <!--            <div class="info-box-content">-->
-            <!--                <span class="info-box-text text-white">Total Earnings (₹)</span>-->
-            <!--                <span class="info-box-number text-white">0.00</span>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--    <div class="col-md-4 col-sm-6 col-12">-->
-            <!--        <div class="info-box details-box bg-success">-->
-            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
-            <!--            <div class="info-box-content">-->
-            <!--                <span class="info-box-text text-white">Admin Earnings (₹)</span>-->
-            <!--                <span class="info-box-number text-white">0.00</span>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--    <div class="col-md-4 col-sm-6 col-12">-->
-            <!--        <div class="info-box bg-secondary">-->
-            <!--            <span class="info-box-icon text-white"> <i class="far fa-money-bill-alt"></i></span>-->
-            <!--            <div class="info-box-content">-->
-            <!--                <span class="info-box-text text-white">Seller Earnings (₹)</span>-->
-            <!--                <span class="info-box-number text-white">0.00</span>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--</div>-->
-            <!--<div class="row">-->
-            <!--    <div class="col-md-6 col-xs-12">-->
-            <!--        <div class="alert sold-products ">-->
-            <!--            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-            <!--            <h6><i class="icon fa fa-info"></i> 0 Product(s) sold out!</h6>-->
-            <!--            <a href="https://avrluxe.com/admin/product/?flag=sold" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-            <!--        </div>-->
-            <!--    </div>-->
-
-            <!--    <div class="col-md-6 col-xs-12">-->
-            <!--        <div class="alert alert-primary alert-dismissible">-->
-            <!--            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-            <!--            <h6><i class="icon fa fa-info"></i> 2 Product(s) low in stock!<small> (Low stock limit 15)</small></h6>-->
-            <!--            <a href="https://avrluxe.com/admin/product/?flag=low" class="text-decoration-none small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--</div>-->
-            <!--</div>-->
-
-            <h5 class="col">Sellers Details</h5>
+            
+                <h5 class="col">Sellers Details</h5>
                 <div class="row col-12 d-flex">
 
                     <div class="col-4">
@@ -215,7 +122,7 @@
                     </div>
                 </div>
                 <br>
-                <div class="container-fluid">
+                <div class="container">
                 <div class="row">
                     <!-- Top Sellers Table -->
                     <div class="col-md-6">
@@ -376,9 +283,6 @@
         </div>
     </div>
 </div>
-
-    
-
             <div class="row">
     <div class="col-md-12 main-content">
         <div class="card content-area p-4">
@@ -485,9 +389,18 @@
     </div>
 </div>
 
-
-            </div>
-        </div>
+    
+    
+    
+    
+    
+    
+    <!---->
+    
     </div>
-</body>
+             <footer class="footer text-center">
+                All Rights Reserved by Matrix-admin. Designed and Developed by <a href="https://wrappixel.com">WrapPixel</a>.
+            </footer>
+        </div>
+
 @endsection

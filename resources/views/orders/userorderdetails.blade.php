@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
@@ -61,12 +63,16 @@
                             <!-- Status Dropdown -->
                             <div class="form-group">
                                 <label for="orderStatus">Order Status</label>
-                                <select id="orderStatus" class="form-select">
-                                    <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                                    <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
+                                <form action="{{ route('update_orderstatus', ['orderId' => $order->order_id]) }}" method="POST">
+                                    @csrf
+                                    @method('POST')
+                                    <select id="orderStatus" class="form-select" name="status" onchange="this.form.submit()">
+                                        <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>Order Placed</option>
+                                        <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Shipped</option>
+                                        <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Out For Delivery</option>
+                                        <option value="3" {{ $order->status == 3 ? 'selected' : '' }}>Delivered</option>
+                                    </select>
+                                </form>
                             </div>
                         </div>
                     </div>

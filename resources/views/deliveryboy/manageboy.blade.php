@@ -1,9 +1,12 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
 
 <form action="{{route('manage_delivery_boy')}}" method="get"></form>
 
-<div class="content-wrapper">
+<!--<div class="content-wrapper">-->
     <!-- Content Header (Page header) -->
     <!-- Main content -->
     <section class="content-header">

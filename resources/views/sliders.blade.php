@@ -1,9 +1,11 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
 <form action="{{ route('sliders') }}" method="get"></form>
 
-<div class="container-fluid">
+<!--<div class="container-fluid">-->
     <!-- Page Header -->
     <section class="content-header">
         <div class="container-fluid">

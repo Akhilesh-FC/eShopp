@@ -25,90 +25,206 @@ class VendorApiController extends Controller
     }
     
     public function add_product(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|string',
-            'categories' => 'required|string',
-            'subcategories' => 'required|string',
-            'name' => 'required|string|max:255',
-            'tags' => 'required|string|max:255',
-            'short_description' => 'required|string',
-            'total_allowed_quantity' => 'required|integer|min:1',
-            'minimum_order_quantity' => 'required|integer|min:1',
-            'size' => 'required|string',
-            'color' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'required|numeric|min:0',
-            'special_price' => 'required|numeric|min:0',
-            'main_image' => 'required|string', 
-            'other_images.*' => 'required|string', 
-        ]);
-    
-        $validator->stopOnFirstFailure();
-    
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()->first(),
-            ], 200);
-        }
-        
-        $imagePaths = [];
-    
-        if ($request->input('main_image')) {
-            
-            $mainImageUrl = $this->handleBase64Image($request->input('main_image'),"product");
-            $imagePaths[] = $mainImageUrl;
-        } elseif ($request->hasFile('main_image')) {
-           
-            $mainImage = $request->file('main_image');
-            $mainImagePath = $mainImage->store('product', 'public');
-            $mainImageUrl = asset('storage/' . $mainImagePath);  
-            $imagePaths[] = $mainImageUrl;  
-        }
-    
-        if ($request->has('other_images')) {
-            
-            $otherImages = is_array($request->input('other_images')) ? $request->input('other_images') : [$request->input('other_images')];
-        
-            foreach ($otherImages as $base64Image) {
-                if ($base64Image) {
-                    $imageUrl = $this->handleBase64Image($base64Image,"product");
-                    $imagePaths[] = $imageUrl;
-                }
-            }
-        }
-    
-        $encodedImagePaths = json_encode($imagePaths);
-        $productId = DB::table('products')->insertGetId([
-            'name' => $request->input('name'),
-            'vendor_id' => $request->input('vendor_id'),
-            'tags' => $request->input('tags'),
-            'short_description' => $request->input('short_description'),
-            'total_allowed_quantity' => $request->input('total_allowed_quantity'),
-            'minimum_order_quantity' => $request->input('minimum_order_quantity'),
-            'category_id' => $request->input('categories'),
-            'image' => $encodedImagePaths,
-        ]);
-        // print_r($mainImageUrl); die();
-        DB::table('product_variants')->insert([
-            'product_id' => $productId,
-            'size' => $request->input('size'),
-            'color' => $request->input('color'),
-            'price' => $request->input('price'),
-            'percentage_off' => $request->input('discount'),
-            'special_price' => $request->input('special_price'),
-        ]);
-    
+{
+    $validator = Validator::make($request->all(), [
+        'vendor_id' => 'required|string',
+        'categories' => 'required|string',
+        'subcategories' => 'required|string',
+        'name' => 'required|string|max:255',
+        'tags' => 'required|string|max:255',
+        'description' =>'required|string|max:255',
+        'short_description' => 'required|string|max:255',
+        'product_highlight' => 'required|string|max:255',
+        'total_allowed_quantity' => 'required|integer|min:1',
+        'minimum_order_quantity' => 'required|integer|min:1',
+        'main_image' => 'required|string', 
+        'other_images.*' => 'required|string', 
+        'variants' => 'required|array', // Add validation for variants
+        'is_returnable' => 'required|in:0,1',  // Validation for is_returnable
+        'is_cancleable' => 'required|in:0,1',  // Validation for is_returnable
+        'cod_allowed' => 'required|in:0,1',
+    ]);
+
+    $validator->stopOnFirstFailure();
+
+    if ($validator->fails()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Product added successfully',
-            'data' => [
-                'product_id' => $productId,
-                'images' => json_decode($encodedImagePaths),
-            ],
+            'status' => false,
+            'message' => $validator->errors()->first(),
         ], 200);
     }
+
+    // Handling images
+    $imagePaths = [];
+    if ($request->input('main_image')) {
+        $mainImageUrl = $this->handleBase64Image($request->input('main_image'), "product");
+        $imagePaths[] = $mainImageUrl;
+    } elseif ($request->hasFile('main_image')) {
+        $mainImage = $request->file('main_image');
+        $mainImagePath = $mainImage->store('product', 'public');
+        $mainImageUrl = asset('storage/' . $mainImagePath);
+        $imagePaths[] = $mainImageUrl;
+    }
+
+    if ($request->has('other_images')) {
+        $otherImages = is_array($request->input('other_images')) ? $request->input('other_images') : [$request->input('other_images')];
+        foreach ($otherImages as $base64Image) {
+            if ($base64Image) {
+                $imageUrl = $this->handleBase64Image($base64Image, "product");
+                $imagePaths[] = $imageUrl;
+            }
+        }
+    }
+
+    $encodedImagePaths = json_encode($imagePaths);
+    
+    $isReturnable = $request->input('is_returnable');  // Expect 1 or 0
+    $isCancleable = $request->input('is_cancleable');  // Expect 1 or 0
+    $codAllowed = $request->input('cod_allowed'); 
+
+    // Insert the product details into the database
+    $productId = DB::table('products')->insertGetId([
+        'name' => $request->input('name'),
+        'vendor_id' => $request->input('vendor_id'),
+        'tags' => $request->input('tags'),
+        'description' =>$request->input('description'),
+        'short_description' => $request->input('short_description'),
+        'product_highlight' => $request->input('product_highlight'),
+        'total_allowed_quantity' => $request->input('total_allowed_quantity'),
+        'minimum_order_quantity' => $request->input('minimum_order_quantity'),
+        'category_id' => $request->input('categories'),
+        'subcategory' => $request->input('subcategories'),
+        'image' => $encodedImagePaths,
+        'is_returnable' => $isReturnable,  // Store the is_returnable value
+        'is_cancelable' => $isCancleable,
+        'cod_allowed' => $codAllowed, 
+    ]);
+
+    // Process and store variants (sizes and colors)
+    $variants = $request->input('variants'); // Get the variants array from the frontend
+
+    foreach ($variants as $variant) {
+        $size = $variant['Size'];
+        $price = $variant['price'];
+        $discount = $variant['discount'];
+        $specialPrice = $variant['specialPrice'];
+
+        // Loop through colors within this variant and insert them
+        foreach ($variant['colors'] as $color) {
+            $colorName = $color['colorName'];
+            $colorIndex = $color['color'];
+            $quantity = $color['quantity'];
+
+            // Insert each size-color combination into product_variants
+            DB::table('product_variants')->insert([
+                'product_id' => $productId,
+                'size' => $size,
+                'color' => $colorName, // Store the color name
+                'color' => $colorIndex, // Store the color index if needed
+                'price' => $price,
+                'percentage_off' => $discount,
+                'special_price' => $specialPrice,
+                'stock' => $quantity, // You can add a quantity column in product_variants if needed
+            ]);
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Product added successfully',
+        'data' => [
+            'product_id' => $productId,
+            'images' => json_decode($encodedImagePaths),
+        ],
+    ], 200);
+}
+
+    
+    // public function add_product(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|string',
+    //         'categories' => 'required|string',
+    //         'subcategories' => 'required|string',
+    //         'name' => 'required|string|max:255',
+    //         'tags' => 'required|string|max:255',
+    //         'short_description' => 'required|string',
+    //         'total_allowed_quantity' => 'required|integer|min:1',
+    //         'minimum_order_quantity' => 'required|integer|min:1',
+    //         'size' => 'required|string',
+    //         'color' => 'required|string',
+    //         'price' => 'required|numeric|min:0',
+    //         'discount' => 'required|numeric|min:0',
+    //         'special_price' => 'required|numeric|min:0',
+    //         'main_image' => 'required|string', 
+    //         'other_images.*' => 'required|string', 
+    //     ]);
+    
+    //     $validator->stopOnFirstFailure();
+    
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $validator->errors()->first(),
+    //         ], 200);
+    //     }
+        
+    //     $imagePaths = [];
+    
+    //     if ($request->input('main_image')) {
+            
+    //         $mainImageUrl = $this->handleBase64Image($request->input('main_image'),"product");
+    //         $imagePaths[] = $mainImageUrl;
+    //     } elseif ($request->hasFile('main_image')) {
+           
+    //         $mainImage = $request->file('main_image');
+    //         $mainImagePath = $mainImage->store('product', 'public');
+    //         $mainImageUrl = asset('storage/' . $mainImagePath);  
+    //         $imagePaths[] = $mainImageUrl;  
+    //     }
+    
+    //     if ($request->has('other_images')) {
+            
+    //         $otherImages = is_array($request->input('other_images')) ? $request->input('other_images') : [$request->input('other_images')];
+        
+    //         foreach ($otherImages as $base64Image) {
+    //             if ($base64Image) {
+    //                 $imageUrl = $this->handleBase64Image($base64Image,"product");
+    //                 $imagePaths[] = $imageUrl;
+    //             }
+    //         }
+    //     }
+    
+    //     $encodedImagePaths = json_encode($imagePaths);
+    //     $productId = DB::table('products')->insertGetId([
+    //         'name' => $request->input('name'),
+    //         'vendor_id' => $request->input('vendor_id'),
+    //         'tags' => $request->input('tags'),
+    //         'short_description' => $request->input('short_description'),
+    //         'total_allowed_quantity' => $request->input('total_allowed_quantity'),
+    //         'minimum_order_quantity' => $request->input('minimum_order_quantity'),
+    //         'category_id' => $request->input('categories'),
+    //         'image' => $encodedImagePaths,
+    //     ]);
+    //     // print_r($mainImageUrl); die();
+    //     DB::table('product_variants')->insert([
+    //         'product_id' => $productId,
+    //         'size' => $request->input('size'),
+    //         'color' => $request->input('color'),
+    //         'price' => $request->input('price'),
+    //         'percentage_off' => $request->input('discount'),
+    //         'special_price' => $request->input('special_price'),
+    //     ]);
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Product added successfully',
+    //         'data' => [
+    //             'product_id' => $productId,
+    //             'images' => json_decode($encodedImagePaths),
+    //         ],
+    //     ], 200);
+    // }
     
     public function vendor_register(Request $request)
     { 

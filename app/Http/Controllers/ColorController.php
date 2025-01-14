@@ -70,17 +70,14 @@ class ColorController extends Controller
         
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
         $request->validate([
             'name' => 'required',
             'color' => 'required',
         ]);
     
-        // Retrieve the color by its ID
         $color = DB::table('color')->where('id', $id)->first();
     
         if ($color) {
-            // Update the color record in the database
             DB::table('color')
                 ->where('id', $id)
                 ->update([
@@ -88,10 +85,8 @@ class ColorController extends Controller
                     'color' => $request->color,
                 ]);
     
-            // Redirect with a success message
             return redirect()->route('color')->with('success', 'Color updated successfully');
         } else {
-            // If the color is not found, redirect with an error message
             return redirect()->route('color')->with('error', 'Color not found');
         }
     }

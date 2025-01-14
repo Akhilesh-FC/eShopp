@@ -27,6 +27,7 @@ Route::controller(OrdersController::class)->group(function()
     Route::get('/orders_track', function () {return view('orders.ordertrack');})->name('orders_track');
     Route::get('/system_notification', function () {return view('orders.sysnotic');})->name('system_notification');
     Route::get('/order/{orderId}', 'viewOrderDetails')->name('view_orderdetails');
+    Route::post('/orders/{orderId}/update-status', 'updateOrderStatus')->name('update_orderstatus');
 });
 //=============================Orders Routes END=================================//
 
@@ -49,7 +50,7 @@ Route::controller(ColorController::class)->group(function() {
     
     Route::post('/color/{id}/edit', 'edit')->name('color.edit');
    //Route::post('/color/{id}/update',  'update')->name('color.update');
-Route::post('/color/update', 'update')->name('color.update');
+    Route::post('/color/update', 'update')->name('color.update');
 
 
 });

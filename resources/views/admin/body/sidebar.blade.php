@@ -3,8 +3,8 @@
             <div class="scroll-sidebar">
                 <!-- Sidebar navigation-->
                 <nav class="sidebar-nav">
-                    <ul id="sidebarnav" >
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('dashboard') }}" aria-expanded="false"><i class="mdi mdi-view-dashboard"></i><span class="hide-menu">Dashboard</span></a></li>
+                    <ul id="sidebarnav">
+                                               <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('dashboard') }}" aria-expanded="false"><i class="mdi mdi-view-dashboard"></i><span class="hide-menu">Dashboard</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-shopping-cart text-warning"></i><span class="hide-menu">Orders </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{{ route('orders') }}" class="sidebar-link"><i class="fa fa-shopping-cart nav-icon"></i><span class="hide-menu"> Orders </span></a></li>
@@ -129,12 +129,9 @@
                         </li> 
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route('faq')}}" aria-expanded="false"><i class="nav-icon fas fa-question-circle text-warning"></i><span class="hide-menu">FAQ</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route('system_user')}}" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">System User </span></a></li>
-                    </ul> 
+                    </ul>
                 </nav>
                 <!-- End Sidebar navigation -->
             </div>
             <!-- End Sidebar scroll-->
-</aside>
-
-
-
+        </aside>

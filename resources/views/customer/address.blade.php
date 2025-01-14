@@ -1,7 +1,8 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
-<div class="content-wrapper">
+<div class="page-wrapper">
+     <div class="container-fluid">
     <section class="content">
         <div class="container-fluid">
             <div class="row">

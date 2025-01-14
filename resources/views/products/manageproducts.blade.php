@@ -1,7 +1,9 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
-<div class="container mt-4">
+<div class="page-wrapper">
+     <div class="container-fluid">
+<!--<div class="container mt-4">-->
     <div class="text-center mb-4">
         <div class="col-md-6">
             <!-- Search Form -->

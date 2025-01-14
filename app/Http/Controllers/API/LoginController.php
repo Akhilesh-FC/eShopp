@@ -51,42 +51,7 @@ class PublicApiController extends Controller
         }
     }
 
-    // Login API
-    // public function login(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'mobile' => 'required|string',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => 200,
-    //             'message' => $validator->errors()
-    //         ], 400);
-    //     }
-        
-
-    //     $user = DB::table('users')->where('mobile', $request->mobile)->first();
-       
-    //     if ($user) {
-    //         // Here you would integrate your OTP sending logic
-    //         $otp = rand(100000, 999999); // Generating a 6-digit OTP
-    //         // Send OTP using a third-party service
-    //         // Example: Http::post('your-otp-api-endpoint', ['otp' => $otp, 'mobile' => $request->mobile]);
-
-    //         return response()->json([
-    //             'success' => 200,
-    //             'message' => 'OTP sent successfully',
-    //         ], 200);
-    //     } else {
-            
-    //         return response()->json([
-    //             'success' => 400,
-    //             'message' => 'You are not registered. Please register first.',
-    //         ], 200);
-    //     }
-    // }
-    
+  
     public function login(Request $request)
     {
         // Validate the request

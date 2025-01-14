@@ -1,7 +1,8 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
-<div class="container-fluid">
+@section('admin')
+<div class="page-wrapper">
+     <div class="container-fluid">
 
     <form action="{{route('products_faqs')}}" method="get"></form>
 

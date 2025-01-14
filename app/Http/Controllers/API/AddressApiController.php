@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Http;
 
 class AddressApiController extends Controller
 {
-   public function add_address(Request $request)
+    public function add_address(Request $request)
     {
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = now();
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'user_id'       => 'required|integer', 
@@ -52,8 +54,8 @@ class AddressApiController extends Controller
             'country'    => $validated['country'],
             'type'       => $validated['address_type'],
             'is_default' => $validated['set_default'],
-            'created_at' => now(), 
-            'updated_at' => now(),
+            'created_at' => $datetime, 
+            'updated_at' => $datetime,
         ]);
     
         // Fetch all addresses for the user
