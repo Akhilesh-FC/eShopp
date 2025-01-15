@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
+@section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 <div class="container mt-5">
     <h2 class="mb-4">Ticket system</h2>
 

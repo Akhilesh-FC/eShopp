@@ -1,5 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 
     <form action="{{ route('delivery_boy_policies') }}" method="get"></form>
     

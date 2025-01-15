@@ -25,7 +25,7 @@ class VendorApiController extends Controller
     }
     
     public function add_product(Request $request)
-{
+    {
     $validator = Validator::make($request->all(), [
         'vendor_id' => 'required|string',
         'categories' => 'required|string',

@@ -13,11 +13,149 @@ use Illuminate\Support\Str;
 class ProductApiController extends Controller
 {
     
-    public function Product_list_rating(){
+    // public function Product_list_rating(){
+    // $data = DB::table('categories')
+    //     ->select(
+    //         'categories.id as category_id',
+    //         'categories.name as category_id_name',
+    //         'categories.title as category_title',
+    //         'products.id',
+    //         'products.subcategory',
+    //         'products.subcategory2',
+    //         'products.category_id',
+    //         'products.vendor_id',
+    //         'products.tax',
+    //         'products.row_order',
+    //         'products.type',
+    //         'products.stock_type',
+    //         'products.name as product_name',
+    //         'products.short_description',
+    //         'products.slug',
+    //         'products.indicator',
+    //         'products.cod_allowed',
+    //         'products.download_allowed',
+    //         'products.download_type',
+    //         'products.download_link',
+    //         'products.minimum_order_quantity',
+    //         'products.quantity_step_size',
+    //         'products.total_allowed_quantity',
+    //         'products.is_prices_inclusive_tax',
+    //         'products.is_returnable',
+    //         'products.is_cancelable',
+    //         'products.cancelable_till',
+    //         'products.image',
+    //         'products.video_type',
+    //         'products.video',
+    //         'products.tags',
+    //         'products.warranty_period',
+    //         'products.guarantee_period',
+    //         'products.made_in',
+    //         'products.hsn_code',
+    //         'products.brand',
+    //         'products.product_highlight',
+    //         'products.sku',
+    //         'products.stock',
+    //         'products.in_day_to_sell',
+    //         'products.item_to_sell',
+    //         'products.availability',
+    //         'products.rating',
+    //         'products.no_of_ratings',
+    //         'products.description',
+    //         'products.extra_description',
+    //         'products.deliverable_type',
+    //         'products.deliverable_zipcodes',
+    //         'products.pickup_location',
+    //         'products.status',
+    //         'products.date_added',
+    //         'product_variants.price',
+    //         'product_variants.special_price', 
+    //         'product_variants.percentage_off' 
+    //     )
+    //     ->leftJoin('products', 'categories.id', '=', 'products.category_id')
+    //     ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+    //     ->whereNotNull('products.id') // Exclude categories without products
+    //     ->where('products.is_vendor', 1)
+    //     ->get()
+    //     ->groupBy('category_id')
+    //     ->map(function ($items, $category_id) {
+    //         $category = $items->first();
+    //         return [
+    //             'category_id' => $category->category_id,
+    //             'category_id_name' => $category->category_id_name,
+    //             'category_title' => $category->category_title,
+    //             'products' => $items->map(function ($item) {
+    //                 return [
+    //                     'id' => $item->id,
+    //                     'subcategory' => $item->subcategory,
+    //                     'subcategory2' => $item->subcategory2,
+    //                     'category_id' => $item->category_id,
+    //                     'vendor_id' => $item->vendor_id,
+    //                     'tax' => $item->tax,
+    //                     'row_order' => $item->row_order,
+    //                     'type' => $item->type,
+    //                     'stock_type' => $item->stock_type,
+    //                     'name' => $item->product_name,
+    //                     'short_description' => $item->short_description,
+    //                     'slug' => $item->slug,
+    //                     'indicator' => $item->indicator,
+    //                     'cod_allowed' => $item->cod_allowed,
+    //                     'download_allowed' => $item->download_allowed,
+    //                     'download_type' => $item->download_type,
+    //                     'download_link' => $item->download_link,
+    //                     'minimum_order_quantity' => $item->minimum_order_quantity,
+    //                     'quantity_step_size' => $item->quantity_step_size,
+    //                     'total_allowed_quantity' => $item->total_allowed_quantity,
+    //                     'is_prices_inclusive_tax' => $item->is_prices_inclusive_tax,
+    //                     'is_returnable' => $item->is_returnable,
+    //                     'is_cancelable' => $item->is_cancelable,
+    //                     'cancelable_till' => $item->cancelable_till,
+    //                     'image' => $item->image,
+    //                     'video_type' => $item->video_type,
+    //                     'video' => $item->video,
+    //                     'tags' => $item->tags,
+    //                     'warranty_period' => $item->warranty_period,
+    //                     'guarantee_period' => $item->guarantee_period,
+    //                     'made_in' => $item->made_in,
+    //                     'hsn_code' => $item->hsn_code,
+    //                     'brand' => $item->brand,
+    //                     'product_highlight' => $item->product_highlight,
+    //                     'sku' => $item->sku,
+    //                     'stock' => $item->stock,
+    //                     'in_day_to_sell' => $item->in_day_to_sell,
+    //                     'item_to_sell' => $item->item_to_sell,
+    //                     'availability' => $item->availability,
+    //                     'rating' => $item->rating,
+    //                     'no_of_ratings' => $item->no_of_ratings,
+    //                     'description' => $item->description,
+    //                     'extra_description' => $item->extra_description,
+    //                     'deliverable_type' => $item->deliverable_type,
+    //                     'deliverable_zipcodes' => $item->deliverable_zipcodes,
+    //                     'pickup_location' => $item->pickup_location,
+    //                     'status' => $item->status,
+    //                     'date_added' => $item->date_added,
+    //                     'price' => $item->price,
+    //                     'special_price' => $item->special_price,
+    //                     'percentage_off' => $item->percentage_off,
+    //                 ]; 
+    //             }),
+    //         ];
+    //     })
+    //     ->values(); // Re-index the array
+    
+    // // return response()->json($data);
+    
+    // return response()->json([
+    //         'success' => true,
+    //         'message' => 'Filtered data grouped by type and category retrieved successfully',
+    //         'data' => $data,
+    //     ], 200);
+    // }
+    
+  public function Product_list_rating() {
     $data = DB::table('categories')
         ->select(
             'categories.id as category_id',
-            'categories.name as category_id_name',
+            'categories.name as category_name',
             'categories.title as category_title',
             'products.id',
             'products.subcategory',
@@ -67,89 +205,91 @@ class ProductApiController extends Controller
             'products.pickup_location',
             'products.status',
             'products.date_added',
-            'product_variants.price',
-            'product_variants.special_price', 
-            'product_variants.percentage_off' 
+            // Select the first variant for each product
+            DB::raw('
+                (SELECT price FROM product_variants WHERE product_variants.product_id = products.id LIMIT 1) as price'),
+            DB::raw('
+                (SELECT special_price FROM product_variants WHERE product_variants.product_id = products.id LIMIT 1) as special_price'),
+            DB::raw('
+                (SELECT percentage_off FROM product_variants WHERE product_variants.product_id = products.id LIMIT 1) as percentage_off')
         )
         ->leftJoin('products', 'categories.id', '=', 'products.category_id')
-        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
-        ->whereNotNull('products.id') // Exclude categories without products
-         ->where('products.is_vendor', 1)
+        ->whereNotNull('products.id')
+        ->where('products.is_vendor', 1)
         ->get()
         ->groupBy('category_id')
-        ->map(function ($items, $category_id) {
+        ->map(function ($items) {
             $category = $items->first();
+            $products = $items->map(fn($item) => [
+                'id' => $item->id,
+                'subcategory' => $item->subcategory,
+                'subcategory2' => $item->subcategory2,
+                'category_id' => $item->category_id,
+                'vendor_id' => $item->vendor_id,
+                'tax' => $item->tax,
+                'row_order' => $item->row_order,
+                'type' => $item->type,
+                'stock_type' => $item->stock_type,
+                'name' => $item->product_name,
+                'short_description' => $item->short_description,
+                'slug' => $item->slug,
+                'indicator' => $item->indicator,
+                'cod_allowed' => $item->cod_allowed,
+                'download_allowed' => $item->download_allowed,
+                'download_type' => $item->download_type,
+                'download_link' => $item->download_link,
+                'minimum_order_quantity' => $item->minimum_order_quantity,
+                'quantity_step_size' => $item->quantity_step_size,
+                'total_allowed_quantity' => $item->total_allowed_quantity,
+                'is_prices_inclusive_tax' => $item->is_prices_inclusive_tax,
+                'is_returnable' => $item->is_returnable,
+                'is_cancelable' => $item->is_cancelable,
+                'cancelable_till' => $item->cancelable_till,
+                'image' => $item->image,
+                'video_type' => $item->video_type,
+                'video' => $item->video,
+                'tags' => $item->tags,
+                'warranty_period' => $item->warranty_period,
+                'guarantee_period' => $item->guarantee_period,
+                'made_in' => $item->made_in,
+                'hsn_code' => $item->hsn_code,
+                'brand' => $item->brand,
+                'product_highlight' => $item->product_highlight,
+                'sku' => $item->sku,
+                'stock' => $item->stock,
+                'in_day_to_sell' => $item->in_day_to_sell,
+                'item_to_sell' => $item->item_to_sell,
+                'availability' => $item->availability,
+                'rating' => $item->rating,
+                'no_of_ratings' => $item->no_of_ratings,
+                'description' => $item->description,
+                'extra_description' => $item->extra_description,
+                'deliverable_type' => $item->deliverable_type,
+                'deliverable_zipcodes' => $item->deliverable_zipcodes,
+                'pickup_location' => $item->pickup_location,
+                'status' => $item->status,
+                'date_added' => $item->date_added,
+                'price' => $item->price,
+                'special_price' => $item->special_price,
+                'percentage_off' => $item->percentage_off
+            ]);
             return [
                 'category_id' => $category->category_id,
-                'category_id_name' => $category->category_id_name,
+                'category_id_name' => $category->category_name,
                 'category_title' => $category->category_title,
-                'products' => $items->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'subcategory' => $item->subcategory,
-                        'subcategory2' => $item->subcategory2,
-                        'category_id' => $item->category_id,
-                        'vendor_id' => $item->vendor_id,
-                        'tax' => $item->tax,
-                        'row_order' => $item->row_order,
-                        'type' => $item->type,
-                        'stock_type' => $item->stock_type,
-                        'name' => $item->product_name,
-                        'short_description' => $item->short_description,
-                        'slug' => $item->slug,
-                        'indicator' => $item->indicator,
-                        'cod_allowed' => $item->cod_allowed,
-                        'download_allowed' => $item->download_allowed,
-                        'download_type' => $item->download_type,
-                        'download_link' => $item->download_link,
-                        'minimum_order_quantity' => $item->minimum_order_quantity,
-                        'quantity_step_size' => $item->quantity_step_size,
-                        'total_allowed_quantity' => $item->total_allowed_quantity,
-                        'is_prices_inclusive_tax' => $item->is_prices_inclusive_tax,
-                        'is_returnable' => $item->is_returnable,
-                        'is_cancelable' => $item->is_cancelable,
-                        'cancelable_till' => $item->cancelable_till,
-                        'image' => $item->image,
-                        'video_type' => $item->video_type,
-                        'video' => $item->video,
-                        'tags' => $item->tags,
-                        'warranty_period' => $item->warranty_period,
-                        'guarantee_period' => $item->guarantee_period,
-                        'made_in' => $item->made_in,
-                        'hsn_code' => $item->hsn_code,
-                        'brand' => $item->brand,
-                        'product_highlight' => $item->product_highlight,
-                        'sku' => $item->sku,
-                        'stock' => $item->stock,
-                        'in_day_to_sell' => $item->in_day_to_sell,
-                        'item_to_sell' => $item->item_to_sell,
-                        'availability' => $item->availability,
-                        'rating' => $item->rating,
-                        'no_of_ratings' => $item->no_of_ratings,
-                        'description' => $item->description,
-                        'extra_description' => $item->extra_description,
-                        'deliverable_type' => $item->deliverable_type,
-                        'deliverable_zipcodes' => $item->deliverable_zipcodes,
-                        'pickup_location' => $item->pickup_location,
-                        'status' => $item->status,
-                        'date_added' => $item->date_added,
-                        'price' => $item->price,
-                        'special_price' => $item->special_price,
-                        'percentage_off' => $item->percentage_off,
-                    ]; 
-                }),
+                'products' => $products
             ];
         })
-        ->values(); // Re-index the array
-    
-    // return response()->json($data);
-    
+        ->values();
+
     return response()->json([
-            'success' => true,
-            'message' => 'Filtered data grouped by type and category retrieved successfully',
-            'data' => $data,
-        ], 200);
-    }
+        'success' => true,
+        'message' => 'Filtered data grouped by category retrieved successfully',
+        'data' => $data,
+    ], 200);
+}
+
+
 
  
     public function productRating(Request $request)
@@ -221,6 +361,8 @@ class ProductApiController extends Controller
             'product_variants.percentage_off'
         )
         ->where('products.is_vendor', 1)
+        ->orderBy('products.id', 'asc') // Ordering by 'products.id' or another field as needed
+            ->limit(1)
         ->when($search, function ($query, $search) {
             return $query->where('products.name', 'like', '%' . $search . '%');
         })

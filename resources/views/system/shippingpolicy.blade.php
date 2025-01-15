@@ -1,5 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 
 <script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
 

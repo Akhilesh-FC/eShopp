@@ -1,7 +1,8 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
-<div class="container">
+<div class="page-wrapper">
+    <div class="container-fluid">
     <!-- Back Button on Top -->
     <!--<a href="{{ route('vendor', $vendor->id) }}" class="btn btn-primary mb-4">Back to Vendor List</a>-->
     <a href="{{ route('vendor', $vendor->id) }}" class="btn btn-primary mb-4">&larr; Back to Vendor List</a>

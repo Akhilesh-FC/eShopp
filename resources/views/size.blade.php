@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
 
 @section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">

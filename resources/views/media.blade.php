@@ -1,5 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 
 <div class="container-fluid mt-4">
     <!-- File Select and Upload Section -->

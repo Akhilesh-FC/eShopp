@@ -8,7 +8,7 @@
     <!---->
     
     
-       <div class="row">
+            <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-3 col-12">
                     <div class="card pull-up">
                         <div class="card-content">
@@ -91,11 +91,13 @@
                                 <h3>1</h3>
                                 <p><button class='btn btn-outline-success text-white border-0' data-toggle="modal" data-target="#approved_sellers">Approved sellers</button></p>
                             </div>
-                            <div class="icon">
-                                <i class="fa fa-xs fa-check-circle"></i>
+                            <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
+                                <!-- Use fa-5x or fa-6x for a larger icon size -->
+                                <i class="fa fa-check-circle fa-5x"></i>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-4">
                         <div class="small-box bg-info">
                             <div class="inner">
@@ -103,9 +105,10 @@
                                 <p><button class='btn btn-outline-secondary text-white border-0' data-toggle="modal" data-target="#not_approved_sellers">Not Approved Sellers</button></p>
 
                             </div>
-                            <div class="icon">
+                            <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
 
-                                <i class="fa fa-xs fa-pause-circle"></i>
+                               <i class="fa fa-ban fa-5x"></i>
+
                             </div>
                         </div>
                     </div>
@@ -115,8 +118,9 @@
                                 <h3>0</h3>
                                 <p><button class='btn btn-outline-danger text-white border-0' data-toggle="modal" data-target="#deactive_sellers">Deactiveted sellers</button></p>
                             </div>
-                            <div class="icon">
-                                <i class="fa fa-xs fa-times-circle"></i>
+                            <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
+                                <i class="fa fa-user-slash fa-5x"></i>
+
                             </div>
                         </div>
                     </div>

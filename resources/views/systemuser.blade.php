@@ -1,6 +1,8 @@
 @extends('admin.body.adminmaster')
-@section('admin')
 
+@section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">

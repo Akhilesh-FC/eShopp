@@ -131,6 +131,8 @@ class CartApiController extends Controller
     
         // Ensure final_total_price is always returned, even if cart is empty
         $finalTotalPrice = $finalTotalPrice ?? 0; // Default to 0 if no cart items
+        
+        $finalTotalPrice = number_format($finalTotalPrice, 2, '.', '');
     
         // Check if the cart is empty and return appropriate response
         if ($cartItems->isEmpty()) {

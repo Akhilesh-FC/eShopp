@@ -1,5 +1,8 @@
 @extends('admin.body.adminmaster')
+
 @section('admin')
+<div class="page-wrapper">
+    <div class="container-fluid">
 
     <form action="{{ route('system_registration') }}" method="get"></form>
     

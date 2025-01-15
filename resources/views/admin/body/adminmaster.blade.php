@@ -23,6 +23,17 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/extra-libs/multicheck/multicheck.css')}}">
     <link rel="stylesheet" href="{{ asset('assets/css/custombutton.css') }}">
     
+    <!---->
+    <!--wriiten by akhilesh for sidebar iocns -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-------for dashborad page orders and signup vendor prodcuts ect ---------->
+    
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    
+
+    <!---->
+    
     
     
     <!--for search feacher in dropdown-->

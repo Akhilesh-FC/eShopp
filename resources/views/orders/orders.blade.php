@@ -2,7 +2,7 @@
 
 @section('admin')
 <div class="page-wrapper">
-     <div class="container-fluid">
+    <div class="container-fluid">
 
 
 <!---->
