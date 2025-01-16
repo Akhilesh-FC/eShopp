@@ -185,22 +185,29 @@
                     </div>
                     <h2 class="text-center mb-4">Sign Into Your Account</h2>
                     <form action="{{ url('login') }}" method="POST">
-                        @csrf
-                        <div class="mb-3 input-box">
-                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter Your Email" required>
+                    @csrf
+                    <div class="mb-3 input-box">
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Enter Your Email" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3 input-box">
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter Your Password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                            <a href="forget-3.html" class="text-decoration-none float-end">Forget Password</a>
                         </div>
-                        <div class="mb-3 input-box">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter Your Password" required>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="rememberMe">
-                                <label class="form-check-label" for="rememberMe">Remember me</label>
-                                <a href="forget-3.html" class="text-decoration-none float-end">Forget Password</a>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn login-btn w-100 mb-3">Login</button>
-                    </form>
+                    </div>
+                    <button type="submit" class="btn login-btn w-100 mb-3">Login</button>
+                </form>
+
 
                     <!-- Register Link -->
                     <p class="text-center register-test mt-3">Don't have an account? <a href="register-3.html">Register here</a></p>

@@ -151,7 +151,7 @@ class ProductApiController extends Controller
     //     ], 200);
     // }
     
-  public function Product_list_rating() {
+    public function Product_list_rating() {
     $data = DB::table('categories')
         ->select(
             'categories.id as category_id',
@@ -289,9 +289,6 @@ class ProductApiController extends Controller
     ], 200);
 }
 
-
-
- 
     public function productRating(Request $request)
     {
         // Validate the incoming request
@@ -346,94 +343,192 @@ class ProductApiController extends Controller
     }
     
     public function product_explore(Request $request) 
-{
-    $search = $request->input('search'); // Search term from JSON payload
-    $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
-    $sortBy = $request->input('sort_by'); // Sorting option from the request (1-5)
-
-    // Fetch products with optional search filter
-    $products = DB::table('products')
-        ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
-        ->select(
-            'products.*',
-            'product_variants.price',
-            'product_variants.special_price', 
-            'product_variants.percentage_off'
-        )
-        ->where('products.is_vendor', 1)
-        ->orderBy('products.id', 'asc') // Ordering by 'products.id' or another field as needed
-            ->limit(1)
-        ->when($search, function ($query, $search) {
-            return $query->where('products.name', 'like', '%' . $search . '%');
-        })
-        ->when($sortBy, function ($query, $sortBy) {
-            // Handling sorting options based on the number (1-5)
-            switch ($sortBy) {
-                case 1: // Top Rated
-                    return $query->orderByDesc('products.rating'); // Assuming 'rating' field is available
-                case 2: // Newest First
-                    return $query->orderByDesc('products.created_at'); // Sorting by creation date (newest first)
-                case 3: // Oldest First
-                    return $query->orderBy('products.created_at'); // Sorting by creation date (oldest first)
-                case 4: // Price Low to High
-                    return $query->orderBy('product_variants.price'); // Sorting by price ascending
-                case 5: // Price High to Low
-                    return $query->orderByDesc('product_variants.price'); // Sorting by price descending
-                default:
-                    return $query; // No sorting if invalid or missing sort option
-            }
-        })
-        ->get();
-
-    // Initialize cart and favorites arrays
-    $cartItems = [];
-    $favoriteItems = [];
+    {
+        $search = $request->input('search'); // Search term from JSON payload
+        $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
+        $sortBy = $request->input('sort_by'); // Sorting option from the request (1-5)
     
-    // Only fetch cart and favorite items if userId is provided
-    if ($userId) {
-        // Fetch the cart items for the given user
-        $cartItems = DB::table('cart')
-            ->where('user_id', $userId)
-            ->where('status', '0') // New cart items (status '0')
-            ->get(['product_id', 'quantity']) 
-            ->keyBy('product_id') // Key by product_id
-            ->map(function ($item) {
-                return $item->quantity; // Return the quantity for each product in the cart
-            });
-        
-        // Fetch product IDs in the user's favorites
-        $favoriteItems = DB::table('favorites')
-            ->where('user_id', $userId)
-            ->pluck('product_id') // Fetch only product IDs
-            ->toArray();
+        // Fetch products with optional search filter and vendor check
+        $products = DB::table('products')
+            ->leftJoin('product_variants', function ($join) {
+                // Subquery to get the first variant for each product
+                $join->on('products.id', '=', 'product_variants.product_id')
+                     ->whereRaw('product_variants.id = (SELECT MIN(id) FROM product_variants WHERE product_variants.product_id = products.id)');
+            })
+            ->select(
+                'products.*',
+                'product_variants.id as variant_id',
+                'product_variants.price',
+                'product_variants.special_price',
+                'product_variants.percentage_off'
+            )
+            ->whereNotNull('products.id') // Ensure the product ID is not null
+            ->where('products.is_vendor', 1) // Only products that are from vendors
+            ->when($search, function ($query, $search) {
+                return $query->where('products.name', 'like', '%' . $search . '%');
+            })
+            ->when($sortBy, function ($query, $sortBy) {
+                switch ($sortBy) {
+                    case 1:
+                        return $query->orderByDesc('products.rating');
+                    case 2:
+                        return $query->orderByDesc('products.created_at');
+                    case 3:
+                        return $query->orderBy('products.created_at');
+                    case 4:
+                        return $query->orderBy('product_variants.price');
+                    case 5:
+                        return $query->orderByDesc('product_variants.price');
+                    default:
+                        return $query;
+                }
+            })
+            ->get();
+    
+        // Initialize cart and favorites arrays
+        $cartItems = [];
+        $favoriteItems = [];
+    
+        // Only fetch cart and favorite items if userId is provided
+        if ($userId) {
+            // Fetch the cart items for the given user
+            $cartItems = DB::table('cart')
+                ->where('user_id', $userId)
+                ->where('status', '0') // New cart items (status '0')
+                ->get(['product_id', 'quantity']) 
+                ->keyBy('product_id') // Key by product_id
+                ->map(function ($item) {
+                    return $item->quantity; // Return the quantity for each product in the cart
+                });
+            
+            // Fetch product IDs in the user's favorites
+            $favoriteItems = DB::table('favorites')
+                ->where('user_id', $userId)
+                ->pluck('product_id') // Fetch only product IDs
+                ->toArray();
+        }
+    
+        // Add `is_added_to_cart`, `is_added_to_fav`, and `quantity_in_cart` flags to each product
+        $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+            // Check if product is in the cart
+            $product->is_added_to_cart = isset($cartItems[$product->id]) ? 1 : 0; // Check for existence of product in the cart
+    
+            // Check if product is in the favorites
+            $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+    
+            // Get the quantity of the product in the cart, or 0 if not present
+            $product->quantity_in_cart = isset($cartItems[$product->id]) ? $cartItems[$product->id] : 0;
+    
+            return $product;
+        });
+    
+        // Add a custom message based on the result
+        $message = $products->isEmpty() 
+            ? 'No products found matching your search.' 
+            : 'Products retrieved successfully.';
+    
+        // Return the response with success status and data
+        return response()->json([
+            'message' => $message,
+            "success" => true,
+            'data' => $products
+        ]);
     }
-    
-    // Add `is_added_to_cart`, `is_added_to_fav`, and `quantity_in_cart` flags to each product
-    $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
-        // Check if product is in the cart
-        $product->is_added_to_cart = isset($cartItems[$product->id]) ? 1 : 0; // Check for existence of product in the cart
-    
-        // Check if product is in the favorites
-        $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
-    
-        // Get the quantity of the product in the cart, or 0 if not present
-        $product->quantity_in_cart = isset($cartItems[$product->id]) ? $cartItems[$product->id] : 0;
-    
-        return $product;
-    });
-    
-    // Add a custom message based on the result
-    $message = $products->isEmpty() 
-        ? 'No products found matching your search.' 
-        : 'Products retrieved successfully.';
-    
-    // Return the response with success status and data
-    return response()->json([
-        'message' => $message,
-        "success" => true,
-        'data' => $products
-    ]);
-}
+
+
+// public function product_explore(Request $request) 
+// {
+//     $search = $request->input('search'); // Search term from JSON payload
+//     $userId = $request->input('user_id'); // Optional user ID for checking cart and favorites
+//     $sortBy = $request->input('sort_by'); // Sorting option from the request (1-5)
+
+//     // Fetch products with optional search filter and vendor check
+//     $products = DB::table('products')
+//         ->leftJoin('product_variants', 'products.id', '=', 'product_variants.product_id')
+//         ->select(
+//              'products.*',
+//             'product_variants.id as variant_id',
+//             'product_variants.price',
+//             'product_variants.special_price',
+//             'product_variants.percentage_off'
+//         )
+//         ->whereNotNull('products.id') // Ensure the product ID is not null
+//         ->where('products.is_vendor', 1) // Only products that are from vendors
+//         ->when($search, function ($query, $search) {
+//             return $query->where('products.name', 'like', '%' . $search . '%');
+//         })
+//         ->when($sortBy, function ($query, $sortBy) {
+//             switch ($sortBy) {
+//                 case 1:
+//                     return $query->orderByDesc('products.rating');
+//                 case 2:
+//                     return $query->orderByDesc('products.created_at');
+//                 case 3:
+//                     return $query->orderBy('products.created_at');
+//                 case 4:
+//                     return $query->orderBy('product_variants.price');
+//                 case 5:
+//                     return $query->orderByDesc('product_variants.price');
+//                 default:
+//                     return $query;
+//             }
+//         })
+//         ->groupBy('products.id', 'products.name', 'products.rating') // Group to get one row per product
+//         ->get();
+
+//     // Initialize cart and favorites arrays
+//     $cartItems = [];
+//     $favoriteItems = [];
+
+//     // Only fetch cart and favorite items if userId is provided
+//     if ($userId) {
+//         // Fetch the cart items for the given user
+//         $cartItems = DB::table('cart')
+//             ->where('user_id', $userId)
+//             ->where('status', '0') // New cart items (status '0')
+//             ->get(['product_id', 'quantity']) 
+//             ->keyBy('product_id') // Key by product_id
+//             ->map(function ($item) {
+//                 return $item->quantity; // Return the quantity for each product in the cart
+//             });
+        
+//         // Fetch product IDs in the user's favorites
+//         $favoriteItems = DB::table('favorites')
+//             ->where('user_id', $userId)
+//             ->pluck('product_id') // Fetch only product IDs
+//             ->toArray();
+//     }
+
+//     // Add `is_added_to_cart`, `is_added_to_fav`, and `quantity_in_cart` flags to each product
+//     $products = $products->map(function ($product) use ($cartItems, $favoriteItems) {
+//         // Check if product is in the cart
+//         $product->is_added_to_cart = isset($cartItems[$product->id]) ? 1 : 0; // Check for existence of product in the cart
+
+//         // Check if product is in the favorites
+//         $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
+
+//         // Get the quantity of the product in the cart, or 0 if not present
+//         $product->quantity_in_cart = isset($cartItems[$product->id]) ? $cartItems[$product->id] : 0;
+
+//         return $product;
+//     });
+
+//     // Add a custom message based on the result
+//     $message = $products->isEmpty() 
+//         ? 'No products found matching your search.' 
+//         : 'Products retrieved successfully.';
+
+//     // Return the response with success status and data
+//     return response()->json([
+//         'message' => $message,
+//         "success" => true,
+//         'data' => $products
+//     ]);
+// }  wrong
+
+
+
+
 
 
  

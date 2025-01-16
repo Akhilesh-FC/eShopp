@@ -24,7 +24,7 @@
                                         <tr>
                                             <th>Name</th>
                                             <th>Image</th>
-                                            <th>Banner</th>
+                                            <!--<th>Banner</th>-->
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -42,13 +42,13 @@
                                                 </td>
 
                                                 <!-- Category Banner -->
-                                                <td>
-                                                    @if($category->banner)
-                                                        <img src="{{ $category->banner }}" alt="Banner" class="img-thumbnail" style="max-width: 100px;">
-                                                    @else
-                                                        <span>No Banner</span>
-                                                    @endif
-                                                </td>
+                                                <!--<td>-->
+                                                <!--    @if($category->banner)-->
+                                                <!--        <img src="{{ $category->banner }}" alt="Banner" class="img-thumbnail" style="max-width: 100px;">-->
+                                                <!--    @else-->
+                                                <!--        <span>No Banner</span>-->
+                                                <!--    @endif-->
+                                                <!--</td>-->
 
                                                 <!-- Status -->
                                                 <td>

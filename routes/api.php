@@ -28,7 +28,7 @@ Route::controller(PublicApiController::class)->group(function () {
     Route::get('/faqs','FAQs');
     Route::get('/Terms_Condition','Terms_Condition');
     Route::post('/product_details','ProductDetails'); 
-    Route::get('/search/{name}','search'); 
+    Route::post('/universalSearch','universalSearch'); 
     
     
 });

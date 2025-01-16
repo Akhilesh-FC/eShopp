@@ -11,7 +11,7 @@
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                             <h3 class="card-title">SubCategories</h3>
                             <a href="{{ route('subcategory.create') }}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Add Category
+                                <i class="fas fa-plus"></i> Add SubCategory
                             </a>
                         </div>
 

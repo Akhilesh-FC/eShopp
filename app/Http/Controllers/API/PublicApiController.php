@@ -15,218 +15,52 @@ use Illuminate\Support\Facades\Schema;
 
 class PublicApiController extends Controller
 {
-    public function search(?string $name)
+    public function universalSearch(Request $request)
     {
-        // Split the input name into individual words
-        $searchWords = explode(' ', $name);
-        
-        if (empty($searchWords[0])) {
+        $searchTerm = $request->input('search');
+    
+        if (!$searchTerm) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid search query',
-                'data' => []
-            ]);
+                'message' => 'Search term is required'
+            ], 400);
         }
     
-        // Get the first letter of the first word
-        $firstLetter = substr($searchWords[0], 0, 1);
+        // Search in products table
+        $products = DB::table('products')
+            ->where('name', 'like', '%' . $searchTerm . '%')
+            ->orWhere('description', 'like', '%' . $searchTerm . '%')
+            ->where('status', 1)
+            ->get();
     
-        // Fetch rows that start with the same first letter
-        $allRows = DB::table('products')->where('name', 'LIKE', $firstLetter . '%')->get();
-        $similarities = [];
+        // Search in users table
+        $users = DB::table('users')
+            ->where('username', 'like', '%' . $searchTerm . '%')
+            ->orWhere('email', 'like', '%' . $searchTerm . '%')
+            ->get();
     
-        foreach ($allRows as $item) {
-            // Split $item->name into individual words by spaces
-            $itemWords = explode(' ', $item->name);
-    
-            // Initialize distances array
-            $distances = [];
-    
-            // 1. Calculate Levenshtein distance for each word in the search query
-            foreach ($searchWords as $searchIndex => $searchWord) {
-                $minNormalizedDistance = PHP_INT_MAX; // Start with a large value
-    
-                // Compare with each word in the item name
-                foreach ($itemWords as $itemWord) {
-                    $levDistance = levenshtein($searchWord, $itemWord);
-                    $normalizedDistance = $levDistance / max(strlen($searchWord), strlen($itemWord));
-                    $minNormalizedDistance = min($minNormalizedDistance, $normalizedDistance);
-                }
-    
-                // Store the minimum normalized distance for this search word
-                $distances[$searchIndex][] = $minNormalizedDistance;
-            }
-    
-            // After calculating distances, store them in a flattened format
-            $item->distances = array_map(function($distanceArray) {
-                sort($distanceArray); // Sort each word's distances
-                return $distanceArray;
-            }, $distances);
-            $similarities[] = $item;
-        }
-    
-        // 3. Sort the results based on the distances
-        usort($similarities, function ($a, $b) {
-            // Compare each set of sorted distances
-            foreach ($a->distances as $index => $distanceArrayA) {
-                $distanceArrayB = $b->distances[$index];
-    
-                // Compare sorted distances for each word
-                foreach ($distanceArrayA as $key => $distanceA) {
-                    if ($distanceA != $distanceArrayB[$key]) {
-                        return $distanceA <=> $distanceArrayB[$key];
-                    }
-                }
-            }
-            return 0; // All distances are equal
-        });
-    
-        // Get the top 30 most similar results
-        $topSimilarities = array_slice($similarities, 0, 30);
-    
-        // Build the result collection from the top similar entries
-        $resultRows = collect($topSimilarities);
+        // Search in orders table
+        $orders = DB::table('orders')
+            ->where('mobile', 'like', '%' . $searchTerm . '%')
+            ->orWhere('status', 'like', '%' . $searchTerm . '%')
+            ->get();
     
         return response()->json([
             'success' => true,
-            'message' => 'Results for search',
-            'data' => $resultRows
-        ]);
-    } 
-    
-//     public function getProductsBySubcategory(Request $request)
-// {
-//     $subcategoryId = $request->input('subcategory_id');
-//     $categoryId = $request->input('category_id'); // Category ID
-//     $sortBy = $request->input('sort_by'); // Sorting option (1-5)
-    
-//     // Check if subcategory_id or category_id is provided
-//     if (!$subcategoryId && !$categoryId) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Subcategory ID or Category ID is required.',
-//         ], 200);
-//     }
-
-//     // You may need to get the user_id from the request if needed
-//     $userId = $request->input('user_id'); 
-
-//     $query = DB::table('products')
-//         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // join with product_variants
-//         ->whereIn('products.is_vendor', [1])
-//         ->orderBy('products.id', 'asc') // Default ordering
-//         ->limit(1); // Limit the result, can be adjusted as needed
-    
-//     if ($subcategoryId) {
-//         // If subcategory_id is provided, filter by subcategory
-//         $query->where('products.subcategory', $subcategoryId);
-//     }
-
-//     if ($categoryId) {
-//         // If category_id is provided, get products of all subcategories under this category
-//         $query->whereIn('products.subcategory', function ($subQuery) use ($categoryId) {
-//             $subQuery->select('id')
-//                 ->from('subcategories')
-//                 ->where('category_id', $categoryId);
-//         });
-//     }
-
-//     // Apply sorting based on 'sort_by'
-//     if ($sortBy) {
-//         switch ($sortBy) {
-//             case 1: // Top Rated
-//                 $query->orderByDesc('products.rating'); // Assuming 'rating' field exists
-//                 break;
-//             case 2: // Newest First
-//                 $query->orderByDesc('products.created_at'); // Sorting by creation date (newest first)
-//                 break;
-//             case 3: // Oldest First
-//                 $query->orderBy('products.created_at'); // Sorting by creation date (oldest first)
-//                 break;
-//             case 4: // Price Low to High
-//                 $query->orderBy('product_variants.price'); // Sorting by price ascending
-//                 break;
-//             case 5: // Price High to Low
-//                 $query->orderByDesc('product_variants.price'); // Sorting by price descending
-//                 break;
-//             default:
-//                 break; // No sorting if invalid or missing sort option
-//         }
-//     }
-
-//     // Limit to the first product variant for each product
-//     $products = $query->distinct('products.id') // Ensure only distinct products
-//         ->select('products.*', 'product_variants.price', 'product_variants.special_price')
-//         ->orderBy('product_variants.id') // Ensure we get the first product variant (adjust sorting if needed)
-//         ->get();
-
-//     $cartItems = [];
-//     $favoriteItems = [];
-//     if ($userId) {
-//         $cartItems = DB::table('cart')
-//             ->where('user_id', $userId)
-//             ->get(['product_id', 'quantity', 'status'])
-//             ->keyBy('product_id')
-//             ->map(function($item) {
-//                 return [
-//                     'quantity' => $item->quantity,
-//                     'status' => $item->status 
-//                 ]; 
-//             });
-
-//         $favoriteItems = DB::table('favorites')
-//             ->where('user_id', $userId)
-//             ->pluck('product_id')
-//             ->toArray();
-//     }
-
-//     // Modify products based on cart and favorite data
-//     $products = $products->map(function ($product) use ($cartItems, $favoriteItems, $userId) {
-//         $product->is_added_to_cart = 0;
-//         $product->quantity_in_cart = 0;
-//         $product->is_added_to_fav = 0;
-
-//         if ($userId) {
-//             // Check if the product is in the cart
-//             $cartItem = $cartItems->get($product->id);
-            
-//             if ($cartItem) {
-//                 // If the cart item status is 1 (checked out), set cart quantity and added to cart status to 0
-//                 if ($cartItem['status'] == 1) {
-//                     $product->is_added_to_cart = 0;
-//                     $product->quantity_in_cart = 0;
-//                 } else {
-//                     // If the cart item status is 0, return the quantity and set 'added to cart' status
-//                     $product->is_added_to_cart = 1;
-//                     $product->quantity_in_cart = $cartItem['quantity'];
-//                 }
-//             }
-
-//             // Check if the product is in the favorites
-//             $product->is_added_to_fav = in_array($product->id, $favoriteItems) ? 1 : 0;
-//         }
-
-//         return $product;
-//     });
-
-//     if ($products->isEmpty()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'No products found for this subcategory or category.',
-//         ], 200);
-//     }
-
-//     return response()->json([
-//         'success' => true,
-//         'data' => $products,
-//     ], 200);
-// }
-
+            'message' => 'Search results',
+            'data' => [
+                'products' => $products,
+                'users' => $users,
+                'orders' => $orders
+            ]
+        ], 200);
+    }
     
     public function getProductsBySubcategory(Request $request)
     {
         $subcategoryId = $request->input('subcategory_id');
         $categoryId = $request->input('category_id'); // Category ID
+        $sortBy = $request->input('sort_by'); 
     
         // Check if subcategory_id or category_id is provided
         if (!$subcategoryId && !$categoryId) {
@@ -239,11 +73,34 @@ class PublicApiController extends Controller
         // You may need to get the user_id from the request if needed
         $userId = $request->input('user_id'); 
     
+        // Start building the query
         $query = DB::table('products')
-            ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // join with product_variants
+            ->join('product_variants', function ($join) {
+                // Subquery to get the first variant for each product
+                $join->on('products.id', '=', 'product_variants.product_id')
+                    ->whereRaw('product_variants.id = (SELECT MIN(id) FROM product_variants WHERE product_variants.product_id = products.id)');
+            })
             ->whereIn('products.is_vendor', [1])
+            ->distinct('products.id') // Ensure we get distinct products
             ->orderBy('products.id', 'asc') // Ordering by 'products.id' or another field as needed
-            ->limit(1);// vendor-related filter, you can modify as needed
+    
+         ->when($sortBy, function ($query, $sortBy) {
+            switch ($sortBy) {
+                case 1:
+                    return $query->orderByDesc('products.rating');
+                case 2:
+                    return $query->orderByDesc('products.created_at');
+                case 3:
+                    return $query->orderBy('products.created_at');
+                case 4:
+                    return $query->orderBy('product_variants.price');
+                case 5:
+                    return $query->orderByDesc('product_variants.price');
+                default:
+                    return $query;
+            }
+        });
+
     
         if ($subcategoryId) {
             // If subcategory_id is provided, filter by subcategory
@@ -259,11 +116,13 @@ class PublicApiController extends Controller
             });
         }
     
-        // Limit to the first product variant for each product
-        $products = $query->distinct('products.id') // ensure only distinct products
-            ->select('products.*', 'product_variants.price', 'product_variants.special_price')
-            ->orderBy('product_variants.id') // ensure we get the first product variant (adjust sorting if needed)
-            ->get();
+        // Get the first variant for each product
+        $products = $query->select(
+            'products.*', 
+            'product_variants.price', 
+            'product_variants.special_price'
+        )
+        ->get();
     
         $cartItems = [];
         $favoriteItems = [];
@@ -327,7 +186,6 @@ class PublicApiController extends Controller
         ], 200);
     }
     
-        
     // public function getProductsBySubcategory(Request $request)
     // {
     //     $subcategoryId = $request->input('subcategory_id');
@@ -344,14 +202,21 @@ class PublicApiController extends Controller
     //     // You may need to get the user_id from the request if needed
     //     $userId = $request->input('user_id'); 
     
+    //     // Start building the query
     //     $query = DB::table('products')
-    //         ->join('product_variants', 'products.id', '=', 'product_variants.product_id') // join with product_variants
-    //         ->whereIn('products.is_vendor', [1]); // vendor-related filter, you can modify as needed
+    //         ->join('product_variants', function ($join) {
+    //             // Subquery to get the first variant for each product
+    //             $join->on('products.id', '=', 'product_variants.product_id')
+    //                 ->whereRaw('product_variants.id = (SELECT MIN(id) FROM product_variants WHERE product_variants.product_id = products.id)');
+    //         })
+    //         ->whereIn('products.is_vendor', [1])
+    //         ->distinct('products.id') // Ensure we get distinct products
+    //         ->orderBy('products.id', 'asc'); // Ordering by 'products.id' or another field as needed
     
     //     if ($subcategoryId) {
     //         // If subcategory_id is provided, filter by subcategory
     //         $query->where('products.subcategory', $subcategoryId);
-    //     } 
+    //     }
     
     //     if ($categoryId) {
     //         // If category_id is provided, get products of all subcategories under this category
@@ -362,19 +227,20 @@ class PublicApiController extends Controller
     //         });
     //     }
     
-    //     // Retrieve the products
-    //     $products = $query->get([
-    //         'products.*', // all fields from the products table
-    //         'product_variants.price',  // price from product_variants table
-    //         'product_variants.special_price'  // special_price from product_variants table
-    //     ]);
+    //     // Get the first variant for each product
+    //     $products = $query->select(
+    //         'products.*', 
+    //         'product_variants.price', 
+    //         'product_variants.special_price'
+    //     )
+    //     ->get();
     
     //     $cartItems = [];
     //     $favoriteItems = [];
     //     if ($userId) {
     //         $cartItems = DB::table('cart')
     //             ->where('user_id', $userId)
-    //             ->get(['product_id', 'quantity', 'status']) 
+    //             ->get(['product_id', 'quantity', 'status'])
     //             ->keyBy('product_id')
     //             ->map(function($item) {
     //                 return [
@@ -386,7 +252,7 @@ class PublicApiController extends Controller
     //         $favoriteItems = DB::table('favorites')
     //             ->where('user_id', $userId)
     //             ->pluck('product_id')
-    //             ->toArray(); 
+    //             ->toArray();
     //     }
     
     //     // Modify products based on cart and favorite data
@@ -421,7 +287,7 @@ class PublicApiController extends Controller
     //     if ($products->isEmpty()) {
     //         return response()->json([
     //             'success' => false,
-    //             'message' => 'No products found for this subcategory or category.', 
+    //             'message' => 'No products found for this subcategory or category.',
     //         ], 200);
     //     }
     
@@ -530,145 +396,26 @@ class PublicApiController extends Controller
         });
     
 
-            $formattedVariants = $formattedVariants->values()->all(); // Get the array values from the collection
-            
-            $variant = $variants->first(); // Get the first variant
-            
-            // Merge product and variant data, and include formattedVariants properly
-            // $productData = (object) array_merge(
-            //     (array) $product,
-            //     (array) $variant,
-               $productData = (object) array_merge((array) $product, (array) $variant);
+        $formattedVariants = $formattedVariants->values()->all(); // Get the array values from the collection
         
+        $variant = $variants->first(); // Get the first variant
+        
+        // Merge product and variant data, and include formattedVariants properly
+        // $productData = (object) array_merge(
+        //     (array) $product,
+        //     (array) $variant,
+           $productData = (object) array_merge((array) $product, (array) $variant);
+    
+        
+        return response()->json([
+            "success" => true,
+            "is_added" => $isAddedToCart,
+            "is_added_to_fav" => $isAddedToFavorites,
+            "data" => $productData,
+            "variants" => $formattedVariants // Returning the grouped variants
+        ], 200);
+    }
             
-            return response()->json([
-                "success" => true,
-                "is_added" => $isAddedToCart,
-                "is_added_to_fav" => $isAddedToFavorites,
-                "data" => $productData,
-                "variants" => $formattedVariants // Returning the grouped variants
-            ], 200);
-            }
-
-
-    
-//     public function ProductDetails(Request $request)  
-//     {
-//     $validator = Validator::make($request->all(), [  
-//         'product_id' => 'required'
-//     ]);
-//     $validator->stopOnFirstFailure(); 
-
-//     if ($validator->fails()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => $validator->errors()->first()
-//         ], 200);
-//     }
-
-//     // Check if the product exists
-//     $product = DB::table('products')
-//         ->where('id', $request->product_id)
-//         ->select('products.*')
-//         ->first();
-
-//     if (empty($product)) {
-//         return response()->json([
-//             'success' => 'error',
-//             'message' => 'No product found for this product ID'
-//         ], 200);
-//     }
-
-//     // Fetch product variants
-//     $variants = DB::table('product_variants')
-//         ->where('product_id', $request->product_id)
-//         ->select(
-//              'id',
-//             'special_price',
-//             'price',
-//             'percentage_off',
-//             'size',
-//             'color',
-//             'stock'
-//         )
-//         ->get();
-
-//     // Group variants by size
-//     $groupedVariants = $variants->groupBy('size');
-    
-//     $colors = DB::table('color')->pluck('name', 'id')->toArray();
-//     $colorCodes = DB::table('color')->pluck('color', 'id')->toArray(); // Fetch color codes as well
-
-//     $userId = $request->input('user_id'); // Optional user ID
-//     $cartItems = [];
-//     $favoriteItems = [];
-
-//     if ($userId) {
-//         // Check if the product is added to the cart
-//         $cartItems = DB::table('cart')
-//             ->where('user_id', $userId)
-//             ->where('status', '0')
-//             ->pluck('product_id')
-//             ->toArray();
-
-//         // Check if the product is added to favorites
-//         $favoriteItems = DB::table('favorites')
-//             ->where('user_id', $userId)
-//             ->pluck('product_id')
-//             ->toArray();
-//     }
-
-//     $isAddedToCart = in_array($request->product_id, $cartItems) ? 1 : 0;
-//     $isAddedToFavorites = in_array($request->product_id, $favoriteItems) ? 1 : 0;
-
-//     // Prepare the response structure for variants with sizes and colors
-//     $formattedVariants = $groupedVariants->map(function ($variantsBySize) {
-//         $size = $variantsBySize->first()->size;
-//         $price = $variantsBySize->first()->price;
-//         $specialPrice = $variantsBySize->first()->special_price;
-//         $discount = $variantsBySize->first()->percentage_off;
-
-//         // Group colors for this size
-//         $colors = $variantsBySize->map(function ($variant) {
-//             return [
-//                 'colorIndex' => $variant->color, // Assuming colorIndex is mapped to color field
-//                 'colorName' => isset($colors[$variant->color]) ? $colors[$variant->color] : 'Unknown', // Color name from the color table
-//                 'colorCode' => isset($colorCodes[$variant->color]) ? $colorCodes[$variant->color] : '#000000', // Color hex code (default to black if not found)
-//                 'stock' => $variant->stock
-//             ];
-//         });
-
-//         return [
-//              'id' => $variantsBySize->first()->id,  // Size ID, assuming size is unique
-//             'Size' => $size,
-//             'price' => $price,
-//             'discount' => $discount,
-//             'specialPrice' => $specialPrice,
-//             'colors' => $colors
-//         ];
-//     });
-
-//     // Flatten the collection to an array
-//     $formattedVariants = $formattedVariants->values()->all();
-
-//     $variant = $variants->first();
-
-//     // Merge product and variant data
-//     $productData = (object) array_merge((array) $product, (array) $variant);
-
-//     return response()->json([
-//         "success" => true,
-//         "is_added" => $isAddedToCart,  
-//         "is_added_to_fav" => $isAddedToFavorites,
-//         "data" => $productData,
-//         "variants" => $formattedVariants // Returning the grouped variants
-//     ], 200);
-// }
-
-
-
-    
-    
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -82,14 +82,16 @@
                 </div>
             </div>
             
-                <h5 class="col">Sellers Details</h5>
+                <h5 class="col">Vendors Details</h5>
+                 <!--<h5 class="text-muted text-bold-500">Vendors Details</h5>-->
                 <div class="row col-12 d-flex">
 
                     <div class="col-4">
                         <div class="small-box bg-success">
                             <div class="inner">
-                                <h3>1</h3>
-                                <p><button class='btn btn-outline-success text-white border-0' data-toggle="modal" data-target="#approved_sellers">Approved sellers</button></p>
+                                <h3 style="text-align: center;">1</h3>
+
+                                <p><button class='btn btn-outline-success text-white border-0' data-toggle="modal" data-target="#approved_sellers" style="text-align: center; display: block; width: 100%"><strong>Approved Vendors</strong></button></p>
                             </div>
                             <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
                                 <!-- Use fa-5x or fa-6x for a larger icon size -->
@@ -101,8 +103,9 @@
                     <div class="col-4">
                         <div class="small-box bg-info">
                             <div class="inner">
-                                <h3>0</h3>
-                                <p><button class='btn btn-outline-secondary text-white border-0' data-toggle="modal" data-target="#not_approved_sellers">Not Approved Sellers</button></p>
+                                <h3 style="text-align: center;">12</h3>
+
+                                <p><button class='btn btn-outline-secondary text-white border-0' data-toggle="modal" data-target="#not_approved_sellers" style="text-align: center; display: block; width: 100%"><b>Not Approved Vendors</b></button></p>
 
                             </div>
                             <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
@@ -115,8 +118,11 @@
                     <div class="col-4">
                         <div class="small-box bg-danger">
                             <div class="inner">
-                                <h3>0</h3>
-                                <p><button class='btn btn-outline-danger text-white border-0' data-toggle="modal" data-target="#deactive_sellers">Deactiveted sellers</button></p>
+                                <h3 style="text-align: center;">10</h3>
+
+                                <!--<p><button class='btn btn-outline-danger text-white border-0' data-toggle="modal" data-target="#deactive_sellers"><b>Deactiveted Vendors</b></button></p>-->
+                                <p><button class='btn btn-outline-danger text-white border-0' data-toggle="modal" data-target="#deactive_sellers" style="text-align: center; display: block; width: 100%"><b>Deactivated Vendors</b></button></p>
+
                             </div>
                             <div class="icon d-flex justify-content-center align-items-center" style="height: 80px;">
                                 <i class="fa fa-user-slash fa-5x"></i>
@@ -131,13 +137,13 @@
                     <!-- Top Sellers Table -->
                     <div class="col-md-6">
                         <div class="card h-100">
-                            <div class="m-3">Top Sellers</div>
+                            <div class="m-3"><b>Top Vendors</b></div>
                             <div class="card-body">
                                 <table class="table table-striped" id="top_seller_table">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Seller Name</th>
+                                            <th>Vendor Name</th>
                                             <th>Store Name</th>
                                             <th>Total</th>
                                         </tr>
@@ -170,7 +176,7 @@
                             <!-- Top Categories Table -->
                             <div class="col-md-6">
                                 <div class="card h-100">
-                                    <div class="m-3">Top Categories</div>
+                                    <div class="m-3"><b>Top Categories</b></div>
                                     <div class="card-body">
                                         <table class="table table-striped" id="top_category_table">
                                             <thead>
@@ -402,9 +408,12 @@
     <!---->
     
     </div>
-             <footer class="footer text-center">
-                All Rights Reserved by Matrix-admin. Designed and Developed by <a href="https://wrappixel.com">WrapPixel</a>.
-            </footer>
-        </div>
+    <footer class="footer text-center">
+        <p>All Rights Reserved by <strong>Free2kart</strong>. Designed and Developed by <strong>Founder Code technology Lucknow</strong>. Developer: <strong>Akhilesh K yadav</strong>.</p>
+       <p>Powered by <a href="https://foundercodes.com/" target="_blank">Free2kart</a>.</p>
+
+    </footer>
+</div>
+
 
 @endsection

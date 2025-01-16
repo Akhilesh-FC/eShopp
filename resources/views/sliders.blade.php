@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="https://free2kart.tirangawin.club/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="https://free2kart.mobileappdemo.net/dashboard">Home</a></li>
                         <li class="breadcrumb-item active">Slider</li>
                     </ol>
                 </div>
@@ -56,7 +56,19 @@
                                         <td>{{ $slider->id }}</td>
                                         <td>{{ ucfirst($slider->type) }}</td>
                                         <td>{{ $slider->type_id }}</td>
-                                        <td><img src="{{ asset('path/to/images/' . $slider->image) }}" alt="Slider Image" width="50"></td>
+                                        <!--  <td><img src="{{ asset('path/to/images/' . $slider->image) }}" alt="Slider Image" width="50"></td>-->
+                                        <!--<td>-->
+                                        <!--    @if($slider->image)-->
+                                        <!--        <img src="{{ asset('sliders/' . $slider->image) }}" alt="Slider Image" class="img-thumbnail" style="max-width: 100px; height: auto;">-->
+                                        <!--    @else-->
+                                        <!--        <span>No Image</span>-->
+                                        <!--    @endif-->
+                                        <!--</td>-->
+                                        
+                                        <td><img src="{{URL::asset($slider->image)}}" width="50 px" height="50 px"></td>
+
+
+
                                         <td><a href="{{ $slider->link }}" target="_blank">Visit Link</a></td>
                                         <td>
                                             <!-- Action Buttons -->

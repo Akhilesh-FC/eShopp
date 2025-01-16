@@ -9,7 +9,7 @@
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{{ route('orders') }}" class="sidebar-link"><i class="fa fa-shopping-cart nav-icon"></i><span class="hide-menu"> Orders </span></a></li>
                                 <li class="sidebar-item"><a href="{{ route('orders_track') }}" class="sidebar-link"><i class="fa fa-map-marker-alt nav-icon"></i><span class="hide-menu"> Order Tracking  </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('system_notification') }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> System Notification </span></a></li>
+                                <!--<li class="sidebar-item"><a href="{{ route('system_notification') }}" class="sidebar-link"><i class="fas fa-bell nav-icon"></i><span class="hide-menu"> System Notification </span></a></li>-->
                             </ul>
                         </li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-bullseye text-success"></i><span class="hide-menu">Categories</span></a>
@@ -19,12 +19,16 @@
                                 
                             </ul>
                         </li> 
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fab fa-adversal text-primary"></i><span class="hide-menu">Brands </span></a>
+                        
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fa fa-user text-success"></i><span class="hide-menu">Customer </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{ route('brand') }}" class="sidebar-link"><i class="fab fa-adversal nav-icon"></i><span class="hide-menu"> Brand </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('bulk_upload') }}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu">  Bulk Upload  </span></a></li>
+                                <li class="sidebar-item"><a href="{{route('view_customer')}}" class="sidebar-link"><i class="fas fa-users nav-icon"></i><span class="hide-menu"> View Customers </span></a></li>
+                                <li class="sidebar-item"><a href="{{route('address')}}" class="sidebar-link"><i class="far fa-address-book nav-icon"></i><span class="hide-menu">  Addressess  </span></a></li>
+                                <li class="sidebar-item"><a href="{{route('transaction')}}" class="sidebar-link"><i class="fas fa-money-bill-wave nav-icon "></i><span class="hide-menu">  Transactions   </span></a></li>
+                                <li class="sidebar-item"><a href="{{route('wallet_transactions')}}" class="sidebar-link"><i class="fas fa-wallet nav-icon "></i><span class="hide-menu">  Wallet Transactions  </span></a></li>
                             </ul>
                         </li>
+                        
                         
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('vendor') }}" aria-expanded="false"><i class="nav-icon fas fa-user-tie text-danger"></i><span class="hide-menu">Vendor</span></a></li>
                             <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('color') }}" aria-expanded="false"><i class="fa-solid fa-palette menu-icon"></i><span class="hide-menu">Color</span></a></li>
@@ -32,14 +36,18 @@
                         
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-cubes text-primary"></i><span class="hide-menu">Products </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{ route('attributes') }}" class="sidebar-link"><i class="fas fa-sliders-h nav-icon"></i><span class="hide-menu"> Attributes </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('tax') }}" class="sidebar-link"><i class="fas fa-percentage nav-icon"></i><span class="hide-menu"> Tax </span></a></li>
+                               
                                 <li class="sidebar-item"><a href="{{ route('add_products')}}" class="sidebar-link"><i class="fas fa-plus-square nav-icon"></i><span class="hide-menu"> Add Products </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('bulk_upload') }}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu"> Bulk Upload </span></a></li>
                                 <li class="sidebar-item"><a href="{{ route('manage_products')}}" class="sidebar-link"><i class="fas fa-boxes nav-icon"></i><span class="hide-menu"> Manage Products </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('products_faqs')}}" class="sidebar-link"><i class="fas fa-question-circle nav-icon"></i><span class="hide-menu"> Products FAQs</span></a></li>
                                 <li class="sidebar-item"><a href="{{ route('product_order') }}" class="sidebar-link"><i class="fa fa-bars nav-icon"></i><span class="hide-menu"> Products Order</span></a></li>
+                                 <li class="sidebar-item"><a href="{{ route('attributes') }}" class="sidebar-link"><i class="fas fa-sliders-h nav-icon"></i><span class="hide-menu"> Attributes </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('tax') }}" class="sidebar-link"><i class="fas fa-percentage nav-icon"></i><span class="hide-menu"> Tax </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('bulk_upload') }}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu"> Bulk Upload </span></a></li>
+                                
+                                <li class="sidebar-item"><a href="{{ route('products_faqs')}}" class="sidebar-link"><i class="fas fa-question-circle nav-icon"></i><span class="hide-menu"> Products FAQs</span></a></li>
+                                
                             </ul>
+                            <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('sliders') }}" aria-expanded="false"><i class="nav-icon far fa-image text-success"></i><span class="hide-menu">Sliders</span></a></li>
                         </li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-blog text-warning"></i><span class="hide-menu">Blogs </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
@@ -47,8 +55,14 @@
                                 <li class="sidebar-item"><a href="{{ route('create_blog')}}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu">  Create Blog  </span></a></li>
                             </ul>
                         </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fab fa-adversal text-primary"></i><span class="hide-menu">Brands </span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{{ route('brand') }}" class="sidebar-link"><i class="fab fa-adversal nav-icon"></i><span class="hide-menu"> Brand </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('bulk_upload') }}" class="sidebar-link"><i class="fas fa-upload nav-icon"></i><span class="hide-menu">  Bulk Upload  </span></a></li>
+                            </ul>
+                        </li>
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('media') }}" aria-expanded="false"><i class="nav-icon fas fa-icons text-danger"></i><span class="hide-menu">Media</span></a></li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('sliders') }}" aria-expanded="false"><i class="nav-icon far fa-image text-success"></i><span class="hide-menu">Sliders</span></a></li>
+                        
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('offers') }}" aria-expanded="false"><i class="nav-icon fa fa-gift text-primary"></i><span class="hide-menu">Offers</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('manage_stock') }}" aria-expanded="false"><i class="nav-icon fa fa-cube text-success"></i><span class="hide-menu">Manage Stock</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-ticket-alt text-danger"></i><span class="hide-menu">Support Tickets </span></a>
@@ -64,14 +78,7 @@
                                 <li class="sidebar-item"><a href="{{route('section_order')}}" class="sidebar-link"><i class="fa fa-bars nav-icon"></i><span class="hide-menu">  Sections Orders  </span></a></li>
                             </ul>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fa fa-user text-success"></i><span class="hide-menu">Customer </span></a>
-                            <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{route('view_customer')}}" class="sidebar-link"><i class="fas fa-users nav-icon"></i><span class="hide-menu"> View Customers </span></a></li>
-                                <li class="sidebar-item"><a href="{{route('address')}}" class="sidebar-link"><i class="far fa-address-book nav-icon"></i><span class="hide-menu">  Addressess  </span></a></li>
-                                <li class="sidebar-item"><a href="{{route('transaction')}}" class="sidebar-link"><i class="fas fa-money-bill-wave nav-icon "></i><span class="hide-menu">  Transactions   </span></a></li>
-                                <li class="sidebar-item"><a href="{{route('wallet_transactions')}}" class="sidebar-link"><i class="fas fa-wallet nav-icon "></i><span class="hide-menu">  Wallet Transactions  </span></a></li>
-                            </ul>
-                        </li>
+                        
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('return_request') }}" aria-expanded="false"><i class="nav-icon fas fa-undo text-warning"></i><span class="hide-menu">Return Request</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-id-card-alt text-info"></i><span class="hide-menu">Delivery Boys </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">

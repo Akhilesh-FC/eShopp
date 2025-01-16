@@ -33,8 +33,8 @@ class SlidersController extends Controller
     
             $filePath = $file->storeAs('public/sliders', $fileName);
             
-            //$imageUrl = env('APP_URL') . 'public/sliders/' . $fileName; 
-            $imageUrl = asset('public/sliders/' . $fileName);
+            $imageUrl = env('APP_URL') . 'public/sliders/' . $fileName; 
+            //$imageUrl = asset('public/sliders/' . $fileName);
         }
     
         DB::table('sliders')->insert([
@@ -46,17 +46,17 @@ class SlidersController extends Controller
         return redirect()->route('sliders')->with('success', 'Slider added successfully!');
     }
 
-    // public function edit($id)
-    // {
-    //     // Fetch slider details from the database
-    //     $slider = DB::table('sliders')->where('id', $id)->first();
+    public function edit($id)
+    {
+        // Fetch slider details from the database
+        $slider = DB::table('sliders')->where('id', $id)->first();
         
-    //     if ($slider) {
-    //         return view('edit_slider', compact('slider'));
-    //     } else {
-    //         return redirect()->route('sliders')->with('error', 'Slider not found!');
-    //     }
-    // }
+        if ($slider) {
+            return view('edit_slider', compact('slider'));
+        } else {
+            return redirect()->route('sliders')->with('error', 'Slider not found!');
+        }
+    }
     
     public function update(Request $request, $id)
     {
