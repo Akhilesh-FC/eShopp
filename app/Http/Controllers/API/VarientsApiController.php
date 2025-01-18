@@ -13,6 +13,27 @@ use Illuminate\Support\Str;
 
 class VarientsApiController extends Controller
 {
+    public function get_promo_codes(){
+            $userCartData = DB::table('promo_codes')
+            ->get();
+        
+        if (empty($userCartData)) {
+            return response()->json([
+                'status' => false,
+                'error' => 'No coupon data found'
+            ], 200);
+        }else{
+            return response()->json([
+             'data'=>$userCartData,
+        'status' => 200,
+        'message' => 'Promo Code data found',
+        ], 200);
+    
+        }
+          
+    }
+    
+    
     public function send_notifications(Request $request)
     {
         // Validate the request input

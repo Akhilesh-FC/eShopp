@@ -4,7 +4,7 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\CustomerController;   
 use App\Http\Controllers\CategoriesController;     
 use App\Http\Controllers\ProductsController;         
-use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController,DashboardController,ColorController,SizeController};          
+use App\Http\Controllers\{OrdersController,SlidersController,LoginsController,VendorController,DashboardController,ColorController,SizeController,PromocodesController};          
 
 //=============================Login/Logout Routes=================================//
 Route::get('/', [LoginsController::class, 'showLoginForm'])->name('login');
@@ -89,6 +89,50 @@ Route::controller(CategoriesController::class)->group(function() {
 });
 //=============================Categories Routes END=================================//
 
+Route::controller(ProductsController::class)->group(function() {  
+    Route::get('/add_products', 'showAddProductForm')->name('add_products');   
+    Route::post('/add_products_data', 'storeProduct')->name('store_product');  
+    
+    Route::get('/manage_products', 'manageProducts')->name('manage_products');
+    Route::get('/admin/product/{id}', 'viewProduct')->name('view_product'); 
+    Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); 
+    Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); 
+    Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  
+    Route::get('/get-subcategories/{categoryId}',  'getSubcategories');
+    // Fix for the toggle_active_inactive route:
+    Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
+
+    
+});
+
+//=============================Sliders Routes=================================//
+Route::controller(SlidersController::class)->group(function() {
+    Route::get('/slider', 'viewsliders')->name('sliders');
+    Route::post('/slider/store', 'store')->name('sliders.store');
+    Route::get('/slider/edit/{id}', 'edit')->name('sliders.edit');
+    Route::post('/slider/update/{id}', 'update')->name('sliders.update');
+    Route::delete('/sliders/{id}', 'destroy')->name('sliders.destroy');
+    //Route::delete('sliders/{id}', [SliderController::class, 'destroy'])->name('sliders.destroy');
+});
+//=============================Sliders Routes END=================================//
+
+// Route::controller(PromocodesController::class)->group(function() {
+//   Route::get('/promo_code','promo_code')->name('promo_code'); 
+// });
+
+Route::get('/promo_codes', [PromocodesController::class, 'promo_code'])->name('promo_code');
+Route::get('/add_promo_code', [PromocodesController::class, 'add_promo_code'])->name('add_promo_code');
+
+//Route::get('/add_promo_code', [PromocodesController::class, 'add_promo_code'])->name('add_promo_code');
+Route::post('/add_promo_codes', [PromocodesController::class, 'add_promo_code_store'])->name('add_promo_code_store'); // Define POST route for form submission
+
+Route::get('/promo_codes/edit/{id}', [PromocodesController::class, 'edit'])->name('promo_code.edit');
+Route::delete('/promo_codes/delete/{id}', [PromocodesController::class, 'destroy'])->name('promo_code.delete');
+Route::post('/promo_codes/update/{id}', [PromocodesController::class, 'update'])->name('promo_code.update');
+
+
+//Route::get('/promo_code', function() {return view('promocode');})->name('promo_code');
+
 //=============================Brand Routes=================================//
 Route::get('/brand', function() {return view('brand.brand');})->name('brand');
 Route::get('/bulk_upload', function() {return view('brand.bulkupload');})->name('bulk_upload');
@@ -107,21 +151,13 @@ Route::get('/bulk_upload', function() { return view('products.bulkupload');})->n
 Route::get('/products_faqs', function() { return view('products.productsfaqs');})->name('products_faqs');
 Route::get('/product_order', function() { return view('products.productorder');})->name('product_order');
 
-Route::controller(ProductsController::class)->group(function() {  
-    Route::get('/add_products', 'showAddProductForm')->name('add_products');   
-    Route::post('/add_products_data', 'storeProduct')->name('store_product');  
-    
-    Route::get('/manage_products', 'manageProducts')->name('manage_products');
-    Route::get('/admin/product/{id}', 'viewProduct')->name('view_product'); 
-    Route::get('/admin/product/{id}/edit', 'editProduct')->name('edit_product'); 
-    Route::post('/admin/product/{id}/update-rating', 'updateRating')->name('update_rating'); 
-    Route::delete('/admin/product/{id}', 'deleteProduct')->name('delete_product');  
-    Route::get('/get-subcategories/{categoryId}',  'getSubcategories');
-    // Fix for the toggle_active_inactive route:
-    Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
-
+Route::controller(CustomerController::class)->group(function () {   
+    Route::get('/view_customer', 'ViewCustomers')->name('view_customer'); 
+    Route::get('/view_customer/toggle-status/{id}', 'toggleStatus')->name('view_customer.toggleStatus');
+    Route::get('/view_address', 'ViewAddress')->name('address');
     
 });
+
 
 //Route::get('/get-colors', [ProductsController::class, 'getColors'])->name('get_colors');
 
@@ -130,17 +166,6 @@ Route::controller(ProductsController::class)->group(function() {
 //=============================Products Routes END=================================//
 
 Route::get('/media', function() {return view('media');})->name('media');
-
-//=============================Sliders Routes=================================//
-Route::controller(SlidersController::class)->group(function() {
-    Route::get('/slider', 'viewsliders')->name('sliders');
-    Route::post('/slider/store', 'store')->name('sliders.store');
-    Route::get('/slider/edit/{id}', 'edit')->name('sliders.edit');
-    Route::post('/slider/update/{id}', 'update')->name('sliders.update');
-    Route::delete('/sliders/{id}', 'destroy')->name('sliders.destroy');
-    //Route::delete('sliders/{id}', [SliderController::class, 'destroy'])->name('sliders.destroy');
-});
-//=============================Sliders Routes END=================================//
 
 
 
@@ -151,7 +176,7 @@ Route::get('/manage_stock', function() {return view('managestock');})->name('man
 Route::get('/ticket_type', function() {return view('supportticket.tickettype');})->name('ticket_type');
 Route::get('/ticket', function() {return view('supportticket.ticket');})->name('ticket');
 
-Route::get('/promo_code', function() {return view('promocode');})->name('promo_code');
+
 Route::get('/return_request', function() { return view('returnrequest');})->name('return_request');
 Route::get('/send_notification', function() {return view('sendnotic');})->name('send_notification');
 
@@ -161,15 +186,6 @@ Route::get('/paymentrequest', function() {return view('paymentrequest');})->name
 Route::get('/manage_section', function() {return view('featuredSection.managesection');})->name('manage_section');
 Route::get('/section_order', function() {return view('featuredSection.sectionorder');})->name('section_order');
 
-
-Route::controller(CustomerController::class)->group(function () {   
-    Route::get('/view_customer', 'ViewCustomers')->name('view_customer'); 
-    Route::get('/view_customer/toggle-status/{id}', 'toggleStatus')->name('view_customer.toggleStatus');
-    Route::get('/view_address', 'ViewAddress')->name('address');
-    
-   
-    
-});
 
 // Route::get('/address', function() {return view('customer.address');})->name('address');
 Route::get('/transaction', function() {return view('customer.transaction');})->name('transaction');

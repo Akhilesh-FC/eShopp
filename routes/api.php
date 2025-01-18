@@ -38,6 +38,8 @@ Route::controller(VarientsApiController::class)->group(function (){
     Route::get('/get_size', 'get_size');
     Route::get('/notification_type','notification_type'); 
     Route::post('/send_notifications','send_notifications'); 
+    Route::get('/get_promo_codes','get_promo_codes'); 
+    
 });
 
 Route::controller(ProductApiController::class)->group(function () {

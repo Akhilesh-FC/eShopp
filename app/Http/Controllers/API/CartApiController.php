@@ -23,7 +23,9 @@ class CartApiController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id', 
             'product_id' => 'required|integer|exists:products,id',
-            'quantity' => 'required|integer|min:1', 
+            'quantity' => 'required|integer|min:1',
+            'color_id' => 'required|integer', //color_id
+            'size_id' => 'required',  //size_id
             ]);
     
             $validator->stopOnFirstFailure();
@@ -33,7 +35,7 @@ class CartApiController extends Controller
                             'status' => false,
                            'message' => $validator->errors()->first()
                           ]; 
-                    return response()->json($response,400);
+                    return response()->json($response,200);
         }
         
          $productVariant = DB::table('product_variants')
@@ -44,7 +46,7 @@ class CartApiController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Product variant not found',
-                ], 404);
+                ], 200);
             }
             
         $existingCartItem = DB::table('cart')
@@ -74,12 +76,14 @@ class CartApiController extends Controller
                 'user_id' => $request->user_id,
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
+                'size_id' => $request->size_id,
+                'color_id' => $request->color_id,
                 
                 'is_added' => true,  // Mark the product as added
                 'created_at' => $datetime,  // Set the created_at timestamp
                 'updated_at' => $datetime,  // Set the updated_at timestamp
                 ///new add//
-                 'price' => $productVariant->price,
+                'price' => $productVariant->price,
                 'special_price' => $productVariant->special_price,
                 'percentage_off' => $productVariant->percentage_off,
             
@@ -443,8 +447,78 @@ class CartApiController extends Controller
         }
     }
 
+    // public function viewFavorites(Request $request)
+    // {
+    // $validator = Validator::make($request->all(), [
+    //     'user_id' => 'required|integer',
+    // ]);
+    
+    // $validator->stopOnFirstFailure();
+
+    // if ($validator->fails()) {
+    //     $response = [
+    //         'status' => false,
+    //         'message' => $validator->errors()->first()
+    //     ];
+    //     return response()->json($response, 200);
+    // }
+
+    // $userId = $request->user_id;
+
+    // // Fetch all favorite items along with product details and variant details
+    // $favoriteItems = DB::table('favorites')
+    //     ->join('products', 'favorites.product_id', '=', 'products.id')
+    //     ->join('product_variants', 'favorites.product_id', '=', 'product_variants.product_id')
+    //     ->select(
+    //         'favorites.id as favorite_item_id',
+    //         'favorites.product_id',
+    //         'products.*', 
+    //         'product_variants.price as product_price', 
+    //         'product_variants.special_price as special_price',
+    //         'product_variants.percentage_off as percentage_off',
+    //         DB::raw('product_variants.special_price as total_price') 
+    //     )
+    //     ->where('favorites.user_id', $userId)
+    //     ->get();
+
+    // if ($favoriteItems->isEmpty()) {
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'No favorite items found',
+    //         'data' => []
+    //     ], 200);
+    // }
+
+    // // Fetch all cart items with status 0 (active) and their quantities
+    // $cartItems = DB::table('cart')
+    //     ->where('user_id', $userId)
+    //     ->where('status', 0)  // Only fetch cart items with status = 0 (active)
+    //     ->select('product_id', 'quantity')
+    //     ->get()
+    //     ->keyBy('product_id');  // Key the cart items by product_id to make lookup easier
+
+    // // Add 'is_added_to_cart' and 'quantity' to each favorite item
+    // $favoriteItems = $favoriteItems->map(function ($item) use ($cartItems) {
+    //     // Check if the product exists in the cart with status 0 and get the quantity
+    //     if (isset($cartItems[$item->product_id])) {
+    //         $item->is_added_to_cart = 1;
+    //         $item->quantity_in_cart = $cartItems[$item->product_id]->quantity;
+    //     } else {
+    //         $item->is_added_to_cart = 0;
+    //         $item->quantity_in_cart = 0;
+    //     }
+    //     return $item;
+    // });
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Favorites retrieved successfully',
+    //         'data' => $favoriteItems,
+    //     ], 200);
+    // }
+    
     public function viewFavorites(Request $request)
-    {
+{
     $validator = Validator::make($request->all(), [
         'user_id' => 'required|integer',
     ]);
@@ -461,18 +535,23 @@ class CartApiController extends Controller
 
     $userId = $request->user_id;
 
-    // Fetch all favorite items along with product details and variant details
+    // Fetch all favorite items along with product details and the first variant's details
     $favoriteItems = DB::table('favorites')
         ->join('products', 'favorites.product_id', '=', 'products.id')
-        ->join('product_variants', 'favorites.product_id', '=', 'product_variants.product_id')
+        ->leftJoin('product_variants', function ($join) {
+            // Subquery to get the first variant for each product
+            $join->on('favorites.product_id', '=', 'product_variants.product_id')
+                ->whereRaw('product_variants.id = (SELECT MIN(id) FROM product_variants WHERE product_variants.product_id = favorites.product_id)');
+        })
         ->select(
             'favorites.id as favorite_item_id',
             'favorites.product_id',
-            'products.*', 
+            'products.*',
+            'product_variants.id as variant_id', 
             'product_variants.price as product_price', 
             'product_variants.special_price as special_price',
             'product_variants.percentage_off as percentage_off',
-            DB::raw('product_variants.special_price as total_price') 
+            DB::raw('IFNULL(product_variants.special_price, product_variants.price) as total_price') // Calculate total price
         )
         ->where('favorites.user_id', $userId)
         ->get();
@@ -506,12 +585,13 @@ class CartApiController extends Controller
         return $item;
     });
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Favorites retrieved successfully',
-            'data' => $favoriteItems,
-        ], 200);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Favorites retrieved successfully',
+        'data' => $favoriteItems,
+    ], 200);
+}
+
 
     public function removeFromFavorite(Request $request)
     {
@@ -846,169 +926,169 @@ class CartApiController extends Controller
     //     ], 200);
     // }
    public function checkout(Request $request) 
-{  
-    $validator = Validator::make($request->all(), [
-        'user_id' => 'required|integer|exists:users,id',
-        'total_price' => 'required|numeric|min:1', 
-        'address_id' => 'required|integer|exists:addresses,id', 
-        'coupon_applied' => 'nullable|string', 
-        'paymode' => 'required|in:0,1'
-    ]);
-
-    $validator->stopOnFirstFailure();
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first(),
-        ], 200);
-    }
-
-    $userId = $request->input('user_id');
-    $totalPrice = $request->input('total_price');
-    $addressId = $request->input('address_id');
-    $paymode = $request->input('paymode');
-    $couponApplied = $request->input('coupon_applied', null);
-
-    $addressExists = DB::table('addresses')
-        ->where('id', $addressId)
-        ->where('user_id', $userId)
-        ->exists();
-
-    if (!$addressExists) {
-        return response()->json([
-            'success' => false,
-            'message' => 'The provided address does not belong to the specified user.',
-        ], 200);
-    }
-
-    if (!empty($couponApplied)) {
-        $isCouponValid = $this->validateCoupon($couponApplied);
-        if (!$isCouponValid) {
+    {  
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,id',
+            'total_price' => 'required|numeric|min:1', 
+            'address_id' => 'required|integer|exists:addresses,id', 
+            'coupon_applied' => 'nullable|string', 
+            'paymode' => 'required|in:0,1'
+        ]);
+    
+        $validator->stopOnFirstFailure();
+    
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid coupon code.',
+                'message' => $validator->errors()->first(),
             ], 200);
         }
-
-        $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
-    }
-
-    $orderId = rand(100000, 999999999);
-
-    $orderData = [
-        'user_id' => $userId,
-        'address_id' => $addressId,
-        'final_total' => $totalPrice,
-        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
-        'order_id' => $orderId, 
-        'status' => 0, // Order placed but not confirmed yet (initial status)
-    ];
-
-    date_default_timezone_set('Asia/Kolkata');
-    $datetime = Carbon::now()->format('Y-m-d H:i:s'); // Format the datetime properly
-
-    DB::table('orders')->insert($orderData);
-
-    // Prepare status array based on order status
-    $statusUpdates = [];
-
-    // Fetch the order status from the orders table
-    $orderStatus = DB::table('orders')->where('order_id', $orderId)->value('status');
     
-    // Dynamically add status messages to the array based on order status
-    if ($orderStatus == 0) {  // Order placed (status = 0)
-        $statusUpdates[] = ['status' => 'orderPlaced', 'datetime' => $datetime];
-    }
+        $userId = $request->input('user_id');
+        $totalPrice = $request->input('total_price');
+        $addressId = $request->input('address_id');
+        $paymode = $request->input('paymode');
+        $couponApplied = $request->input('coupon_applied', null);
     
-    if ($orderStatus == 1) {  // Order shipped (status = 1)
-        $statusUpdates[] = ['status' => 'orderShipped', 'datetime' => $datetime];
-    }
-
-    if ($orderStatus == 2) {  // Order out for delivery (status =2)
-        $statusUpdates[] = ['status' => 'orderOutForDelivery', 'datetime' => $datetime];
-    }
+        $addressExists = DB::table('addresses')
+            ->where('id', $addressId)
+            ->where('user_id', $userId)
+            ->exists();
     
-    if ($orderStatus == 3) {  // Order delivered (status = 3)
-        $statusUpdates[] = ['status' => 'orderDelivered', 'datetime' => $datetime];
-    }
-
-    // Encode the status array to JSON
-    $orderItemStatus = json_encode($statusUpdates);
-
-    // Insert into order_items with the dynamic status in JSON format
-    DB::table('order_items')->insert([
-        'order_id' => $orderId,
-        'user_id' => $userId,
-         'address_id' => $addressId,
-        'final_total' => $totalPrice,
-        'payment_method' => $paymode == 1 ? 'Online' : 'COD',
-       'status' => $orderItemStatus, // Store the dynamic status as JSON
-        // Other necessary columns in order_items (like item_id, quantity, etc.)
-    ]);
-
-    DB::table('cart')
-        ->where('user_id', $userId)
-        ->update(['order_id' => $orderId]);
-
-    if ($paymode == 0) { // COD
-        DB::table('orders')
-            ->where('order_id', $orderId)
-            ->update(['status' => 0]); // 0 indicates order placed and confirmed
-
+        if (!$addressExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided address does not belong to the specified user.',
+            ], 200);
+        }
+    
+        if (!empty($couponApplied)) {
+            $isCouponValid = $this->validateCoupon($couponApplied);
+            if (!$isCouponValid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid coupon code.',
+                ], 200);
+            }
+    
+            $totalPrice = $this->applyCouponDiscount($totalPrice, $couponApplied);
+        }
+    
+        $orderId = rand(100000, 999999999);
+    
+        $orderData = [
+            'user_id' => $userId,
+            'address_id' => $addressId,
+            'final_total' => $totalPrice,
+            'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+            'order_id' => $orderId, 
+            'status' => 0, // Order placed but not confirmed yet (initial status)
+        ];
+    
+        date_default_timezone_set('Asia/Kolkata');
+        $datetime = Carbon::now()->format('Y-m-d H:i:s'); // Format the datetime properly
+    
+        DB::table('orders')->insert($orderData);
+    
+        // Prepare status array based on order status
+        $statusUpdates = [];
+    
+        // Fetch the order status from the orders table
+        $orderStatus = DB::table('orders')->where('order_id', $orderId)->value('status');
+        
+        // Dynamically add status messages to the array based on order status
+        if ($orderStatus == 0) {  // Order placed (status = 0)
+            $statusUpdates[] = ['status' => 'orderPlaced', 'datetime' => $datetime];
+        }
+        
+        if ($orderStatus == 1) {  // Order shipped (status = 1)
+            $statusUpdates[] = ['status' => 'orderShipped', 'datetime' => $datetime];
+        }
+    
+        if ($orderStatus == 2) {  // Order out for delivery (status =2)
+            $statusUpdates[] = ['status' => 'orderOutForDelivery', 'datetime' => $datetime];
+        }
+        
+        if ($orderStatus == 3) {  // Order delivered (status = 3)
+            $statusUpdates[] = ['status' => 'orderDelivered', 'datetime' => $datetime];
+        }
+    
+        // Encode the status array to JSON
+        $orderItemStatus = json_encode($statusUpdates);
+    
+        // Insert into order_items with the dynamic status in JSON format
+        DB::table('order_items')->insert([
+            'order_id' => $orderId,
+            'user_id' => $userId,
+             'address_id' => $addressId,
+            'final_total' => $totalPrice,
+            'payment_method' => $paymode == 1 ? 'Online' : 'COD',
+           'status' => $orderItemStatus, // Store the dynamic status as JSON
+            // Other necessary columns in order_items (like item_id, quantity, etc.)
+        ]);
+    
         DB::table('cart')
             ->where('user_id', $userId)
-            ->update(['status' => 1]); // 1 indicates the cart is checked out and confirmed
-    }
-
-    if ($paymode == 1) {
-        $paymentLink = $this->payin($paymode, $userId, $totalPrice, $orderId);  
-
-        if ($paymentLink) {
-            return response()->json([
-                'success' => true, 
-                'message' => 'Make Payment to confirm order.',   
-                'data' => [
-                    'payment_url' => $paymentLink, 
-                    'paymode' => 'Online', 
-                    'final_total' => $totalPrice, 
-                    'coupon_applied' => $couponApplied,  
-                    'order_id' => $orderId,
-                ],
-            ], 200); 
+            ->update(['order_id' => $orderId]);
+    
+        if ($paymode == 0) { // COD
+            DB::table('orders')
+                ->where('order_id', $orderId)
+                ->update(['status' => 0]); // 0 indicates order placed and confirmed
+    
+            DB::table('cart')
+                ->where('user_id', $userId)
+                ->update(['status' => 1]); // 1 indicates the cart is checked out and confirmed
         }
-    }
-
-    if ($paymode == 1) {
-        $paymentStatus = DB::table('payins')
-            ->where('user_id', $userId)
-            ->where('order_id', $orderId)
-            ->value('status');
-
-        if ($paymentStatus == 1) { 
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment is not completed yet.',
-            ], 200);
-        } elseif ($paymentStatus == 2) { 
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment successful.',
-            ], 200); 
+    
+        if ($paymode == 1) {
+            $paymentLink = $this->payin($paymode, $userId, $totalPrice, $orderId);  
+    
+            if ($paymentLink) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Make Payment to confirm order.',   
+                    'data' => [
+                        'payment_url' => $paymentLink, 
+                        'paymode' => 'Online', 
+                        'final_total' => $totalPrice, 
+                        'coupon_applied' => $couponApplied,  
+                        'order_id' => $orderId,
+                    ],
+                ], 200); 
+            }
         }
+    
+        if ($paymode == 1) {
+            $paymentStatus = DB::table('payins')
+                ->where('user_id', $userId)
+                ->where('order_id', $orderId)
+                ->value('status');
+    
+            if ($paymentStatus == 1) { 
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment is not completed yet.',
+                ], 200);
+            } elseif ($paymentStatus == 2) { 
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment successful.',
+                ], 200); 
+            }
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Order Placed successfully.',
+            'data' => [
+                'paymode' => $paymode == 1 ? 'Online' : 'COD',
+                'final_total' => $totalPrice,
+                'coupon_applied' => $couponApplied,
+                'order_id' => $orderId,
+            ],
+        ], 200);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Order Placed successfully.',
-        'data' => [
-            'paymode' => $paymode == 1 ? 'Online' : 'COD',
-            'final_total' => $totalPrice,
-            'coupon_applied' => $couponApplied,
-            'order_id' => $orderId,
-        ],
-    ], 200);
-}
 
     public function viewcheckout(Request $request)  
     {

@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
-            <a href="{{ route('orders') }}" class="btn btn-primary btn-sm position-absolute" style="top: 20px; right: 20px;">Back to Orders</a>
+            <a href="{{ route('orders') }}" class="btn btn-primary btn-sm position-absolute" style="top: 20px; right: 20px;"> <i class="fas fa-arrow-left"></i>Back to Orders</a>
             <h3 class="mb-4">Order Details</h3>
 
             <!-- Order Info Card -->

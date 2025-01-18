@@ -47,8 +47,9 @@
                                 <li class="sidebar-item"><a href="{{ route('products_faqs')}}" class="sidebar-link"><i class="fas fa-question-circle nav-icon"></i><span class="hide-menu"> Products FAQs</span></a></li>
                                 
                             </ul>
-                            <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('sliders') }}" aria-expanded="false"><i class="nav-icon far fa-image text-success"></i><span class="hide-menu">Sliders</span></a></li>
                         </li>
+                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('sliders') }}" aria-expanded="false"><i class="nav-icon far fa-image text-success"></i><span class="hide-menu">Sliders</span></a></li>
+                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route ('promo_code') }}" aria-expanded="false"><i class="nav-icon fa fa-puzzle-piece text-warning"></i><span class="hide-menu">Promo Code</span></a></li>
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-blog text-warning"></i><span class="hide-menu">Blogs </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{{ route('blog_categories') }}" class="sidebar-link"><i class="fas fa-bullseye nav-icon"></i><span class="hide-menu"> Blog Categories </span></a></li>
@@ -71,7 +72,7 @@
                                 <li class="sidebar-item"><a href="{{'ticket'}}" class="sidebar-link"><i class="fas fa-ticket-alt nav-icon"></i><span class="hide-menu">  Tickets </span></a></li>
                             </ul>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{route ('promo_code') }}" aria-expanded="false"><i class="nav-icon fa fa-puzzle-piece text-warning"></i><span class="hide-menu">Promo Code</span></a></li>
+                       
                         <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="nav-icon fas fa-layer-group text-danger"></i><span class="hide-menu">Featured sections </span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item"><a href="{{route('manage_section')}}" class="sidebar-link"><i class="fas fa-folder-plus nav-icon"></i><span class="hide-menu"> Manage Sections </span></a></li>
