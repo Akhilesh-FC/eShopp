@@ -107,6 +107,7 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/get-subcategories/{categoryId}',  'getSubcategories');
     // Fix for the toggle_active_inactive route:
     Route::get('/manage_products/toggle/{id}', 'toggleActiveInactive')->name('toggle_active_inactive');
+    Route::get('/view_product_details/{id}', 'view_product_details')->name('view_product_details');
 
     
 });

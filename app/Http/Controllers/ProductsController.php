@@ -8,9 +8,35 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductsController extends Controller
 {
+    public function view_product_details($id)
+    {
+        // Fetch the product details using DB facade
+        $products = DB::table('products')
+                    ->where('id', $id)
+                    ->get(); // Using first() to get a single record
+    
+        // Fetch related variants
+        $variants = DB::table('product_variants')
+                    ->where('product_variants.product_id', $id)
+                    ->join('size', 'product_variants.size', '=', 'size.id')  // join on size_id and id of sizes table
+                    ->join('color', 'product_variants.color', '=', 'color.id') // join on color_id and id of colors table
+                    ->select('product_variants.*', 'size.size as size_name', 'color.name as color_name')
+                    ->get();
+    
+        // // Fetch images related to the product
+        // $images = DB::table('product_images') 
+        //             ->where('product_id', $id)
+        //             ->get();
+    
+        // Pass data to the view
+        return view('products.manageproducts', compact('products', 'variants'));
+    }
+
+    
     public function showAddProductForm(Request $request)
     {
         $perPage = $request->input('per_page', 5);
+        
         $colors =DB::table('color')->get();
         $sizes =DB::table('size')->get();
     

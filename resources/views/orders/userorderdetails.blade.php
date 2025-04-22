@@ -17,7 +17,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>User Name:</strong></p>
+                             <p><strong>User Name:</strong> {{ $userName }}</p>
                             <p><strong>Order ID:</strong> #{{ $order->order_id }}</p>
                             <p><strong>Transaction ID:</strong> {{ $order->transaction_id }}</p>
                             <p><strong>Total:</strong> ₹{{ $order->final_total }}</p>
@@ -40,12 +40,19 @@
                             <h5>Product Information</h5>
                         </div>
                         <div class="card-body text-center">
-                            @foreach ($products as $product) <!-- Loop through products -->
-                                <img src="{{ asset('storage/'.$product->image) }}" alt="Product Image" class="img-fluid" style="max-width: 200px; max-height: 200px;">
-                                <p class="mt-3"><strong>Product ID:</strong> {{ $product->id }}</p>
-                                <p><strong>Product Name:</strong> {{ $product->name }}</p>
-                            @endforeach
+                            <div id="product-images" style="display: none;">
+                                @foreach ($products as $product)
+                                    <div class="product-item">
+                                        <img src="{{ asset('storage/'.$product['product_image']) }}" alt="Product Image" class="img-fluid" style="max-width: 200px; max-height: 200px;">
+                                        <p class="mt-3"><strong>Product ID:</strong> {{ $product['product_id'] }}</p>
+                                        <p><strong>Product Name:</strong> {{ $product['product_name'] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button id="show-all-btn" class="btn btn-primary mt-3">Show All Images</button>
                         </div>
+
+                        
                     </div>
                 </div>
 
@@ -58,7 +65,7 @@
                         <div class="card-body">
                             <!-- Action Buttons -->
                             <a href="{{ route('view_orderdetails', ['orderId' => $order->order_id]) }}" class="btn btn-warning btn-block mb-3">View</a>
-                            <button class="btn btn-danger btn-block mb-3">Delete</button>
+                            <!--<button class="btn btn-danger btn-block mb-3">Delete</button>-->
                             
                             <!-- Status Dropdown -->
                             <div class="form-group">
@@ -110,5 +117,21 @@
 
 
 </style>
+
+<script>
+    document.getElementById('show-all-btn').addEventListener('click', function() {
+        var imagesContainer = document.getElementById('product-images');
+        var button = document.getElementById('show-all-btn');
+
+        // Toggle visibility of images
+        if (imagesContainer.style.display === 'none') {
+            imagesContainer.style.display = 'block';
+            button.textContent = 'Hide Images';
+        } else {
+            imagesContainer.style.display = 'none';
+            button.textContent = 'Show All Images';
+        }
+    });
+</script>
 
 @endsection
